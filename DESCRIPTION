@@ -1,11 +1,19 @@
 Package: ForSysXR
 Type: Package
-Title: What the Package Does (Title Case)
+Title: ForSys Scenario Planning
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Authors@R: 
+    c(
+        person(given = "Bruno",
+           family = "A. Aparício",
+           role = c("aut", "cre"),
+           email = "bruno.a.aparicio@gmail.com",),
+        person(given = "Alan",
+           family = "Ager",
+           role = c("aut"),
+           email = "alan.ager@oregonstate.edu")
+    )
+Description: ForSys is a multi-objective spatial prioritization system that was designed to explore how specific investment strategies aimed at improving forest conditions change under a range of management constraints to achieve specific outcomes and understand tradeoffs. ForSysXR package allows to run ForSysX from R, mixing the fast ForSysX algorithm with the flexibility of ForSysR.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
