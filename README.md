@@ -17,7 +17,8 @@ and was used in several published studies. ForSys has been used in
 several research and applied case studies at a range of scales
 (projects, forests, states, continental United States) to prioritize
 landscape-scale treatments (see case studies). ForSys is available in a
-windows desktop GUI (ForSysX) and an R version (ForSysR).
+windows desktop GUI (ForSysX) and an in a modified R version (ForSysR).
+For details on ForSysX and ForSysR algorithms, please refer to Day et al. (2023) <!-- INSERT LINK WHEN PUBLIC -->
 
 ## Installation
 
@@ -35,7 +36,9 @@ remotes::install_github("forsys-sp/patchmax")
 
 After installing ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
-[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist.zip)
+[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist.zip).
+This step is crucial as it downloads ForSysX executable that will later
+be run from R.
 
 ## Usage
 
