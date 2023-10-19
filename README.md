@@ -23,10 +23,7 @@ windows desktop GUI (ForSysX) and an R version (ForSysR).
 
 The current official version of the *forsys* package can be installed
 from [GitHub](https://github.com/forsys-sp/forsysr/) using the following
-code. Note that in order to use the *patchmax* package, you need to
-install that package as well. The current official version of the
-*patchmax* package can be installed from
-[GitHub](https://github.com/forsys-sp/patchmax/).
+code. 
 
 We recommend updating other packages when prompted.
 
@@ -35,6 +32,10 @@ if (!require(remotes)) install.packages("remotes")
 remotes::install_github("forsys-sp/forsysr")
 remotes::install_github("forsys-sp/patchmax")
 ```
+
+After installing ForSysXR package, the user needs to download
+and unzip the ForSysXDLL from
+[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist.zip)
 
 ## Usage
 
