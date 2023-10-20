@@ -3,20 +3,14 @@
 \docType{data}
 \name{stands_data}
 \alias{stands_data}
-\title{Spatial data of metropolitan areas}
+\title{Spatial data of stands}
 \format{
 An object of class \code{sf} (inherits from \code{data.frame}) with 1028 rows and 11 columns.
-}
-\source{
-<https://population.un.org/wup/>
 }
 \usage{
 stands_data
 }
 \description{
-`metro` includes a population time series from 1950 to (forecasted) 2030. All metro areas with over 1 million inhabitants in 2010 are included.
-}
-\references{
-United Nations, Department of Economic and Social Affairs, Population Division (2014). World Urbanization Prospects: The 2014 Revision, CD-ROM Edition.
+`stands_data` includes real stands from a study area with three objectives that can be optimized, an area field that can be used as constraint and one threshold. It also contains fields with the stands' availability for treatments and stands to be excluded from the analysis.
 }
 \keyword{datasets}
