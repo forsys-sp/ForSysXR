@@ -13,13 +13,15 @@ set_forsysx_run(
   available_for_management,
   available,
   seed_stands_only_available_stands,
+  exclude_stands = 0,
   exclude_field,
   x_coordinate,
   y_coordinate,
   seed_stand_percent,
   max_project_diameter,
   max_number_projects,
-  inverse_distance_power,
+  inverse_distance_power = 0,
+  maximize_distance = 0,
   adjacency_matrix,
   output_adjacency_matrix,
   constraints_name,
@@ -44,6 +46,8 @@ set_forsysx_run(
 \item{available_for_management}{If the input_shapefile contains information on available and unavailable stands. <\emph{logical}>}
 
 \item{available}{Field from input_shapefile containing the available stands}
+
+\item{exclude_stands}{If the input_shapefile contains information on stands that should be excluded from the prioritization. <\emph{logical}>}
 
 \item{exclude_field}{Field from input_shapefile identifying the stands to be excluded}
 
@@ -78,8 +82,6 @@ set_forsysx_run(
 \item{run_forsysx}{Binary. If 1 will run ForSysX. If 0 will end after saving the XML file}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
-
-\item{exclude_stands}{If the input_shapefile contains information on stands that should be excluded from the prioritization. <\emph{logical}>}
 }
 \description{
 Primary function for running the ForSysX treatment planner from R without an

@@ -36,7 +36,7 @@ set_forsysx_run <- function(input_shapefile,
                             available_for_management, #default is to not have stands with availability info
                             available,
                             seed_stands_only_available_stands,
-                            #exclude_stands=0, #the default is not to have info on exclude in stands
+                            exclude_stands=0, #the default is not to have info on exclude in stands
                             exclude_field,
                             #load_objective_steps,
                             #step_file,
@@ -50,8 +50,8 @@ set_forsysx_run <- function(input_shapefile,
                             #patch_buster,
                             #weight,
                             #patch_identifier,
-                            inverse_distance_power,
-                            #maximize_distance,
+                            inverse_distance_power=0, #default is 0
+                            maximize_distance = 0, #default is 0 (not use)
                             adjacency_matrix,
                             output_adjacency_matrix,
                             constraints_name,
@@ -69,7 +69,17 @@ set_forsysx_run <- function(input_shapefile,
   if(input_shapefile_format!= ".shp")
     stop("input_shapefile has to be a shapefile!")
 
+  if (missing(adjacency_matrix) & missing(output_adjacency_matrix)) {
+    stop("User must specify an existing adjacency matrix or generate one (output_adjacency_matrix parameter)")
+  }
 
+  if(exclude_stands !=0 | exclude_stands !=1) {
+    stop("exclude_stands must be 0 or 1")
+  }
+
+  if(exclude_stands ==1 & missing(exclude_field)) {
+    stop("User is specifying that some stands must be excluded without indicating the field with this information")
+  }
 
   #warning if default definitions are used for some parameters. And say that the
   #user should see the manual to understand if it is doing what they want
@@ -81,7 +91,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-  if (missing(output_adjacency_matrix)){
+  if (!missing(output_adjacency_matrix)){
     cat("Loading shapefile",'\n')
     my_shp <- sf::read_sf(input_shapefile)
 
@@ -125,10 +135,17 @@ set_forsysx_run <- function(input_shapefile,
   xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
   }
 
-  #seed_stands_only_available_stands - falta fazer
-  #exclude_stands - falta fazer este
 
-  xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+  #Exclude stands
+  xml_data_use <- gsub(paste("Exclusions=\"",exclude_stands,"\"",sep=""),"",unlist(xml_data_use))
+
+  if (exclude_stands == 0) {
+    xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
+  } else {
+    xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+  }
+
+
 
 
   #load_objective_steps - falta fazer
@@ -182,11 +199,6 @@ set_forsysx_run <- function(input_shapefile,
 
   integer_val <- decimalplaces(total_n_objective)
 
-  print(length(objectives))
-  print(objectives)
-  print(paste("number of objectives: ",total_n_objective,sep=""))
-  print(integer_val)
-
   if(integer_val != 0)
     stop("Wrong number of arguments when defining the objectives")
 
@@ -216,6 +228,15 @@ set_forsysx_run <- function(input_shapefile,
       }
 
   }
+
+
+
+  #MaximizeDistanceOpt
+  xml_data_use <- gsub(paste("MaximizeDistanceOpt=\"",MaximizeDistanceOpt,"\"",sep=""),"",unlist(xml_data_use))
+
+  #IdwPower
+  xml_data_use <- gsub(paste("IdwPower=\"",inverse_distance_power,"\"",sep=""),"",unlist(xml_data_use))
+
 
 
   write.table(xml_data_use,output_xml,row.names = F,col.names = F,quote = FALSE)
