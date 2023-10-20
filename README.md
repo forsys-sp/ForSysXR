@@ -48,7 +48,7 @@ For brevity, the dataset used is distributed with the package. First, we will
 load the *forsys* package.
 
 ``` r
-library(forsys)
+library(ForSysXR)
 
 # In order to run the examples below, these additional libraries are required:
 library(sf)
@@ -59,48 +59,42 @@ library(dplyr)
 
 Although *forsys* can support many different types of treatment unit
 data, here our treatment units are represented as polygons in a spatial
-vector format. Each polygon represents a different treatment unit.
+vector format. Each polygon represents a different treatment unit. 
+Please note that geodatabase format is not supported by *ForSysX*. Only shapefile format is currently supported
 
 ``` r
 # load treatment unit data
-data(test_forest)
+data(stands_data)
 # show the first rows in the attribute table
-head(test_forest)
+head(stands_data)
 ```
 
-    ## Simple feature collection with 6 features and 16 fields
+    ## Simple feature collection with 6 features and 10 fields
     ## Geometry type: POLYGON
     ## Dimension:     XY
-    ## Bounding box:  xmin: -1805472 ymin: 2689815 xmax: -1799472 ymax: 2690815
-    ## Projected CRS: NAD83 / Conus Albers
-    ##   stand_id proj_id area_ha priority1 priority2 priority3 priority4 threshold1
-    ## 1        1      86     100      0.42      0.53      0.48      0.51          1
-    ## 2        2      86     100      0.42      0.49      0.48      0.65          1
-    ## 3        3      86     100      0.42      0.45      0.48      0.66          1
-    ## 4        4      86     100      0.42      0.42      0.48      0.60          1
-    ## 5        5      86     100      0.43      0.39      0.48      0.62          1
-    ## 6        6      86     100      0.44      0.37      0.48      0.51          1
-    ##   threshold2 boundary1 boundary2 cluster1 cluster2 cluster3 mosaic1 mosaic2
-    ## 1          1         0         0        0        1        0       2       3
-    ## 2          1         0         0        2        1        0       2       3
-    ## 3          1         0         0        2        0        0       1       3
-    ## 4          1         0         0        2        0        0       1       3
-    ## 5          1         0         0        2        0        1       2       3
-    ## 6          0         0         0        2        0        1       2       3
-    ##                         geometry
-    ## 1 POLYGON ((-1805472 2690815,...
-    ## 2 POLYGON ((-1804472 2690815,...
-    ## 3 POLYGON ((-1803472 2690815,...
-    ## 4 POLYGON ((-1802472 2690815,...
-    ## 5 POLYGON ((-1801472 2690815,...
-    ## 6 POLYGON ((-1800472 2690815,...
+    ## Bounding box:  xmin: 571829.6 ymin: 4449945 xmax: 577284.2 ymax: 4455392
+    ## Projected CRS: ETRS89 / UTM zone 29N
+    ##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2
+    ## 1        1 2.149784 577104.1 4455304        1     0  649.1051 2.632802
+    ## 2        2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031
+    ## 3        3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908
+    ## 4        4 1.283715 576908.8 4451242        1     0  252.8004 2.378386
+    ## 5        5 1.393932 577108.5 4451299        1     0  269.7420 2.388572
+    ## 6        6 1.077390 574488.3 4452205        1     0  146.1724 2.339832
+    ##   obj_3        threshold                  geometry
+    ## 1 0.0017115583  1.750002 POLYGON ((577284.2 4455239,...
+    ## 2 0.0004543819  1.627590 POLYGON ((571986 4450002, 5...
+    ## 3 0.0008986479  1.996994 POLYGON ((572168.8 4450285,...
+    ## 4 0.0037384391  2.315409 POLYGON ((576948.2 4451149,...
+    ## 5 0.0038692370  2.815383 POLYGON ((577192.4 4451290,...
+    ## 6 0.0020394307  1.976931 POLYGON ((574485.3 4452268,...
 
 ``` r
 # plot the treatment units
-plot(test_forest[,c(4:5,7:10)], border=NA)
+plot(stands_data[,1])
 ```
 
-<img src="README_files/figure-gfm/unnamed-chunk-4-1.png" width="600" />
+<img src="man/figures/fig_1.png" width="600" />
 
 ### Running a ForSys Scenario
 
