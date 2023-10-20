@@ -91,10 +91,10 @@ head(stands_data)
 
 ``` r
 # plot the treatment units
-plot(test_forest[,c(4:5,7:10)], border=NA)
+plot(stands_data[,1])
 ```
 
-<img src="README_files/figure-gfm/unnamed-chunk-4-1.png" width="600" />
+<img src="man/figures/fig_1.png" width="600" />
 
 ### Running a ForSys Scenario
 
