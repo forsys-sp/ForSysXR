@@ -43,10 +43,8 @@ be run from R.
 
 ## Usage
 
-Here we will provide a short example showing how the *forsys* package
-can be used to build and solve simple multi-objective landscape
-management problems. For brevity, we will use one of the built-in
-simulated datasets that is distributed with the package. First, we will
+Below we demonstrate how the *ForSysXR* package can be used and highlight the flexibility of the algorithm in solving multiple problems.
+For brevity, the dataset used is distributed with the package. First, we will
 load the *forsys* package.
 
 ``` r
