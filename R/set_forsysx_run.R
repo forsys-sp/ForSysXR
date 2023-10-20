@@ -35,7 +35,7 @@ set_forsysx_run <- function(input_shapefile,
                             stand_id,area,
                             available_for_management, #default is to not have stands with availability info
                             available,
-                            #seed_stands_only_available_stands,
+                            seed_stands_only_available_stands,
                             #exclude_stands=0, #the default is not to have info on exclude in stands
                             exclude_field,
                             #load_objective_steps,
@@ -81,8 +81,8 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-  if (!missing(output_adjacency_matrix)){
-    cat("Loading shapefile")
+  if (missing(output_adjacency_matrix)){
+    cat("Loading shapefile",'\n')
     my_shp <- sf::read_sf(input_shapefile)
 
     #keep only the stand id data
@@ -92,7 +92,7 @@ set_forsysx_run <- function(input_shapefile,
     my_shp <- my_shp[order(my_shp$V1),]
 
 
-    cat("Generating adjacency matrix")
+    cat("Generating adjacency matrix",'\n')
     adj_raw <- expp::neighborsDataFrame(spdep::poly2nb(my_shp))
     adj_final <- adj_raw[,c(2,1)]
 
@@ -118,8 +118,12 @@ set_forsysx_run <- function(input_shapefile,
 
   #available_for_management -falta fazer este
   if (available_for_management==1){
-    rlang::is_missing(available)
-  xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))}
+    if (missing(available)) {
+      stop("User is specifying that some stands cannot be treated without indicating the field with this information")
+      }
+  xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))
+  xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
+  }
 
   #seed_stands_only_available_stands - falta fazer
   #exclude_stands - falta fazer este
@@ -228,10 +232,10 @@ set_forsysx_run <- function(input_shapefile,
   #run forsysX
 
   if (run_forsysx==1){
-    cat("XML file saved")
+    cat("XML file saved",'\n')
     run_forsysx_console(exe_path, output_xml)
 
-  } else {cat("XML file saved")}
+  } else {cat("XML file saved",'\n')}
 
 
   }

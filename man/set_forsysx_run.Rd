@@ -12,6 +12,7 @@ set_forsysx_run(
   area,
   available_for_management,
   available,
+  seed_stands_only_available_stands,
   exclude_field,
   x_coordinate,
   y_coordinate,
