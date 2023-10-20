@@ -94,7 +94,7 @@ head(stands_data)
 plot(stands_data[,1])
 ```
 
-<img src="man/figures/fig_1.png" width="600" />
+<img src="man/figures/fig_1.png" width="300" />
 
 ### Running a ForSys Scenario
 
