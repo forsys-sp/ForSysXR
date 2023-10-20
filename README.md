@@ -96,6 +96,67 @@ plot(stands_data[,1])
 
 <img src="man/figures/fig_1.png" width="300" />
 
+The figure plotted shows the stands in the study area. It is composed of 1028 different stands.
+
+It is also useful to plot the objectives, available stands, and stands that should be excluded.
+
+``` r
+# plot the objectives, availability and excluded stands
+plot_1 <- stands_data  %>%
+  mutate_at(c('obj_1'), ~na_if(., 0)) %>%
+  ggplot() +
+  geom_sf(aes(fill=obj_1),colour=NA) +
+  scale_fill_viridis_c(option = "A",na.value = "grey50")+
+  ggtitle("Objective 1") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))
+
+
+
+plot_2 <- stands_data  %>%
+  mutate_at(c('obj_2'), ~na_if(., 0)) %>%
+  ggplot() +
+  geom_sf(aes(fill=obj_2),colour=NA) +
+  scale_fill_viridis_c(option = "A",na.value = "grey50")+
+  ggtitle("Objective 2") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))
+
+
+
+plot_3 <- stands_data  %>%
+  mutate_at(c('obj_3'), ~na_if(., 0)) %>%
+  ggplot() +
+  geom_sf(aes(fill=obj_3),colour=NA) +
+  scale_fill_viridis_c(option = "A",na.value = "grey50")+
+  ggtitle("Objective 3") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))
+
+
+plot_4 <- stands_data  %>%
+  ggplot() +
+  geom_sf(aes(fill=factor(availuse)),colour=NA) +
+  ggtitle("Availability") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))+
+  guides(fill=guide_legend(title="Availab"))
+
+
+plot_5 <- stands_data  %>%
+  ggplot() +
+  geom_sf(aes(fill=factor(water)),colour=NA) +
+  ggtitle("Exclude") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))+
+  guides(fill=guide_legend(title="Exclude"))
+
+
+ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
+
+```
+<img src="man/figures/fig_2.png" width="600" />
+
 ### Running a ForSys Scenario
 
 *Forsys* prioritizes projects by maximizing an objective given one or
