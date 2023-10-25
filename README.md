@@ -412,4 +412,4 @@ contains information on the *forsys* package.
 
 If you have any questions about the *ForSysXR* package or suggestions for
 improving it, please [post an issue on the code
-repository](https://https://github.com/bmaparicio/ForSysXR/issues).
+repository](https://github.com/bmaparicio/ForSysXR/issues).
