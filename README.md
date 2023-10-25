@@ -19,7 +19,7 @@ several research and applied case studies at a range of scales
 landscape-scale treatments (see case studies). ForSys is available in a
 windows desktop GUI (ForSysX) and an in a modified R version (ForSysR).
 
-For details on ForSysX and ForSysR algorithms, please refer to Day et al. (2023) <!-- INSERT LINK WHEN PUBLIC -->
+For details on ForSysX and [ForSysR](https://github.com/forsys-sp/forsysr) algorithms, please refer to Day et al. (2023) <!-- INSERT LINK WHEN PUBLIC -->
 
 ## Installation
 
