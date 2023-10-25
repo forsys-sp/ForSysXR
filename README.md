@@ -397,7 +397,7 @@ plot(plot_dat_6[,'treatment_rank'], border=NA, main="Patch rank")
 Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
-> Aparício BA and Ager A. (2023). ForSysXR:
+> Aparício BA and Ager A. (2023).
 > ForSysXR: A R package for running the ForSysX scenario planning platform for modeling multi-criteria spatial
 > priorities. R package version 0.9. Available at
 > <https://https://github.com/bmaparicio/ForSysXR>.
@@ -410,6 +410,6 @@ contains information on the *forsys* package.
 
 ## Getting help
 
-If you have any questions about the *forsys* package or suggestions for
+If you have any questions about the *ForSysXR* package or suggestions for
 improving it, please [post an issue on the code
-repository](https://github.com/forsysr/issues/new).
+repository](https://https://github.com/bmaparicio/ForSysXR/issues/new).
