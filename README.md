@@ -19,7 +19,7 @@ several research and applied case studies at a range of scales
 landscape-scale treatments (see case studies). ForSys is available in a
 windows desktop GUI (ForSysX) and an in a modified R version (ForSysR).
 
-For details on ForSysX and ForSysR algorithms, please refer to Day et al. (2023) <!-- INSERT LINK WHEN PUBLIC -->
+For details on ForSysX and [ForSysR](https://github.com/forsys-sp/forsysr) algorithms, please refer to Day et al. (2023) <!-- INSERT LINK WHEN PUBLIC -->
 
 ## Installation
 
@@ -397,10 +397,10 @@ plot(plot_dat_6[,'treatment_rank'], border=NA, main="Patch rank")
 Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
-> Evers C, Houtman R, Day M, Belavenutti P, and Ager A. (2023). ForSysR:
-> A scenario planning platform for modeling multi-criteria spatial
-> priorities in R. R package version 0.9. Available at
-> <https://github.com/forsys-sp/forsysr>.
+> Aparício BA and Ager A. (2023).
+> ForSysXR: A R package for running the ForSysX scenario planning platform for modeling multi-criteria spatial
+> priorities. R package version 0.9. Available at
+> <https://https://github.com/bmaparicio/ForSysXR>.
 
 ## Additional resources
 
@@ -410,6 +410,6 @@ contains information on the *forsys* package.
 
 ## Getting help
 
-If you have any questions about the *forsys* package or suggestions for
+If you have any questions about the *ForSysXR* package or suggestions for
 improving it, please [post an issue on the code
-repository](https://github.com/forsysr/issues/new).
+repository](https://github.com/bmaparicio/ForSysXR/issues).
