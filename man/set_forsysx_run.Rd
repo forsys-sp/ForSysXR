@@ -13,15 +13,16 @@ set_forsysx_run(
   available_for_management,
   available,
   seed_stands_only_available_stands,
-  exclude_stands = 0,
+  exclude_stands,
   exclude_field,
   x_coordinate,
   y_coordinate,
-  seed_stand_percent,
-  max_project_diameter,
+  seed_stand_percent = 100,
+  max_project_diameter = -1,
   max_number_projects,
   inverse_distance_power = 0,
   maximize_distance = 0,
+  MaximizeDistanceOpt = 0,
   adjacency_matrix,
   output_adjacency_matrix,
   constraints_name,
@@ -31,6 +32,8 @@ set_forsysx_run(
   objectives,
   output_xml,
   run_forsysx,
+  save_outputs,
+  plot_results = FALSE,
   exe_path
 )
 }

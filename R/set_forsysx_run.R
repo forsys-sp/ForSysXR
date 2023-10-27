@@ -36,7 +36,7 @@ set_forsysx_run <- function(input_shapefile,
                             available_for_management, #default is to not have stands with availability info
                             available,
                             seed_stands_only_available_stands,
-                            exclude_stands=0, #the default is not to have info on exclude in stands
+                            exclude_stands, #the default is not to have info on exclude in stands
                             exclude_field,
                             #load_objective_steps,
                             #step_file,
@@ -44,14 +44,15 @@ set_forsysx_run <- function(input_shapefile,
                             #spatial_optimization,
                             x_coordinate,
                             y_coordinate,
-                            seed_stand_percent,
-                            max_project_diameter,
+                            seed_stand_percent=100,
+                            max_project_diameter= -1,
                             max_number_projects,
                             #patch_buster,
                             #weight,
                             #patch_identifier,
                             inverse_distance_power=0, #default is 0
                             maximize_distance = 0, #default is 0 (not use)
+                            MaximizeDistanceOpt =0, #0 has to be the default. This is only useful for FBN
                             adjacency_matrix,
                             output_adjacency_matrix,
                             constraints_name,
@@ -61,21 +62,26 @@ set_forsysx_run <- function(input_shapefile,
                             objectives,
                             output_xml,
                             run_forsysx,
+                            save_outputs,
+                            plot_results=FALSE,
                             exe_path #,xml_path
                             ) {
 
-  input_shapefile_format <- substrRight(input_shapefile,4)
 
+
+  if(class(input_shapefile)[1]=="character"){
+  input_shapefile_format <- substrRight(input_shapefile,4)
   if(input_shapefile_format!= ".shp")
-    stop("input_shapefile has to be a shapefile!")
+    stop("input_shapefile has to be a shapefile!")}
 
   if (missing(adjacency_matrix) & missing(output_adjacency_matrix)) {
     stop("User must specify an existing adjacency matrix or generate one (output_adjacency_matrix parameter)")
   }
 
-  if(exclude_stands !=0 | exclude_stands !=1) {
-    stop("exclude_stands must be 0 or 1")
-  }
+  if(exclude_stands !=0) {
+    if (exclude_stands !=1){
+      stop("exclude_stands must be 0 or 1")
+    }}
 
   if(exclude_stands ==1 & missing(exclude_field)) {
     stop("User is specifying that some stands must be excluded without indicating the field with this information")
@@ -85,6 +91,22 @@ set_forsysx_run <- function(input_shapefile,
   #user should see the manual to understand if it is doing what they want
 
   #input_shapefile <- "C:/Users/almeidbr/Desktop/umatilla/stands_with_distance_to_FBN_projects/changed_availability_after_implementing_projects_stands_vs2/Umatilla_Restoration_08282023_with_distance_to_FBN_linear_Rev_proj_1_vs2.shp"
+
+
+
+
+  if(class(input_shapefile)[1]=="sf"){
+    my_shp <- (input_shapefile)
+    st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
+    input_shapefile <- paste(outputs_base_name,"_stand_data.shp",sep="")
+  }
+
+  if(class(input_shapefile)[1]=="character"){
+    my_shp <- sf::st_read(input_shapefile)
+  }
+
+
+
   input_shapefile_use <- gsub("/","\\\\\\\\",input_shapefile)
 
   outputs_base_name_use <- gsub("/","\\\\\\\\",outputs_base_name)
@@ -93,7 +115,7 @@ set_forsysx_run <- function(input_shapefile,
 
   if (!missing(output_adjacency_matrix)){
     cat("Loading shapefile",'\n')
-    my_shp <- sf::read_sf(input_shapefile)
+
 
     #keep only the stand id data
     my_shp <- my_shp[,stand_id]
@@ -108,7 +130,9 @@ set_forsysx_run <- function(input_shapefile,
 
     colnames(adj_final) <- c(stand_id,paste(" Adjacent_",stand_id,sep=""))
 
-    write.csv(adj_final,paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep=""),row.names = FALSE)
+    #write.csv(adj_final,paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep=""),row.names = FALSE)
+
+    write.table(adj_final, file=paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep=""), sep=",", row.names = FALSE, quote=FALSE)
 
     adjacency_matrix <- paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep="")
   }
@@ -137,7 +161,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
   #Exclude stands
-  xml_data_use <- gsub(paste("Exclusions=\"",exclude_stands,"\"",sep=""),"",unlist(xml_data_use))
+  xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",exclude_stands,"\"",sep=""),unlist(xml_data_use))
 
   if (exclude_stands == 0) {
     xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
@@ -238,6 +262,30 @@ set_forsysx_run <- function(input_shapefile,
   xml_data_use <- gsub(paste("IdwPower=\"",inverse_distance_power,"\"",sep=""),"",unlist(xml_data_use))
 
 
+  #export shapefile
+  if(any(grepl("shapefile", save_outputs, fixed = TRUE))==TRUE){
+    xml_data_use <- gsub(paste("DisableShapeOutput=\"0\"",sep=""),"DisableShapeOutput=\"0\"",unlist(xml_data_use))
+  } else {
+    xml_data_use <- gsub(paste("DisableShapeOutput=\"0\"",sep=""),"DisableShapeOutput=\"1\"",unlist(xml_data_use))
+  }
+
+
+  #export image
+  if(any(grepl("image", save_outputs, fixed = TRUE))==TRUE){
+    xml_data_use <- gsub(paste("ImageOutput=\"0\"",sep=""),"ImageOutput=\"1\"",unlist(xml_data_use))
+  } else {
+    xml_data_use <- gsub(paste("ImageOutput=\"0\"",sep=""),"ImageOutput=\"0\"",unlist(xml_data_use))
+  }
+
+
+  #export csv
+  if(any(grepl("stand_csv", save_outputs, fixed = TRUE))==TRUE){
+    xml_data_use <- gsub(paste("DisablePointsOutput=\"0\"",sep=""),"DisablePointsOutput=\"0\"",unlist(xml_data_use))
+  } else {
+    xml_data_use <- gsub(paste("DisablePointsOutput=\"0\"",sep=""),"DisablePointsOutput=\"1\"",unlist(xml_data_use))
+  }
+
+
 
   write.table(xml_data_use,output_xml,row.names = F,col.names = F,quote = FALSE)
 
@@ -258,6 +306,47 @@ set_forsysx_run <- function(input_shapefile,
 
   } else {cat("XML file saved",'\n')}
 
+
+  #plot the results if the shapefile is saved
+
+  if(any(grepl("shapefile", save_outputs, fixed = TRUE))==TRUE){
+    if(plot_results==TRUE){
+      all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+
+      all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+      all_elements_use <- as.character(all_elements_use)
+
+      path_with_results <- paste(all_elements_use, collapse = '/')
+
+      #list patterns
+      output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+      output_shp_run <- st_read(paste(path_with_results,output_shp_run,sep="/"))
+
+      if (missing(my_shp)){
+        my_shp <- sf::st_read(input_shapefile)
+      }
+
+
+      my_shp$diss <- 1
+
+      ttt <- my_shp  %>%
+        #mutate_at(c('diss'), ~na_if(., 0)) %>%
+        #st_combine() %>%
+        ggplot() +
+        geom_sf(aes(fill=diss),fill="grey",color=NA) +
+        #ggtitle("Projects ranking") +
+        theme_void()+
+        theme(plot.title=element_text(hjust=0.5))+
+        #guides(fill="none")+
+        geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
+        scale_fill_viridis_c(option = "turbo",direction=-1)+
+        labs(fill='Project number')
+
+      return(ttt)
+    }
+
+  }
 
   }
 
