@@ -161,16 +161,15 @@ ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
 
 *Forsys* prioritizes projects by maximizing an objective given one or
 more constraints. The objectives represent one or more management
-priorities while the constraints may include a maximum cost or area
-treated. Thresholds are environmental or categorical conditions that
-trigger the need to treat an indiviudal treatment unit or stand (e.g., a
+priorities, while a constraint can be perceived as the condition required to stop the prioritization process. Common constraints are total area treated and/or total cost.
+Thresholds are environmental or categorical conditions that
+trigger the need to treat an individual treatment unit or stand (e.g., 
 particular ownership or minimum forest cover). *Forsys* then builds
 projects and ranks them in order of their priority. Projects can be
 either predefined units (e.g., watersheds) or can be built dynamically.
 
-Let’s set up a very simple *forsys* run to see how things work. We’ll
-use the test_forest data shown above. We want to find the top 2000 ha
-within each predefined project based on ‘priority1’.
+The example below sets a simple *ForSysX* run. It uses the stands_data shown above to delineate the top 50 ha
+within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each.
 
 ``` r
 plot(test_forest[,c('proj_id','priority1')], border=NA)
