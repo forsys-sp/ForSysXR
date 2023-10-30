@@ -172,7 +172,27 @@ The example below sets a simple *ForSysX* run. It uses the stands_data shown abo
 within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each.
 
 ``` r
-plot(test_forest[,c('proj_id','priority1')], border=NA)
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_1",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "Point_X",
+                 y_coordinate = "Point_Y",
+                 max_number_projects = 10,
+                 output_adjacency_matrix ="C:/Users/ForSysXR",
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 save_outputs = c("stand_csv","shapefile","image"))
 ```
 
 ![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
