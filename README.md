@@ -195,7 +195,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" />
+<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
 
 We run *forsys* with the following arguments. *Forsys* always writes its
 outputs to csv files saved within the output folder, but we can
