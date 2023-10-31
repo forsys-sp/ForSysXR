@@ -161,22 +161,47 @@ ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
 
 *Forsys* prioritizes projects by maximizing an objective given one or
 more constraints. The objectives represent one or more management
-priorities while the constraints may include a maximum cost or area
-treated. Thresholds are environmental or categorical conditions that
-trigger the need to treat an indiviudal treatment unit or stand (e.g., a
+priorities, while a constraint can be perceived as the condition required to stop the prioritization process. Common constraints are total area treated and/or total cost.
+Thresholds are environmental or categorical conditions that
+trigger the need to treat an individual treatment unit or stand (e.g., 
 particular ownership or minimum forest cover). *Forsys* then builds
 projects and ranks them in order of their priority. Projects can be
 either predefined units (e.g., watersheds) or can be built dynamically.
 
-Let’s set up a very simple *forsys* run to see how things work. We’ll
-use the test_forest data shown above. We want to find the top 2000 ha
-within each predefined project based on ‘priority1’.
+The example below sets a simple *ForSysX* run. It uses the stands_data shown above to delineate the top 50 ha
+within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each.
 
 ``` r
-plot(test_forest[,c('proj_id','priority1')], border=NA)
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_1",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "Point_X",
+                 y_coordinate = "Point_Y",
+                 max_number_projects = 10,
+                 output_adjacency_matrix ="C:/Users/ForSysXR",
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
+
+
+### Using threshold 
+
+It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targetted for treatment. Here, the field threshold represents predicted flame length in meters. As an example, one could be limit the treatments to be allocated only in areas with predicted flame length greater than 2 meters.
+
 
 We run *forsys* with the following arguments. *Forsys* always writes its
 outputs to csv files saved within the output folder, but we can
