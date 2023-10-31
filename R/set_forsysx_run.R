@@ -26,6 +26,7 @@
 #' @param run_forsysx Binary. If 1 will run ForSysX. If 0 will end after saving the XML file
 #' @param exe_path Path to the ForSysXConsole.exe
 #'
+#' @import dplyr sf ggplot2
 #' @return
 #' @export
 #'
@@ -33,10 +34,10 @@
 set_forsysx_run <- function(input_shapefile,
                             outputs_base_name,
                             stand_id,area,
-                            available_for_management, #default is to not have stands with availability info
+                            #available_for_management, #default is to not have stands with availability info
                             available,
                             seed_stands_only_available_stands,
-                            exclude_stands, #the default is not to have info on exclude in stands
+                            #exclude_stands, #the default is not to have info on exclude in stands
                             exclude_field,
                             #load_objective_steps,
                             #step_file,
@@ -60,6 +61,7 @@ set_forsysx_run <- function(input_shapefile,
                             constraints_slack,
                             effect_fields,
                             objectives,
+                            threshold,
                             output_xml,
                             run_forsysx,
                             save_outputs,
@@ -78,14 +80,14 @@ set_forsysx_run <- function(input_shapefile,
     stop("User must specify an existing adjacency matrix or generate one (output_adjacency_matrix parameter)")
   }
 
-  if(exclude_stands !=0) {
-    if (exclude_stands !=1){
-      stop("exclude_stands must be 0 or 1")
-    }}
-
-  if(exclude_stands ==1 & missing(exclude_field)) {
-    stop("User is specifying that some stands must be excluded without indicating the field with this information")
-  }
+  # if(exclude_stands !=0) {
+  #   if (exclude_stands !=1){
+  #     stop("exclude_stands must be 0 or 1")
+  #   }}
+  #
+  # if(exclude_stands ==1 & missing(exclude_field)) {
+  #   stop("User is specifying that some stands must be excluded without indicating the field with this information")
+  # }
 
   #warning if default definitions are used for some parameters. And say that the
   #user should see the manual to understand if it is doing what they want
@@ -97,7 +99,7 @@ set_forsysx_run <- function(input_shapefile,
 
   if(class(input_shapefile)[1]=="sf"){
     my_shp <- (input_shapefile)
-    st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
+    sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
     input_shapefile <- paste(outputs_base_name,"_stand_data.shp",sep="")
   }
 
@@ -141,7 +143,18 @@ set_forsysx_run <- function(input_shapefile,
   adjacency_matrix_use <- gsub("/","\\\\\\\\",adjacency_matrix)
 
 
-  data("xml_data")
+
+  if(missing(threshold)){
+    data("xml_data_threshold")
+    xml_data <- xml_data_threshold
+  }
+
+
+  if(!missing(threshold)){
+    data("xml_data")
+    }
+
+
   xml_data_use <- gsub("my_input_shapefile.shp",input_shapefile_use,unlist(xml_data)) #input_shapefile_use
   xml_data_use <- gsub("my_output_name",outputs_base_name_use,unlist(xml_data_use))
   xml_data_use <- gsub("my_adjacency_file.csv",adjacency_matrix_use,unlist(xml_data_use)) #input_shapefile_use
@@ -150,24 +163,58 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
+
   #available_for_management -falta fazer este
-  if (available_for_management==1){
+  #if (available_for_management==1){
     if (missing(available)) {
-      stop("User is specifying that some stands cannot be treated without indicating the field with this information")
-      }
-  xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))
-  xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub("my_availability_field","",unlist(xml_data_use))
+      xml_data_use <- gsub("Availability=\"1\"","Availability=\"0\"",unlist(xml_data_use))
+      xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",0,"\"",sep=""),unlist(xml_data_use))
+    }
+
+
+  if (length(available)==1) {
+    xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))
+    xml_data_use <- gsub("Availability=\"1\"","Availability=\"1\"",unlist(xml_data_use))
+    xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
+  } else{
+    stop("One and only one field must be used to specify the available stands")
   }
+
+
+  #available_for_management -falta fazer este
+  # if (available_for_management==1){
+  #   if (missing(available)) {
+  #     stop("User is specifying that some stands cannot be treated without indicating the field with this information")
+  #     }
+  # xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))
+  # xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
+  # }
 
 
   #Exclude stands
-  xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",exclude_stands,"\"",sep=""),unlist(xml_data_use))
 
-  if (exclude_stands == 0) {
+  if (missing(exclude_field)) {
+    xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",0,"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
-  } else {
+    }
+
+
+  if (length(exclude_field)==1) {
+    xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",1,"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+  } else{
+    stop("One and only one field must be used to specify the excluded stands")
   }
+
+
+  # xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",exclude_stands,"\"",sep=""),unlist(xml_data_use))
+  #
+  # if (exclude_stands == 0) {
+  #   xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
+  # } else {
+  #   xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+  # }
 
 
 
@@ -255,6 +302,63 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
+
+  #repeat for threshold
+#
+#   if(missing(threshold)){
+#     for(q in 1:6){
+#       xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"1.00\" />",sep=""),"",unlist(xml_data_use))
+#     }
+#   }
+
+
+  if(!missing(threshold)){
+  total_n_threshold <- base::length(threshold)
+  total_n_threshold <- total_n_threshold/3
+
+  #integer_val <- total_n_threshold%%1==0
+
+  integer_val <- decimalplaces(total_n_threshold)
+
+  if(integer_val != 0)
+    stop("Wrong number of arguments when defining the threshold")
+
+  if(total_n_threshold > 6)
+    stop("Maximum number of threshold reached. Maximum number allowd is 6")
+
+  for (k in 1:total_n_threshold){
+
+    position_threshold <- (k-1)*3
+    xml_data_use <- gsub(paste("my_threshold",k,"\"",sep=""),paste(threshold[position_threshold+1],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("my_operator",k,sep=""),
+                         if(threshold[position_threshold+2]==">="){"&gt;="} else
+                         if(threshold[position_threshold+2]=="<="){"&lt;="} else
+                         if(threshold[position_threshold+2]=="<"){"&lt;"} else
+                         if(threshold[position_threshold+2]==">"){"&gt;"} else
+                         if(threshold[position_threshold+2]=="=="){"=="},
+                         unlist(xml_data_use))
+    xml_data_use <- gsub(paste("min_val_threshold",k,sep=""),threshold[position_threshold+3],unlist(xml_data_use))
+
+
+  }
+
+
+  #delete the unused threshold
+  if(total_n_threshold < 6){
+    diff_threshold <- 6-total_n_threshold
+    position_unused <- (1:6)
+    position_unused <- tail(position_unused,diff_threshold)
+
+    for(q in min(position_unused):max(position_unused)){
+      xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"1.00\" />",sep=""),"",unlist(xml_data_use))
+      }
+}
+  }
+
+
+
+
+
   #MaximizeDistanceOpt
   xml_data_use <- gsub(paste("MaximizeDistanceOpt=\"",MaximizeDistanceOpt,"\"",sep=""),"",unlist(xml_data_use))
 
@@ -319,9 +423,15 @@ set_forsysx_run <- function(input_shapefile,
       path_with_results <- paste(all_elements_use, collapse = '/')
 
       #list patterns
-      output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+      #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
 
-      output_shp_run <- st_read(paste(path_with_results,output_shp_run,sep="/"))
+      last_name <- all_elements[,ncol(all_elements)]
+      #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+      output_shp_run = intersect(list.files(path_with_results, paste(as.numeric(constraints_value),".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+
+
+      output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run,sep="/"))
 
       if (missing(my_shp)){
         my_shp <- sf::st_read(input_shapefile)

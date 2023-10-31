@@ -13,6 +13,9 @@
 
 "xml_data"
 
+#' data(xml_data_threshold)
+
+"xml_data_threshold"
 
 #' Spatial data of stands
 #'
