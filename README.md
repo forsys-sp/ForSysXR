@@ -197,6 +197,12 @@ set_forsysx_run (input_shapefile = stands_data,
 
 <img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
 
+
+### Using threshold 
+
+It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targetted for treatment. Here, the field threshold represents predicted flame length in meters. As an example, one could be limit the treatments to be allocated only in areas with predicted flame length greater than 2 meters.
+
+
 We run *forsys* with the following arguments. *Forsys* always writes its
 outputs to csv files saved within the output folder, but we can
 optionally set it to write that data out to a list which has three
