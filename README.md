@@ -255,8 +255,11 @@ plot(plot_dat_2[,c('treatment_rank','priority1')], border=NA)
 
 ### Multiple priorities
 
-Next we look at multiple priorities. Plotting priorities 1 and 2 shows
-that areas where priority 1 are highest tend to be lower for priority 2.
+In many prioritization studies, more than one objective is often considered.  When this is the case, it is advised that the real values are not used directly in ForSysX as the magnitude of the objectives' values are often different. Two clear examples of that are objective 1 (ranges from 0 to 2569) and objective 3 (ranges from 0 to 0.0848). If these values are used directly in ForSys, the priority areas would be defined based on objective 1 instead of on both.
+
+ForSysX and ForSysXR allow the user to normalize the objectives using the PCP (percentage contribution concerning the total problem of all treatable units) and SPM (percentage difference from the maximum value of the objective). Hence, the sum of the PCP of all stands is 100 and the maximum SPM value of any stand is 100. Usually, the SPM is used as an objective and the PCP as an effect.
+
+To normalize the objectives, the function normalize_objectives can be used
 
 ``` r
 plot(test_forest[,c('priority1','priority2')], border=NA)
