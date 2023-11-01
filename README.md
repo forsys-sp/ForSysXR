@@ -6,7 +6,7 @@
 
 ## Scenario planning for land management
 
-ForSys a land management planning model that explores potential outcomes
+ForSys is a land management planning model that explores potential outcomes
 across many possible priorities, including but not limited to landscape
 restoration and hazardous fuel management. The model is spatially
 explicit and uses multi-criteria prioritization and optimization methods
@@ -285,6 +285,9 @@ normalize_objectives(stands_data, fields=c("obj_1","obj_2","obj_3"), availabilit
 ##5  POLYGON ((577192.4 4451290,... 10.498772  82.96146 15.480582 0.06318820 0.1042465 0.067738260
 ##6  POLYGON ((574485.3 4452268,...  5.689255  81.26859  8.159638 0.03424151 0.1021192 0.035704064
 ```
+
+After running the normalize_objective function, a shapefile named *forsysXR_stands_normalized* is stored in the output_name specified.
+This shapefile will be used to run ForSysX with multiobjectives. In the example, all three objectives will be used.
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
