@@ -198,32 +198,41 @@ set_forsysx_run (input_shapefile = stands_data,
 <img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
 
 
+Not surprisingly, the treatment rank of the projects selected
+corresponds directly to those areas where obj_1 was highest, as
+plotted above. Project rank \#1 (darkest red) is the highest-ranked
+project.
+
 ### Using threshold 
 
-It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targetted for treatment. Here, the field threshold represents predicted flame length in meters. As an example, one could be limit the treatments to be allocated only in areas with predicted flame length greater than 2 meters.
+It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
 
 
-We run *forsys* with the following arguments. *Forsys* always writes its
-outputs to csv files saved within the output folder, but we can
-optionally set it to write that data out to a list which has three
-elements containing the outputs.
+We run *forsys* with the following arguments. Note the use of adjacency_matrix (uses the adjacency created above instead of generating a new file) and the parameter threshold.
 
 ``` r
-stand_dat <- test_forest %>% st_drop_geometry()
-
-run_outputs <- forsys::run(
-  return_outputs = TRUE,
-  scenario_name = "test_scenario",
-  stand_data = stand_dat,
-  stand_id_field = "stand_id",
-  proj_id_field = "proj_id",
-  stand_area_field = "area_ha",
-  scenario_priorities = "priority1",
-  scenario_output_fields = c("area_ha", "priority1", "priority2", "priority3", "priority4"),
-  proj_fixed_target =  TRUE,
-  proj_target_field = "area_ha",
-  proj_target_value = 2000
-)
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_threshold_2",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 adjacency_matrix ="C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/test_tutorial_vs3_threshold.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 threshold=c("threshold",">",2),
+                 save_outputs = c("stand_csv","shapefile","image"))
 ```
 
 Not surprisingly, the treatment rank of the projects selected
