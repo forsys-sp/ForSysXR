@@ -316,31 +316,86 @@ normalize_objectives(stands_data, fields=c("obj_1","obj_2","obj_3"), availabilit
 After running the normalize_objective function, a shapefile named *forsysXR_stands_normalized* is stored in the output_name specified.
 This shapefile will be used to run ForSysX with multiobjectives. In the example, all three objectives will be used.
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
-
-Let’s see if *forsys* can find locations where we can achieve both
-objectives. We prioritize on both variables, priority1 and priority2. We
-run *forsys* weighting the two objectives from 0 to 5, which results in
-21 scenarios. We then filter the results to observe the outcome of the
-scenario where the two objectives are equally weighted. The project rank
-graph represents areas that are highest for both priorities.
 
 ``` r
-run_outputs_3 = forsys::run(
-  return_outputs = TRUE,
-  scenario_name = "test_scenario",
-  stand_data = stand_dat,
-  stand_id_field = "stand_id",
-  proj_id_field = "proj_id",
-  stand_area_field = "area_ha",
-  scenario_priorities = c("priority1","priority2"),
-  scenario_weighting_values = c("0 5 1"),
-  scenario_output_fields = c("area_ha", "priority1", "priority2", "priority3", "priority4"),
-  proj_fixed_target =  TRUE,
-  proj_target_field = "area_ha",
-  proj_target_value = 2000
-)
+set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized.shp",
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_multiobjectives",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 adjacency_matrix = "C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 constraints_name = "Area_ha",
+                 constraints_value = "50",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1_PCP","obj_2_PCP","obj_3_PCP"),
+                 objectives = c("obj_1_SPM","Treat","1","1","1",
+                                "obj_2_SPM","Treat","1","1","1",
+                                "obj_3_SPM","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/test_tutorial_multiobjectives.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 save_outputs = c("stand_csv","shapefile","image"))
+
+``` 
+
+<img src="man/figures/run_tutorial_multicriteria.jpg" width="300" align="center"/>
+
+One can plot the attainment for each objective and the overall attainment as follows 
+
+``` r
+result_table <- read.csv("C:/Users/aparicio/Desktop/ForSysXR/run_tutorial_multiobjectives_300_Results.csv")
+head(result_table)
+
+#area_treated <- result_table[,"Treat_Area_ha"]
+obj1_PCP_treated <- result_table[,c("ProjectNumber","Treat_Area_ha","ETrt_obj_1_PCP")]
+obj1_PCP_treated$objective <- 1
+colnames(obj1_PCP_treated)<- c("ProjectNumber","Treat_Area_ha","PCP_treated","objective")
+
+obj2_PCP_treated <- result_table[,c("ProjectNumber","Treat_Area_ha","ETrt_obj_2_PCP")]
+obj2_PCP_treated$objective <- 2
+colnames(obj2_PCP_treated)<- c("ProjectNumber","Treat_Area_ha","PCP_treated","objective")
+
+obj3_PCP_treated <- result_table[,c("ProjectNumber","Treat_Area_ha","ETrt_obj_3_PCP")]
+obj3_PCP_treated$objective <- 3
+colnames(obj3_PCP_treated)<- c("ProjectNumber","Treat_Area_ha","PCP_treated","objective")
+
+PCP_treated <- rbind(obj1_PCP_treated,obj2_PCP_treated,obj3_PCP_treated)
+
+plot_1 <- ggplot(PCP_treated,aes(x=ProjectNumber, y=PCP_treated, color=factor(objective)))+
+  geom_line(linewidth=1.2)+
+  scale_x_continuous(breaks = 1:10)+
+  xlab("Project number")+
+  ylab("Objective attainment (PCP)")+
+  guides(color=guide_legend(title="Objective"))+
+  ggtitle("Individual attainment") +
+  theme(plot.title=element_text(hjust=0.5))+
+  theme_classic()+
+  theme(text=element_text(size=14))
+
+#alternativelty, one can also plot the overall attainment for the three objective
+
+plot_2 <- ggplot(result_table,aes(x=ProjectNumber,y=max_value))+
+  geom_line()+
+  scale_x_continuous(breaks = 1:10)+
+  xlab("Project number")+
+  ylab("Objective attainment")+
+  ggtitle("Overall attainment") +
+  theme(plot.title=element_text(hjust=0.5))+
+  theme_classic()+
+  theme(text=element_text(size=14))
+
+
+
+ggarrange(plot_1,plot_2,ncol=2)
 ```
+
+<img src="man/figures/multiobjective_attainment.jpg" width="300" align="center"/>
 
 Notice we will need to filter the outputs to find the scenario where
 each priority is equally weighted. We do this by filtering the priority
