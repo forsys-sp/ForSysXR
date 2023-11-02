@@ -6,7 +6,7 @@
 
 ## Scenario planning for land management
 
-ForSys a land management planning model that explores potential outcomes
+ForSys is a land management planning model that explores potential outcomes
 across many possible priorities, including but not limited to landscape
 restoration and hazardous fuel management. The model is spatially
 explicit and uses multi-criteria prioritization and optimization methods
@@ -198,32 +198,56 @@ set_forsysx_run (input_shapefile = stands_data,
 <img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
 
 
-### Using threshold 
+Not surprisingly, the treatment rank of the projects selected
+corresponds directly to those areas where obj_1 was highest, as
+plotted above. Project rank \#1 (darkest red) is the highest-ranked
+project.
 
-It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targetted for treatment. Here, the field threshold represents predicted flame length in meters. As an example, one could be limit the treatments to be allocated only in areas with predicted flame length greater than 2 meters.
 
+The amount of objective targeted for treatment per project can be plotted as follows
 
-We run *forsys* with the following arguments. *Forsys* always writes its
-outputs to csv files saved within the output folder, but we can
-optionally set it to write that data out to a list which has three
-elements containing the outputs.
 
 ``` r
-stand_dat <- test_forest %>% st_drop_geometry()
+result_table <- read.csv("C:/Users/aparicio/Desktop/ForSysXR/run_tutorial_1_Results.csv")
 
-run_outputs <- forsys::run(
-  return_outputs = TRUE,
-  scenario_name = "test_scenario",
-  stand_data = stand_dat,
-  stand_id_field = "stand_id",
-  proj_id_field = "proj_id",
-  stand_area_field = "area_ha",
-  scenario_priorities = "priority1",
-  scenario_output_fields = c("area_ha", "priority1", "priority2", "priority3", "priority4"),
-  proj_fixed_target =  TRUE,
-  proj_target_field = "area_ha",
-  proj_target_value = 2000
-)
+ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
+  geom_line()+
+  scale_x_continuous(breaks = 1:10)+
+  xlab("Objective attainment")+
+  ylab("Project number")+
+  theme_classic()
+```
+
+### Using threshold 
+
+It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
+
+
+We run *forsys* with the following arguments. Note the use of adjacency_matrix (uses the adjacency created above instead of generating a new file) and the parameter threshold.
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_threshold_2",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 adjacency_matrix ="C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/test_tutorial_vs3_threshold.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 threshold=c("threshold",">",2),
+                 save_outputs = c("stand_csv","shapefile","image"))
 ```
 
 Not surprisingly, the treatment rank of the projects selected
@@ -255,12 +279,39 @@ plot(plot_dat_2[,c('treatment_rank','priority1')], border=NA)
 
 ### Multiple priorities
 
-Next we look at multiple priorities. Plotting priorities 1 and 2 shows
-that areas where priority 1 are highest tend to be lower for priority 2.
+In many prioritization studies, more than one objective is often considered.  When this is the case, it is advised that the real values are not used directly in ForSysX as the magnitude of the objectives' values are often different. Two clear examples of that are objective 1 (ranges from 0 to 2569) and objective 3 (ranges from 0 to 0.0848). If these values are used directly in ForSys, the priority areas would be defined based on objective 1 instead of on both.
+
+ForSysX and ForSysXR allow the user to normalize the objectives using the PCP (percentage contribution concerning the total problem of all treatable units) and SPM (percentage difference from the maximum value of the objective). Hence, the sum of the PCP of all stands is 100 and the maximum SPM value of any stand is 100. Usually, the SPM is used as an objective and the PCP as an effect.
+
+To normalize the objectives, the function normalize_objectives can be used
 
 ``` r
-plot(test_forest[,c('priority1','priority2')], border=NA)
+normalize_objectives(stands_data, fields=c("obj_1","obj_2","obj_3"), availability_txt="availuse",output_name="C:/Users/ForSysXR")
+
+## Simple feature collection with 1028 features and 16 fields
+## Geometry type: POLYGON
+## Dimension:     XY
+## Bounding box:  xmin: 571404.6 ymin: 4448921 xmax: 579181 ymax: 4456309
+## Projected CRS: ETRS89 / UTM zone 29N
+## First 10 features:
+##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2        obj_3 threshold
+##1         1 2.149784 577104.1 4455304        1     0  649.1051 2.632802 0.0017115583  1.750002
+##2         2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031 0.0004543819  1.627590
+##3         3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908 0.0008986479  1.996994
+##4         4 1.283715 576908.8 4451242        1     0  252.8004 2.378386 0.0037384391  2.315409
+##5         5 1.393932 577108.5 4451299        1     0  269.7420 2.388572 0.0038692370  2.815383
+##6         6 1.077390 574488.3 4452205        1     0  146.1724 2.339832 0.0020394307  1.976931
+##                         geometry obj_1_SPM obj_2_SPM obj_3_SPM  obj_1_PCP obj_2_PCP   obj_3_PCP
+##1  POLYGON ((577284.2 4455239,... 25.264164  91.44424  6.847841 0.15205560 0.1149056 0.029964043
+##2  POLYGON ((571986 4450002, 5... 42.535493  84.08887  1.817954 0.25600530 0.1056631 0.007954809
+##3  POLYGON ((572168.8 4450285,... 41.731688  83.28573  3.595436 0.25116750 0.1046539 0.015732519
+##4  POLYGON ((576948.2 4451149,...  9.839378  82.60767 14.957268 0.05921955 0.1038019 0.065448396
+##5  POLYGON ((577192.4 4451290,... 10.498772  82.96146 15.480582 0.06318820 0.1042465 0.067738260
+##6  POLYGON ((574485.3 4452268,...  5.689255  81.26859  8.159638 0.03424151 0.1021192 0.035704064
 ```
+
+After running the normalize_objective function, a shapefile named *forsysXR_stands_normalized* is stored in the output_name specified.
+This shapefile will be used to run ForSysX with multiobjectives. In the example, all three objectives will be used.
 
 ![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
 
