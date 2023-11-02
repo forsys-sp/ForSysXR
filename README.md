@@ -316,7 +316,35 @@ normalize_objectives(stands_data, fields=c("obj_1","obj_2","obj_3"), availabilit
 After running the normalize_objective function, a shapefile named *forsysXR_stands_normalized* is stored in the output_name specified.
 This shapefile will be used to run ForSysX with multiobjectives. In the example, all three objectives will be used.
 
-![](README_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
+``` r
+set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized.shp",
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_multiobjectives",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 adjacency_matrix = "C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 constraints_name = "Area_ha",
+                 constraints_value = "50",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1_PCP","obj_2_PCP","obj_3_PCP"),
+                 objectives = c("obj_1_SPM","Treat","1","1","1",
+                                "obj_2_SPM","Treat","1","1","1",
+                                "obj_3_SPM","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/test_tutorial_multiobjectives.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 save_outputs = c("stand_csv","shapefile","image"))
+
+``` 
+
+<img src="man/figures/run_tutorial_multicriteria.jpg" width="300" align="center"/>
 
 Let’s see if *forsys* can find locations where we can achieve both
 objectives. We prioritize on both variables, priority1 and priority2. We
