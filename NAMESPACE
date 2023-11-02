@@ -2,6 +2,7 @@
 
 export(calculate_pcp)
 export(calculate_spm)
+export(normalize_objectives)
 export(run_forsysx_console)
 export(set_forsysx_run)
 import(dplyr)
@@ -9,3 +10,4 @@ import(ggplot2)
 import(sf)
 importFrom(dplyr,mutate)
 importFrom(dplyr,pull)
+importFrom(sf,st_write)

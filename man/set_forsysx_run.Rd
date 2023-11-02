@@ -75,6 +75,8 @@ set_forsysx_run(
 
 \item{objectives}{Field(s) from input_shapefile identifying the treatment priorities}
 
+\item{threshold}{Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value}
+
 \item{output_xml}{Path and name (with xml extention) where the xml file for the run should be stored.}
 
 \item{run_forsysx}{Binary. If 1 will run ForSysX. If 0 will end after saving the XML file}

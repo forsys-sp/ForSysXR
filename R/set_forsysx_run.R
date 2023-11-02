@@ -20,6 +20,7 @@
 #' @param constraints_name Field from input_shapefile that will be used as a constraint. Typical area or cost.
 #' @param constraints_value Constraint value
 #' @param constraints_slack Constraint slack.
+#' @param threshold Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value
 #' @param effect_fields Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments
 #' @param objectives Field(s) from input_shapefile identifying the treatment priorities
 #' @param output_xml Path and name (with xml extention) where the xml file for the run should be stored.
@@ -339,6 +340,8 @@ set_forsysx_run <- function(input_shapefile,
                          unlist(xml_data_use))
     xml_data_use <- gsub(paste("min_val_threshold",k,sep=""),threshold[position_threshold+3],unlist(xml_data_use))
 
+    #if we only want to run one threshold and not steps, we do this
+    xml_data_use <- gsub(paste("step_threshold",k,sep=""),"0",unlist(xml_data_use))
 
   }
 
@@ -350,7 +353,7 @@ set_forsysx_run <- function(input_shapefile,
     position_unused <- tail(position_unused,diff_threshold)
 
     for(q in min(position_unused):max(position_unused)){
-      xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"1.00\" />",sep=""),"",unlist(xml_data_use))
+      xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
       }
 }
   }
