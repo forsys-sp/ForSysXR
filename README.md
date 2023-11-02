@@ -346,29 +346,56 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
 
 <img src="man/figures/run_tutorial_multicriteria.jpg" width="300" align="center"/>
 
-Let’s see if *forsys* can find locations where we can achieve both
-objectives. We prioritize on both variables, priority1 and priority2. We
-run *forsys* weighting the two objectives from 0 to 5, which results in
-21 scenarios. We then filter the results to observe the outcome of the
-scenario where the two objectives are equally weighted. The project rank
-graph represents areas that are highest for both priorities.
+One can plot the attainment for each objective and the overall attainment as follows 
 
 ``` r
-run_outputs_3 = forsys::run(
-  return_outputs = TRUE,
-  scenario_name = "test_scenario",
-  stand_data = stand_dat,
-  stand_id_field = "stand_id",
-  proj_id_field = "proj_id",
-  stand_area_field = "area_ha",
-  scenario_priorities = c("priority1","priority2"),
-  scenario_weighting_values = c("0 5 1"),
-  scenario_output_fields = c("area_ha", "priority1", "priority2", "priority3", "priority4"),
-  proj_fixed_target =  TRUE,
-  proj_target_field = "area_ha",
-  proj_target_value = 2000
-)
+result_table <- read.csv("C:/Users/aparicio/Desktop/ForSysXR/run_tutorial_multiobjectives_300_Results.csv")
+head(result_table)
+
+#area_treated <- result_table[,"Treat_Area_ha"]
+obj1_PCP_treated <- result_table[,c("ProjectNumber","Treat_Area_ha","ETrt_obj_1_PCP")]
+obj1_PCP_treated$objective <- 1
+colnames(obj1_PCP_treated)<- c("ProjectNumber","Treat_Area_ha","PCP_treated","objective")
+
+obj2_PCP_treated <- result_table[,c("ProjectNumber","Treat_Area_ha","ETrt_obj_2_PCP")]
+obj2_PCP_treated$objective <- 2
+colnames(obj2_PCP_treated)<- c("ProjectNumber","Treat_Area_ha","PCP_treated","objective")
+
+obj3_PCP_treated <- result_table[,c("ProjectNumber","Treat_Area_ha","ETrt_obj_3_PCP")]
+obj3_PCP_treated$objective <- 3
+colnames(obj3_PCP_treated)<- c("ProjectNumber","Treat_Area_ha","PCP_treated","objective")
+
+PCP_treated <- rbind(obj1_PCP_treated,obj2_PCP_treated,obj3_PCP_treated)
+
+plot_1 <- ggplot(PCP_treated,aes(x=ProjectNumber, y=PCP_treated, color=factor(objective)))+
+  geom_line(linewidth=1.2)+
+  scale_x_continuous(breaks = 1:10)+
+  xlab("Project number")+
+  ylab("Objective attainment (PCP)")+
+  guides(color=guide_legend(title="Objective"))+
+  ggtitle("Individual attainment") +
+  theme(plot.title=element_text(hjust=0.5))+
+  theme_classic()+
+  theme(text=element_text(size=14))
+
+#alternativelty, one can also plot the overall attainment for the three objective
+
+plot_2 <- ggplot(result_table,aes(x=ProjectNumber,y=max_value))+
+  geom_line()+
+  scale_x_continuous(breaks = 1:10)+
+  xlab("Project number")+
+  ylab("Objective attainment")+
+  ggtitle("Overall attainment") +
+  theme(plot.title=element_text(hjust=0.5))+
+  theme_classic()+
+  theme(text=element_text(size=14))
+
+
+
+ggarrange(plot_1,plot_2,ncol=2)
 ```
+
+<img src="man/figures/multiobjective_attainment.jpg" width="300" align="center"/>
 
 Notice we will need to filter the outputs to find the scenario where
 each priority is equally weighted. We do this by filtering the priority
