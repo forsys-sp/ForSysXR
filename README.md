@@ -208,7 +208,7 @@ The amount of objective targeted for treatment per project can be plotted as fol
 
 
 ``` r
-result_table <- read.csv("C:/Users/aparicio/Desktop/ForSysXR/run_tutorial_1_Results.csv")
+result_table <- read.csv("C:/Users/ForSysXR/run_tutorial_1_Results.csv")
 
 ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   geom_line()+
@@ -217,6 +217,9 @@ ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   ylab("Project number")+
   theme_classic()
 ```
+
+<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
+
 
 ### Using threshold 
 
