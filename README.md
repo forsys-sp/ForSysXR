@@ -203,6 +203,21 @@ corresponds directly to those areas where obj_1 was highest, as
 plotted above. Project rank \#1 (darkest red) is the highest-ranked
 project.
 
+
+The amount of objective targeted for treatment per project can be plotted as follows
+
+
+``` r
+result_table <- read.csv("C:/Users/aparicio/Desktop/ForSysXR/run_tutorial_1_Results.csv")
+
+ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
+  geom_line()+
+  scale_x_continuous(breaks = 1:10)+
+  xlab("Objective attainment")+
+  ylab("Project number")+
+  theme_classic()
+```
+
 ### Using threshold 
 
 It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
