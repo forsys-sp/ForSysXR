@@ -2,7 +2,7 @@
 % Please edit documentation in R/set_forsysx_run.R
 \name{set_forsysx_run}
 \alias{set_forsysx_run}
-\title{Primary function for running the ForSysX treatment planner from R without an
+\title{Primary function for running the ForSysX treatment planner from R without an existent XML
 existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml}
 \usage{
 set_forsysx_run(
@@ -88,6 +88,6 @@ set_forsysx_run(
 \item{exclude_stands}{If the input_shapefile contains information on stands that should be excluded from the prioritization. <\emph{logical}>}
 }
 \description{
-Primary function for running the ForSysX treatment planner from R without an
+Primary function for running the ForSysX treatment planner from R without an existent XML
 existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml
 }

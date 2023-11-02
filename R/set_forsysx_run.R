@@ -1,4 +1,4 @@
-#' Primary function for running the ForSysX treatment planner from R without an
+#' Primary function for running the ForSysX treatment planner from R without an existent XML
 #' existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml
 #'
 #' @param input_shapefile Shapefile containing the stands that will be used in the prioritization process
@@ -69,6 +69,34 @@ set_forsysx_run <- function(input_shapefile,
                             plot_results=FALSE,
                             exe_path #,xml_path
                             ) {
+
+
+  if (file.exists(output_xml)) {
+    #Delete file if it exists
+    file.remove(output_xml)
+  }
+
+
+
+
+
+  # all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+  #
+  # all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+  # all_elements_use <- as.character(all_elements_use)
+  #
+  # path_with_results <- paste(all_elements_use, collapse = '/')
+  #
+  # #list patterns
+  # #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+  #
+  # last_name <- all_elements[,ncol(all_elements)]
+  # #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+  #
+  # output_shp_run = intersect(list.files(path_with_results, paste(as.numeric(constraints_value),".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+  #
+  #
+
 
 
 
@@ -394,7 +422,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-  write.table(xml_data_use,output_xml,row.names = F,col.names = F,quote = FALSE)
+
 
   #falta os seguintes também
   #patch_buster
@@ -406,6 +434,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
   #run forsysX
+
+  #wait a bit for the xml to be written and then run forsysX
+  date_time<-Sys.time()
+  while((as.numeric(Sys.time()) - as.numeric(date_time))<5){
+    #print("waiting")
+  }
+
+  write.table(xml_data_use,output_xml,row.names = F,col.names = F,quote = FALSE)
 
   if (run_forsysx==1){
     cat("XML file saved",'\n')
