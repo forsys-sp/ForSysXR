@@ -218,7 +218,7 @@ ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   theme_classic()
 ```
 
-<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
+<img src="man/figures/attainment_run1.jpg" width="300" align="center"/>
 
 
 ### Using threshold 
