@@ -395,7 +395,7 @@ plot_2 <- ggplot(result_table,aes(x=ProjectNumber,y=max_value))+
 ggarrange(plot_1,plot_2,ncol=2)
 ```
 
-<img src="man/figures/multiobjective_attainment.jpg" width="300" align="center"/>
+<img src="man/figures/multiobjective_attainment.jpg" width="1100" align="center"/>
 
 Notice we will need to filter the outputs to find the scenario where
 each priority is equally weighted. We do this by filtering the priority
