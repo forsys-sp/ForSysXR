@@ -526,6 +526,29 @@ plot(plot_dat_6[,'treatment_rank'], border=NA, main="Patch rank")
 
 ![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
+## Running ForSysXR using predefined XML
+
+ForSysXR can be used to run predefined XML files. This can be useful to include in R scripts or loops
+
+``` r
+run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                xml_path = "C:/Users/ForSysXR/run_tutorial_1.xml")
+``` 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## Citation
 
 Please cite the *forsys* package when using it in publications. To cite
