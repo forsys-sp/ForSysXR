@@ -540,9 +540,21 @@ run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
 
 ForSys can also be constrained by subunits. This will allow pre-defined planning areas to be used when creating scenarios.
 When using pre-defined planning areas, the “subunit_field” must be set to the field that places stands into planning areas.
-The following example shows how the ForSysXR can be run with pre-defined planning areas
+The following example shows how the ForSysXR can be run with pre-defined planning areas. First, we plot the subunits in the dataset
 
+``` r
+stands_data  %>%
+  ggplot() +
+  geom_sf(aes(fill=factor(subunit)),colour=NA) +
+  scale_fill_manual(values=c("grey80","grey40"))+
+  #scale_fill_viridis_c(option = "A",na.value = "grey50")+
+  ggtitle("Subunits") +
+  theme_void()+
+  labs(fill='Subunit number')+
+  theme(plot.title=element_text(hjust=0.5))
+``` 
 
+<img src="man/figures/subunits.jpg" width="400" align="center"/>
 
 
 
