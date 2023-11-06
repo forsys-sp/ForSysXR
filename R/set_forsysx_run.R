@@ -23,6 +23,8 @@
 #' @param threshold Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value
 #' @param effect_fields Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments
 #' @param objectives Field(s) from input_shapefile identifying the treatment priorities
+#' @param subunit_field Field from input_shapefile identifying the pre-defined planning areas
+#' @param master_subunit If master subunits should be used
 #' @param output_xml Path and name (with xml extention) where the xml file for the run should be stored.
 #' @param run_forsysx Binary. If 1 will run ForSysX. If 0 will end after saving the XML file
 #' @param exe_path Path to the ForSysXConsole.exe
@@ -63,6 +65,8 @@ set_forsysx_run <- function(input_shapefile,
                             effect_fields,
                             objectives,
                             threshold,
+                            subunit_field,
+                            master_subunit,
                             output_xml,
                             run_forsysx,
                             save_outputs,
@@ -125,7 +129,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-
+#this is ONLY if we are either plotting (plot=TRUE) or generating the adjacency matrix
   if(class(input_shapefile)[1]=="sf"){
     my_shp <- (input_shapefile)
     sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
@@ -422,6 +426,19 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
+
+  #subunit
+
+  if (!missing(subunit_field)){
+    xml_data_use <- gsub(paste("SubunitsEnable=\"0\"",sep=""),"SubunitsEnable=\"1\"",unlist(xml_data_use))
+    xml_data_use <- gsub(paste("SubunitsField=\"\"",sep=""),paste("SubunitsField=\"",subunit_field,"\"",sep=""),unlist(xml_data_use))
+  }
+
+
+  if (missing(master_subunit)){
+    xml_data_use <- gsub(paste("NestedSubunitsEnable=\"1\"",sep=""),"NestedSubunitsEnable=\"0\"",unlist(xml_data_use))
+
+  }
 
 
   #falta os seguintes também

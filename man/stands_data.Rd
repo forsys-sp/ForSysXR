@@ -5,7 +5,7 @@
 \alias{stands_data}
 \title{Spatial data of stands}
 \format{
-An object of class \code{sf} (inherits from \code{data.frame}) with 1028 rows and 11 columns.
+An object of class \code{sf} (inherits from \code{data.frame}) with 1028 rows and 12 columns.
 }
 \usage{
 stands_data

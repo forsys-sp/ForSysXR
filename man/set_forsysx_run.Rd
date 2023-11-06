@@ -29,6 +29,8 @@ set_forsysx_run(
   effect_fields,
   objectives,
   threshold,
+  subunit_field,
+  master_subunit,
   output_xml,
   run_forsysx,
   save_outputs,
@@ -76,6 +78,10 @@ set_forsysx_run(
 \item{objectives}{Field(s) from input_shapefile identifying the treatment priorities}
 
 \item{threshold}{Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value}
+
+\item{subunit_field}{Field from input_shapefile identifying the pre-defined planning areas}
+
+\item{master_subunit}{If master subunits should be used}
 
 \item{output_xml}{Path and name (with xml extention) where the xml file for the run should be stored.}
 
