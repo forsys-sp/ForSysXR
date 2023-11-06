@@ -17,6 +17,6 @@ Description: ForSys is a multi-objective spatial prioritization system that was 
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)

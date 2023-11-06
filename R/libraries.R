@@ -1,7 +1,6 @@
 ('Loading required R packages...')
 pacman::p_load(
   sf,
-  expp,
   spdep,
   rlang,
   tidyverse,

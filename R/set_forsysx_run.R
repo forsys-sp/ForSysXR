@@ -160,7 +160,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
     cat("Generating adjacency matrix",'\n')
-    adj_raw <- expp::neighborsDataFrame(spdep::poly2nb(my_shp))
+    adj_raw <- neighborsDataFrame_expp(spdep::poly2nb(my_shp))
     adj_final <- adj_raw[,c(2,1)]
 
     colnames(adj_final) <- c(stand_id,paste(" Adjacent_",stand_id,sep=""))
