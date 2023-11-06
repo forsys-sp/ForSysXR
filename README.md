@@ -539,7 +539,7 @@ run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
 ## Running ForSys with subunits
 
 ForSys can also be constrained by subunits. This will allow pre-defined planning areas to be used when creating scenarios.
-When using pre-defined planning areas, the “enable_subunits” option must be set to TRUE and the “subunit_field” set to the field that places stands into planning areas.
+When using pre-defined planning areas, the “subunit_field” must be set to the field that places stands into planning areas.
 The following example shows how the ForSysXR can be run with pre-defined planning areas
 
 
