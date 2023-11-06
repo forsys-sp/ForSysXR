@@ -587,7 +587,14 @@ set_forsysx_run (input_shapefile = stands_data,
 <img src="man/figures/three_projects_subunits.jpg" width="400" align="center"/>
 
 
+## Running ForSys with zones
 
+
+
+
+
+## Running ForSys with zones interactively
+Running ForSys with interactive zones allows to update fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects to be allocated in new projects. However, in some cases this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
 
 
 
