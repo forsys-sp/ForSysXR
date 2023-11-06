@@ -554,7 +554,7 @@ stands_data  %>%
   theme(plot.title=element_text(hjust=0.5))
 ``` 
 
-<img src="man/figures/subunits.jpg" width="300" align="center"/>
+<img src="man/figures/subunits.jpg" width="400" align="center"/>
 
 
 
