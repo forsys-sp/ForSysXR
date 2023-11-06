@@ -528,12 +528,19 @@ plot(plot_dat_6[,'treatment_rank'], border=NA, main="Patch rank")
 
 ## Running ForSysXR using predefined XML
 
-ForSysXR can be used to run predefined XML files. This can be useful to include in R scripts or loops
+ForSysXR can be used to run predefined XML files. This can be useful to include in R scripts or loops. This function is similar to run zones in ForSysX
 
 ``` r
 run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
                 xml_path = "C:/Users/ForSysXR/run_tutorial_1.xml")
 ``` 
+
+
+## Running ForSys with subunits
+
+ForSys can also be constrained by subunits. This will allow pre-defined planning areas to be used when creating scenarios.
+When using pre-defined planning areas, the “enable_subunits” option must be set to TRUE and the “subunit_field” set to the field that places stands into planning areas.
+The following example shows how the ForSysXR can be run with pre-defined planning areas
 
 
 
