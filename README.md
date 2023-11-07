@@ -617,7 +617,26 @@ FBN_restoration_data  %>%
 
 
 
+To plot the temporary files created with the corresponding distance to each fuelbreak network project, one can do the following
 
+``` r
+for(i in 1:3){
+  shp_data_i <- sf::st_read(paste("C:/Users/ForSysXR/temp_folder_shp/interactive_zones_",i,".shp",sep=""))
+  
+  plot_i <- shp_data_i  %>%
+    ggplot() +
+    geom_sf(aes(fill=distance),colour=NA) +
+    ggtitle(paste("Distance to FBN project ",i,sep="")) +
+    scale_fill_viridis_c(option = "inferno",na.value = "grey50",direction=-1)+
+    theme_void()+
+    theme(plot.title=element_text(hjust=0.5))+
+    guides(fill=guide_legend(title="Distance (m)"))
+    assign(paste("plot_",i,sep=""),plot_i)
+    rm(shp_data_i,plot_i)
+}
+
+ggpubr::ggarrange(plot_1,plot_2,plot_3,nrow=1,ncol=3,common.legend = TRUE,legend="bottom")
+```
 
 <img src="man/figures/distance_to_FBN_projects.jpg" width="600" align="center"/>
 
