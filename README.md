@@ -618,6 +618,11 @@ FBN_restoration_data  %>%
 
 
 
+
+<img src="man/figures/distance_to_FBN_projects.jpg" width="600" align="center"/>
+
+
+
 The same approach can be applied to other problems. For instance, if the treatments should be placed within a given distance from specific urban areas.
 
 
