@@ -557,10 +557,44 @@ stands_data  %>%
 <img src="man/figures/subunits.jpg" width="400" align="center"/>
 
 
+In the following example, we set the number of projects per subunit as three, each with a total treated area of 50 hectares.
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_subunits",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 3,
+                 adjacency_matrix = "C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 constraints_name = "Area_ha",
+                 constraints_value = 50,
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/test_tutorial_multiobjectives.xml",
+                 run_forsysx = 1,
+                 subunit_field = "subunit",
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 save_outputs = c("stand_csv","shapefile","image"))
+``` 
+
+<img src="man/figures/three_projects_subunits.jpg" width="400" align="center"/>
+
+
+## Running ForSys with zones
 
 
 
 
+
+## Running ForSys with zones interactively
+Running ForSys with interactive zones allows to update fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects to be allocated in new projects. However, in some cases this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
 
 
 
