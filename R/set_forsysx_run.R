@@ -159,9 +159,15 @@ set_forsysx_run <- function(input_shapefile,
     my_shp <- my_shp[order(my_shp$V1),]
 
 
+    my_shp_df_nei <- as.data.frame(my_shp)
+
+
     cat("Generating adjacency matrix",'\n')
-    adj_raw <- neighborsDataFrame_expp(spdep::poly2nb(my_shp))
-    adj_final <- adj_raw[,c(2,1)]
+    adj_raw <- neighborsDataFrame_expp(spdep::poly2nb(my_shp, queen=FALSE))
+    adj_raw$id_correct <- my_shp_df_nei[adj_raw$id,1]
+    adj_raw$id_neigh_correct <- my_shp_df_nei[adj_raw$id_neigh,1]
+
+    adj_final <- adj_raw[,c(4,3)]
 
     colnames(adj_final) <- c(stand_id,paste(" Adjacent_",stand_id,sep=""))
 
