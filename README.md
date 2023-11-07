@@ -641,6 +641,37 @@ ggpubr::ggarrange(plot_1,plot_2,plot_3,nrow=1,ncol=3,common.legend = TRUE,legend
 <img src="man/figures/distance_to_FBN_projects.jpg" width="600" align="center"/>
 
 
+The first step to use ForSysXR is the creation of the XML file that defines the ForSysX run. Because in this case, the only difference between the runs is the input shapefile (i.e. all run parameters should be the same), one can create the XML within a simple for loop in R. This will create the three XML files without running ForSysX
+
+``` r
+for(i in 1:3){
+  set_forsysx_run (input_shapefile = paste("C:/Users/ForSysXR/temp_folder_shp/interactive_zones_",i,".shp",sep=""),
+                   outputs_base_name = paste(C:/Users/ForSysXR/temp_folder_shp/run_tutorial_zones_",i,sep=""),
+                   stand_id = "ID_forsys",
+                   area = "area_ha",
+                   available = "avail_fin",
+                   exclude_field = "Exclude",
+                   seed_stands_only_available_stands = 1,
+                   x_coordinate = "Point_X",
+                   y_coordinate = "Point_Y",
+                   max_number_projects = 1,
+                   output_adjacency_matrix = "C:/Users/ForSysXR/temp_folder_shp",
+                   constraints_name = "area_ha",
+                   constraints_value = 500,
+                   constraints_slack = "1.00",
+                   effect_fields = c("ob2_PCP"),
+                   objectives = c("ob2_SPM","Treat","1","1","1"),
+                   output_xml = paste("C:/Users/ForSysXR/temp_folder_shp/test_tutorial_zones_",i,".xml",sep=""),
+                   run_forsysx = 0,
+                   threshold=c("distance","<=",2500),
+                   save_outputs = c("stand_csv","shapefile","image"))
+  
+}
+``` 
+
+
+
+
 
 The same approach can be applied to other problems. For instance, if the treatments should be placed within a given distance from specific urban areas.
 
