@@ -664,10 +664,11 @@ for(i in 1:3){
                    output_xml = paste("C:/Users/ForSysXR/temp_folder_shp/test_tutorial_zones_",i,".xml",sep=""),
                    run_forsysx = 0,
                    threshold=c("distance","<=",2500),
-                   save_outputs = c("stand_csv","shapefile","image"))
-  
-}
+                   save_outputs = c("stand_csv","shapefile","image"))}
 ``` 
+
+
+Finally, to run ForSysXR with zones interactively one can simply use the function xxxxx as follows
 
 
 
