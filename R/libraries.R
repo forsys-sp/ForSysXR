@@ -4,7 +4,8 @@ pacman::p_load(
   spdep,
   rlang,
   tidyverse,
-  dplyr
+  dplyr,
+  spsUtil
 )
 
 

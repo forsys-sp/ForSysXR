@@ -4,12 +4,14 @@
 \alias{run_forsysx_xml}
 \title{Primary function for running the ForSysX treatment planner from R with an existent XML}
 \usage{
-run_forsysx_xml(exe_path, xml_path)
+run_forsysx_xml(exe_path, xml_path, xml_folder, run_zones_interactive = FALSE)
 }
 \arguments{
 \item{exe_path}{Path to the ForSysXConsole.exe}
 
 \item{xml_path}{Path to the XML file that must be used in the ForSysX run}
+
+\item{xml_folder}{Folder containing the XML files that must be used in the ForSysX run. Useful when running a large number of XML files}
 }
 \description{
 Primary function for running the ForSysX treatment planner from R with an existent XML
