@@ -597,7 +597,7 @@ set_forsysx_run (input_shapefile = stands_data,
 Running ForSys with interactive zones allows to update fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects to be allocated in new projects. However, in some cases this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
 
 
-First, one can plot the new stand dataset highlighting the predefined fuel break network projects as follows
+First, one can plot the new stand dataset highlighting the predefined fuel break network projects as follows (note that stands that are not part of the fuelbreak network will be displayed as NA)
 
 ``` r
 FBN_restoration_data  %>%
