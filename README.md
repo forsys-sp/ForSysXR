@@ -719,7 +719,8 @@ run_forsysx_xml(exe_path="F:/forsys/ForSysXConsole.exe",
 The restoration projects generated from ForSys can be plotted as follows
 
 ``` r
-all_shps_results <- intersect(list.files("C:/Users/ForSysXR/temp_folder_shp",pattern = "\\.shp$"), list.files("C:/Users/ForSysXR/temp_folder_shp",pattern = "run_tutorial_zones"))
+all_shps_results <- intersect(list.files("C:/Users/ForSysXR/temp_folder_shp",pattern = "\\.shp$"),
+list.files("C:/Users/ForSysXR/temp_folder_shp",pattern = "run_tutorial_zones"))
 all_shps_results_i <- sf::st_read(paste("C:/Users/ForSysXR/temp_folder_shp",all_shps_results[1],sep="/"))
 all_shps_results_i$ProjectNum <- 1
 
