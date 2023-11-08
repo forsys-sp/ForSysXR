@@ -588,6 +588,7 @@ set_forsysx_run (input_shapefile = stands_data,
 
 
 ## Running ForSys with zones
+Running ForSys with zones allows the user to run several XML files within a single command.
 To exemplify the option of running zones in ForSys, we will use another dataset included in the package. 
 The new dataset is called `stands_data_FBN` and includes real stands from a study area with one objective that can be optimized, an area field that can be used as a constraint, a field representing the distance to the fuelbreak network to be used as a threshold, and a field with the order of execution of the fuelbreak network. It also contains fields with the stands' availability for treatments and stands to be excluded from the analysis.
 
@@ -610,6 +611,40 @@ stands_data_FBN  %>%
 
 <img src="man/figures/FBN_projects.jpg" width="400" align="center"/>
 
+
+As illustrated in the image above, there are three fuelbreak network projects. The number 1 is the most priority one and should be implemented first, while the third project has the least priority. 
+To understand the use of zones, we can set the following research problem:
+i) After implementing a fuelbreak network project, we want to create a restoration project in the landscape before moving to the second fuelbreak network project
+ii) The restoration project must be within a given distance of the fuelbreak network project that was just implemented.
+
+
+Given the objectives, we will need to create three different shapefiles, where the distance to the most recently implemented fuelbreak network project changes.
+
+``` r
+distance_to_FBN_projects <- function(my_stands,FBN_projects,output_folder){
+  my_stands_use <- sf::st_read(my_stands)
+  FBN_porj_position <- grep(FBN_projects, colnames(my_stands_use))
+  names(my_stands_use)[FBN_porj_position] <- "FBN_proj"
+  my_linear_projs <-  subset(my_stands_use,FBN_proj!=0)
+  
+  for(i in 1:max(my_stands_use$FBN_proj,na.rm = TRUE)){
+    my_linear_projs_loop <- subset(my_stands_use,FBN_proj==i)
+    index <- sf::st_nearest_feature(x = my_stands_use, y = my_linear_projs_loop)
+    my_FBN_2 <- my_linear_projs_loop %>% slice(index)
+    poly_dist <- as.numeric(st_distance(x = my_stands_use, y= my_FBN_2, by_element = TRUE))
+    my_stands_use$distance <- poly_dist
+    my_stands_final <- my_stands_use
+      
+    #create a temp folder
+    dir.create(file.path(output_folder, "temp_folder_shp"), showWarnings = FALSE)
+    st_write(my_stands_final,paste(output_folder, "/temp_folder_shp/","interactive_zones_",i,".shp",sep=""))
+    }}
+
+
+distance_to_FBN_projects(my_stands="C:/Users/almeidbr/OneDrive - Oregon State University/Desktop/ForSysXR/umatilla_data_for_package_vs7.shp",
+                         FBN_projects="FBN_rank",
+                         output_folder="F:/ForSysXR/interactive_zones")
+```
 
 
 ## Running ForSys with zones interactively
