@@ -622,28 +622,34 @@ Given the objectives, we will need to create three different shapefiles, where t
 
 ``` r
 distance_to_FBN_projects <- function(my_stands,FBN_projects,output_folder){
-  my_stands_use <- sf::st_read(my_stands)
+  if(class(my_stands)[1]=="character"){
+    my_stands_use <- sf::st_read(my_stands)}
+  
+  if(class(my_stands)[1]=="sf"){
+    my_stands_use <-(my_stands)}
+    
+  #get the position of the variable with FBN projects
   FBN_porj_position <- grep(FBN_projects, colnames(my_stands_use))
   names(my_stands_use)[FBN_porj_position] <- "FBN_proj"
   my_linear_projs <-  subset(my_stands_use,FBN_proj!=0)
-  
+
   for(i in 1:max(my_stands_use$FBN_proj,na.rm = TRUE)){
     my_linear_projs_loop <- subset(my_stands_use,FBN_proj==i)
+    # create an index of the nearest feature
     index <- sf::st_nearest_feature(x = my_stands_use, y = my_linear_projs_loop)
     my_FBN_2 <- my_linear_projs_loop %>% slice(index)
-    poly_dist <- as.numeric(st_distance(x = my_stands_use, y= my_FBN_2, by_element = TRUE))
+    poly_dist <- as.numeric(sf::st_distance(x = my_stands_use, y= my_FBN_2, by_element = TRUE))
     my_stands_use$distance <- poly_dist
     my_stands_final <- my_stands_use
-      
+    
     #create a temp folder
     dir.create(file.path(output_folder, "temp_folder_shp"), showWarnings = FALSE)
-    st_write(my_stands_final,paste(output_folder, "/temp_folder_shp/","interactive_zones_",i,".shp",sep=""))
-    }}
+    sf::st_write(my_stands_final,paste(output_folder, "/temp_folder_shp/","interactive_zones_",i,".shp",sep=""))}}
 
 
-distance_to_FBN_projects(my_stands="C:/Users/almeidbr/OneDrive - Oregon State University/Desktop/ForSysXR/umatilla_data_for_package_vs7.shp",
+distance_to_FBN_projects(my_stands=stands_data_FBN,
                          FBN_projects="FBN_rank",
-                         output_folder="F:/ForSysXR/interactive_zones")
+                         output_folder="C:/Users/ForSysXR")
 ```
 
 
