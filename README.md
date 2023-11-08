@@ -761,6 +761,9 @@ run_forsysx_xml(exe_path="C:/Users/ForSysXR/ForSysXConsole.exe",
 
 
 
+As illustrated by the figure above, the restoration projects generated when running zones interactively differ from the previous case as projects no longer overlap.
+
+
 
 ## Citation
 
