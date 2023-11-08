@@ -653,28 +653,8 @@ distance_to_FBN_projects(my_stands=stands_data_FBN,
 ```
 
 
-## Running ForSys with zones interactively
-Running ForSys with interactive zones allows the update of fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects from being allocated to new projects. However, in some cases, this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
-
-
-First, one can plot the new stand dataset highlighting the predefined fuel break network projects as follows (note that stands that are not part of the fuelbreak network will be displayed as NA)
-
-``` r
-FBN_restoration_data  %>%
-  mutate_at(c('FBN_rank'), ~na_if(., 0)) %>%
-  ggplot() +
-  geom_sf(aes(fill=factor(FBN_rank))) +
-  scale_fill_viridis_d(option = "A",na.value = "grey60")+
-  ggtitle("Fuelbreak network projects") +
-  theme_void()+
-  theme(plot.title=element_text(hjust=0.5))+
-  guides(fill=guide_legend(title="FBN number"))
-```
-
-
-<img src="man/figures/FBN_projects.jpg" width="400" align="center"/>
-
-
+This function will create three shapefiles (one for each fuelbreak network project) with the corresponding distance to the newest fuelbreak network project.
+The shapefiles are named interactive_zones and are located in a temporary folder inside the path given by the user. This temporary folder can be deleted after running ForSys (see below).
 
 
 To plot the temporary files created with the corresponding distance to each fuelbreak network project, one can do the following
@@ -726,6 +706,32 @@ for(i in 1:3){
                    threshold=c("distance","<=",2500),
                    save_outputs = c("stand_csv","shapefile","image"))}
 ``` 
+
+
+## Running ForSys with zones interactively
+Running ForSys with interactive zones allows the update of fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects from being allocated to new projects. However, in some cases, this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
+
+
+First, one can plot the new stand dataset highlighting the predefined fuel break network projects as follows (note that stands that are not part of the fuelbreak network will be displayed as NA)
+
+``` r
+FBN_restoration_data  %>%
+  mutate_at(c('FBN_rank'), ~na_if(., 0)) %>%
+  ggplot() +
+  geom_sf(aes(fill=factor(FBN_rank))) +
+  scale_fill_viridis_d(option = "A",na.value = "grey60")+
+  ggtitle("Fuelbreak network projects") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))+
+  guides(fill=guide_legend(title="FBN number"))
+```
+
+
+<img src="man/figures/FBN_projects.jpg" width="400" align="center"/>
+
+
+
+
 
 
 Finally, to run ForSysXR with zones interactively one can simply use the function ```run_zones_interactive=TRUE``` as follows
