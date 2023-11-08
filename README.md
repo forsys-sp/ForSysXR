@@ -742,41 +742,23 @@ stands_data_FBN %>%
   guides(fill=guide_legend(title="Project number"))
 ``` 
 
+As shown in the figure, three restoration projects were created following the rules set in the XML. Each project is within a distance of 2500 meters from the corresponding fuelbreak network project (i.e. restoration project 1 is within 2500 meters of fuelbreak project 1, etc.).
+
+Although the simple run zones function can be useful, it may not be enough as information on previously allocated projects is not shared between zones (or XML runs). This may result in the overlap of some projects, which can be seen in the figure. To prevent stands from being allocated to more than one project when running zones, one can run zones interactively as shown in the next section.
 
 
 ## Running ForSys with zones interactively
-Running ForSys with interactive zones allows the update of fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects from being allocated to new projects. However, in some cases, this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
+Running ForSys with interactive zones allows the update of fields of the input stand shapefile between runs, preventing stands from being allocated to more than one project. For the moment, this feature is only available in ForSysXR package.
 
-
-First, one can plot the new stand dataset highlighting the predefined fuel break network projects as follows (note that stands that are not part of the fuelbreak network will be displayed as NA)
-
-``` r
-FBN_restoration_data  %>%
-  mutate_at(c('FBN_rank'), ~na_if(., 0)) %>%
-  ggplot() +
-  geom_sf(aes(fill=factor(FBN_rank))) +
-  scale_fill_viridis_d(option = "A",na.value = "grey60")+
-  ggtitle("Fuelbreak network projects") +
-  theme_void()+
-  theme(plot.title=element_text(hjust=0.5))+
-  guides(fill=guide_legend(title="FBN number"))
-```
-
-
-<img src="man/figures/FBN_projects.jpg" width="400" align="center"/>
-
-
-
-
-
-
-Finally, to run ForSysXR with zones interactively one can simply use the function ```run_zones_interactive=TRUE``` as follows
+To run ForSysXR with zones interactively one can simply use the function ```run_zones_interactive=TRUE``` as follows
 
 ``` r
 run_forsysx_xml(exe_path="C:/Users/ForSysXR/ForSysXConsole.exe", 
                 xml_folder="C:/Users/ForSysXR/temp_folder_shp/xml_to_use",
                 run_zones_interactive=TRUE)
 ``` 
+
+
 
 
 The same approach can be applied to other problems. For instance, if the treatments should be placed within a given distance from specific urban areas.
