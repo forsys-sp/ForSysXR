@@ -588,13 +588,32 @@ set_forsysx_run (input_shapefile = stands_data,
 
 
 ## Running ForSys with zones
+To exemplify the option of running zones in ForSys, we will use another dataset included in the package. 
+The new dataset is called `stands_data_FBN` and includes real stands from a study area with one objective that can be optimized, an area field that can be used as a constraint, a field representing the distance to the fuelbreak network to be used as a threshold, and a field with the order of execution of the fuelbreak network. It also contains fields with the stands' availability for treatments and stands to be excluded from the analysis.
+
+First, one can plot the new stand dataset highlighting the predefined fuel break network projects as follows (note that stands that are not part of the fuelbreak network will be displayed as NA)
+
+``` r
+data("stands_data_FBN")
+head(stands_data_FBN)
+
+stands_data_FBN  %>%
+  mutate_at(c('FBN_rank'), ~na_if(., 0)) %>%
+  ggplot() +
+  geom_sf(aes(fill=factor(FBN_rank))) +
+  scale_fill_viridis_d(option = "A",na.value = "grey60")+
+  ggtitle("Fuelbreak network projects") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))+
+  guides(fill=guide_legend(title="FBN number"))
+```
 
 
 
 
 
 ## Running ForSys with zones interactively
-Running ForSys with interactive zones allows to update fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects to be allocated in new projects. However, in some cases this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
+Running ForSys with interactive zones allows the update of fields of the input stand shapefile between runs. A simple run in Forsys will only prevent previous projects from being allocated to new projects. However, in some cases, this may not be enough. For instance, if the research objective is to allocate landscape treatments to areas close to a fuel break network at the same time it is being implemented (i.e. co-prioritization), the simple run with zones will not ensure that projects do not overlap. For the moment, this feature is only available in ForSysXR package.
 
 
 First, one can plot the new stand dataset highlighting the predefined fuel break network projects as follows (note that stands that are not part of the fuelbreak network will be displayed as NA)
