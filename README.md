@@ -608,7 +608,7 @@ stands_data_FBN  %>%
   guides(fill=guide_legend(title="FBN number"))
 ```
 
-
+<img src="man/figures/FBN_projects.jpg" width="400" align="center"/>
 
 
 
