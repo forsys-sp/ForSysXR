@@ -750,7 +750,7 @@ Although the simple run zones function can be useful, it may not be enough as in
 ## Running ForSys with zones interactively
 Running ForSys with interactive zones allows the update of fields of the input stand shapefile between runs, preventing stands from being allocated to more than one project. For the moment, this feature is only available in ForSysXR package.
 
-To run ForSysXR with zones interactively one can simply use the parameter ```run_zones_interactive=TRUE```. This parameter updates the exclude field of each shapefile, excluding the stands that were used in previous projects. After updating the field, the shapefile used as input in the XML is updated, replacing the previous version. Zones can be run interactively as follows
+To run ForSysXR with zones interactively one can simply use the parameter ```run_zones_interactive=TRUE```. This parameter updates the exclude field of each shapefile, excluding the stands that were used in previous projects. After updating the field, the shapefile used as input in the XML is updated, replacing the previous version. The results from the previous run will also be overwritten. Zones can be run interactively as follows:
 
 ``` r
 run_forsysx_xml(exe_path="C:/Users/ForSysXR/ForSysXConsole.exe", 
