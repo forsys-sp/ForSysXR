@@ -686,7 +686,7 @@ The first step to use ForSysXR is the creation of the XML file that defines the 
 ``` r
 for(i in 1:3){
   set_forsysx_run (input_shapefile = paste("C:/Users/ForSysXR/temp_folder_shp/interactive_zones_",i,".shp",sep=""),
-                   outputs_base_name = paste(C:/Users/ForSysXR/temp_folder_shp/run_tutorial_zones_",i,sep=""),
+                   outputs_base_name = paste("C:/Users/ForSysXR/temp_folder_shp/run_tutorial_zones_",i,sep=""),
                    stand_id = "ID_forsys",
                    area = "area_ha",
                    available = "avail_fin",
@@ -706,6 +706,16 @@ for(i in 1:3){
                    threshold=c("distance","<=",2500),
                    save_outputs = c("stand_csv","shapefile","image"))}
 ``` 
+
+
+After generating the required XML files, the three XMLs (i.e. zones) can be run using one single command 
+
+``` r
+run_forsysx_xml(exe_path="F:/forsys/ForSysXConsole.exe",
+                xml_folder="C:/Users/ForSysXR/temp_folder_shp")
+``` 
+
+
 
 
 ## Running ForSys with zones interactively
