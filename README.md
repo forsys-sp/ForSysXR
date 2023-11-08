@@ -668,7 +668,7 @@ for(i in 1:3){
 ``` 
 
 
-Finally, to run ForSysXR with zones interactively one can simply use the function ``` r run_zones_interactive=TRUE ``` as follows
+Finally, to run ForSysXR with zones interactively one can simply use the function ```run_zones_interactive=TRUE``` as follows
 
 
 
