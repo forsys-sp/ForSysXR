@@ -397,100 +397,45 @@ ggarrange(plot_1,plot_2,ncol=2)
 
 <img src="man/figures/multiobjective_attainment.jpg" width="800" align="center"/>
 
-Notice we will need to filter the outputs to find the scenario where
-each priority is equally weighted. We do this by filtering the priority
-scores. Pr_1 indicates the first priority score, and Pr_2 indicates the
-second priority score.
 
-``` r
-plot_dat_3 <- test_forest %>%
-  group_by(proj_id) %>% summarize() %>%
-  left_join(run_outputs_3$project_output %>% filter(Pr_1_priority1 == 1 & Pr_2_priority2 == 1) %>% 
-              select(proj_id, treatment_rank))
-
-plot(plot_dat_3[,'treatment_rank'], main="Project rank for two priorities")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
-
-Alternatively we could pass *forsys* the weighted scenario alone, rather
-than running through all the weights and the 21 scenario outcomes. Here
-we will utilize the combine_priorities function that we call outside of
-the *forsys* run function.
-
-``` r
-# Create a new combined priority variable to pass directly to our priority weightings based on priority 1 and priority 2
-test_forest <- test_forest %>% forsys::combine_priorities(
-  fields = c('priority1','priority2'), 
-  weights = c(1,1), 
-  new_field = 'combo_priority')
-
-# Recreate our input dataset
-stand_dat <- test_forest %>% st_drop_geometry()
-
-# Rerun forsys with the same scenario, passing the combo_priority as the new priority
-run_outputs_4 = forsys::run(
-  return_outputs = TRUE,
-  scenario_name = "test_scenario",
-  stand_data = stand_dat,
-  stand_id_field = "stand_id",
-  proj_id_field = "proj_id",
-  stand_area_field = "area_ha",
-  scenario_priorities = c("combo_priority"),
-  scenario_output_fields = c("area_ha", "priority1", "priority2", "priority3", "priority4"),
-  proj_fixed_target =  TRUE,
-  proj_target_field = "area_ha",
-  proj_target_value = 2000
-)
-
-plot_dat_4 <- test_forest %>%
-  group_by(proj_id) %>% summarize() %>%
-  left_join(run_outputs_4$project_output %>% select(proj_id, treatment_rank))
-plot(plot_dat_4[,'treatment_rank'], main="Project rank")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
-
-Let’s make this scenario a bit more complex by using a stand threshold
-and limiting stand selection to locations where threshold2 = 1 (yellow
-areas in the map below).
-
-``` r
-plot(test_forest[,c('combo_priority','threshold2')], border=NA)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
-
-Let’s run this scenario.
-
-``` r
-run_outputs_5 = forsys::run(
-  return_outputs = TRUE,
-  scenario_name = "test_scenario",
-  stand_data = stand_dat,
-  stand_id_field = "stand_id",
-  proj_id_field = "proj_id",
-  stand_area_field = "area_ha",
-  stand_threshold = "threshold2 == 1",
-  scenario_priorities = c("combo_priority"),
-  scenario_output_fields = c("area_ha", "priority1", "priority2", "priority3", "priority4"),
-  proj_fixed_target =  TRUE,
-  proj_target_field = "area_ha",
-  proj_target_value = 2000
-)
-
-plot_dat_5 <- test_forest %>%
-  group_by(proj_id) %>% summarize() %>%
-  left_join(run_outputs_5$project_output %>% select(proj_id, treatment_rank))
-
-plot(plot_dat_5[,'treatment_rank'], main="Project rank for two priorities for threshold2")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 ### Exploring different project prioritization methods
 
-*Forsys* can build projects dynamically using a package called
+*Forsys* can build projects with different shapes and following different methods. 
+The first parameter one can change is the Inverse Distance Power (IDP). This parameter controls how the project should be clustered together. A high IDP value will result in more tightly clumped stands in a project area, but sacrifices the overall objective. In *ForSysXR* the parameter is called ```inverse_distance_power``` and can be used as follows
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_IDP_1",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "Point_X",
+                 y_coordinate = "Point_Y",
+                 max_number_projects = 10,
+                 output_adjacency_matrix ="C:/Users/ForSysXR",
+                 inverse_distance_power=0
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
+
+
+
+
+
+dynamically using a package called
 *patchmax*, which requires some additional arguments and a shapefile as
 the input. Here we will prioritize priority2 and build five 25,000
 hectare patches.
