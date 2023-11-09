@@ -416,7 +416,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  y_coordinate = "Point_Y",
                  max_number_projects = 10,
                  output_adjacency_matrix ="C:/Users/ForSysXR",
-                 inverse_distance_power=0
+                 inverse_distance_power=1,
                  constraints_name = "Area_ha",
                  constraints_value = "50.00",
                  constraints_slack = "1.00",
@@ -429,7 +429,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
+<img src="man/figures/run_tutorial_IDP_1.jpg" width="300" align="center"/>
 
 
 
