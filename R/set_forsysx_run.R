@@ -137,8 +137,9 @@ set_forsysx_run <- function(input_shapefile,
   }
 
   if(class(input_shapefile)[1]=="character"){
+    if(plot_results==TRUE | !missing(output_adjacency_matrix)){
     my_shp <- sf::st_read(input_shapefile)
-  }
+  }}
 
 
 

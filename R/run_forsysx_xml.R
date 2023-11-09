@@ -3,11 +3,15 @@
 #' @param exe_path Path to the ForSysXConsole.exe
 #' @param xml_path Path to the XML file that must be used in the ForSysX run
 #' @param xml_folder Folder containing the XML files that must be used in the ForSysX run. Useful when running a large number of XML files
+#' @param run_zones_interactive Logical. If TRUE, then zones will be run interactively. Default is FALSE. See https://github.com/bmaparicio/ForSysXR/tree/main for an example
 #' @return
 #' @export
 #'
 #' @examples
-run_forsysx_xml <- function(exe_path, xml_path,xml_folder,run_zones_interactive = FALSE) {
+run_forsysx_xml <- function(exe_path,
+                            xml_path,
+                            xml_folder,
+                            run_zones_interactive = FALSE) {
 
   if(missing(xml_path) & missing(xml_folder)){
     stop("Either xml_path or xml_folder must be specified")
