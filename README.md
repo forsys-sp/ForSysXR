@@ -761,7 +761,8 @@ run_forsysx_xml(exe_path="C:/Users/ForSysXR/ForSysXConsole.exe",
 
 
 
-The same approach can be applied to other problems. For instance, if the treatments should be placed within a given distance from specific urban areas.
+As illustrated by the figure above, the restoration projects generated when running zones interactively differ from the previous case as projects no longer overlap.
+
 
 
 ## Citation
