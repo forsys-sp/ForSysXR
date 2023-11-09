@@ -526,14 +526,6 @@ plot(plot_dat_6[,'treatment_rank'], border=NA, main="Patch rank")
 
 ![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
-## Running ForSysXR using predefined XML
-
-ForSysXR can be used to run predefined XML files. This can be useful to include in R scripts or loops. This function is similar to run zones in ForSysX
-
-``` r
-run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
-                xml_path = "C:/Users/ForSysXR/run_tutorial_1.xml")
-``` 
 
 
 ## Running ForSys with subunits
@@ -585,6 +577,16 @@ set_forsysx_run (input_shapefile = stands_data,
 ``` 
 
 <img src="man/figures/three_projects_subunits.jpg" width="400" align="center"/>
+
+
+## Running ForSysXR using predefined XML
+
+ForSysXR can be used to run predefined XML files. This can be useful to include in R scripts or loops. This function is similar to run zones in ForSysX
+
+``` r
+run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                xml_path = "C:/Users/ForSysXR/run_tutorial_1.xml")
+``` 
 
 
 ## Running ForSys with zones
