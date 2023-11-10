@@ -405,7 +405,7 @@ set_forsysx_run <- function(input_shapefile,
   xml_data_use <- gsub(paste("MaximizeDistanceOpt=\"",MaximizeDistanceOpt,"\"",sep=""),"",unlist(xml_data_use))
 
   #IdwPower
-  xml_data_use <- gsub(paste("IdwPower=\"",inverse_distance_power,"\"",sep=""),"",unlist(xml_data_use))
+  xml_data_use <- gsub("my_idw_value",inverse_distance_power,unlist(xml_data_use))
 
 
   #export shapefile

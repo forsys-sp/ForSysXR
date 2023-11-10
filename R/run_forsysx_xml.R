@@ -27,6 +27,24 @@ run_forsysx_xml <- function(exe_path,
 
   if(!missing(xml_folder)){
     xml_files <- list.files(xml_folder,pattern="\\.xml$")
+
+    pt_1<-gsub(".xml","",xml_files)
+    pt_2 <- stringr::str_split(pt_1, "_")
+
+    xml_files_df <- data.frame((pt_1))
+    xml_files_df <- stringr::str_split_fixed(xml_files_df[,1],"_",length(pt_2[[1]]))
+
+    #order
+    xml_files_df <- as.data.frame(xml_files_df)
+    xml_files_df[,ncol(xml_files_df)] <- as.numeric(xml_files_df[,ncol(xml_files_df)])
+
+    xml_files_df <- xml_files_df[order(xml_files_df[,ncol(xml_files_df)]),]
+
+
+    xml_files <- do.call(paste, xml_files_df[1:ncol(xml_files_df)])
+    xml_files <- gsub(" ","_",xml_files)
+    xml_files <- paste0(xml_files,".xml")
+
     xml_path <- paste(xml_folder,xml_files,sep="/")
 
   }
