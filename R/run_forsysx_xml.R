@@ -161,6 +161,22 @@ run_forsysx_xml <- function(exe_path,
         shapefile_input <- gsub("\\\\","/",shapefile_input)
 
 
+        shapefile_input_noshp <- gsub(".shp*","",shapefile_input)
+        shapefile_input_noshp <- paste(shapefile_input_noshp,"_changed.shp",sep="")
+
+
+        #put this new name in the xml file
+
+        shapefile_input_replace1 <- stringr::str_split(shapefile_input, "/")
+        shapefile_input_replace1_name <- shapefile_input_replace1[[1]][length(shapefile_input_replace1[[1]])]
+
+        shapefile_input_changed1 <- stringr::str_split(shapefile_input_noshp, "/")
+        shapefile_input_changed1_name <- shapefile_input_changed1[[1]][length(shapefile_input_changed1[[1]])]
+
+
+
+
+
 
         shapefile_input_use <- spsUtil::quiet(sf::st_read(shapefile_input))
 
@@ -198,7 +214,13 @@ run_forsysx_xml <- function(exe_path,
 
         ###save the shapefile and replace the previous one####
 
-        spsUtil::quiet(sf::st_write(shapefile_input_use,shapefile_input,append = FALSE))
+        xml_path_file_i <- read.table(xml_path_i,sep="\t",quote = "")
+
+        xml_path_file_i <- gsub(shapefile_input_replace1_name,shapefile_input_changed1_name,unlist(xml_path_file_i))
+
+        write.table(xml_path_file_i,xml_path_total[i],row.names = F,col.names = F,quote = FALSE)
+
+        spsUtil::quiet(sf::st_write(shapefile_input_use,paste("changed_",shapefile_input,sep=""),append = FALSE))
 
 
 
