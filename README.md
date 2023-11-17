@@ -253,11 +253,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-Not surprisingly, the treatment rank of the projects selected
-corresponds directly to those areas where priority1 was highest, as
-plotted below. Projeck rank \#1 (darkest blue) is the highest ranked
-project.
-
+<img src="man/figures/threshold_figure.jpg" width="300" align="center"/>
 
 
 To assess the impact of the use of the threshold in the treated area in each project, one can run the following script
@@ -286,21 +282,8 @@ plot_1 <- stands_data  %>%
 
 <img src="man/figures/threshold_figure.jpg" width="300" align="center"/>
 
+As shown in the figure above, only stands above the threshold are targetted for treatments.
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
-
-Below we plot the stands rather than the project rank and only retain
-those stands that were treated.
-
-``` r
-plot_dat_2 <- test_forest %>% select(stand_id) %>%
-  left_join(run_outputs$stand_output %>% mutate(stand_id = as.integer(stand_id))) %>%
-  select(stand_id, priority1, proj_id) %>%
-  left_join(run_outputs$project_output %>% select(proj_id, treatment_rank))
-plot(plot_dat_2[,c('treatment_rank','priority1')], border=NA)
-```
-
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 ### Multiple priorities
 
