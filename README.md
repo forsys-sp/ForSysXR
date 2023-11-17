@@ -722,8 +722,8 @@ As illustrated by the figure above, the restoration projects generated when runn
 Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
-> Aparício BA and Ager A. (2023).
-> ForSysXR: A R package to execute C++ (ForSysX) version of ForSys scenario planning model. R package version 0.9. Available at
+> Aparício, B.A., Bunzel, K. and  Ager A. (2023).
+> ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model. R package version 0.9. Available at
 > <https://https://github.com/bmaparicio/ForSysXR>.
 
 ## Additional resources
