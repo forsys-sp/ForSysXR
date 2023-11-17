@@ -258,12 +258,34 @@ corresponds directly to those areas where priority1 was highest, as
 plotted below. Projeck rank \#1 (darkest blue) is the highest ranked
 project.
 
+
+
+To assess the impact of the use of the threshold in the treated area in each project, one can run the following script
+
 ``` r
-plot_dat <- test_forest %>%
-  group_by(proj_id) %>% summarize() %>%
-  left_join(run_outputs$project_output %>% select(proj_id, treatment_rank))
-plot(plot_dat[,'treatment_rank'], main="Project rank")
+output_threshold <- sf::st_read("C:/Users/ForSysXR/run_tutorial_threshold_2_1_2_49-50.shp") %>%
+  filter(Treat==1)
+
+plot_1 <- stands_data  %>%
+  mutate(threshold_bin = ifelse(threshold > 2, 1, 0)) %>%
+  ggplot() +
+  geom_sf(aes(fill=factor(threshold_bin)),colour=NA) +
+  scale_fill_manual(values = c("gray50", "gray"),
+                    labels=c('Below threshold', 'Above threshold'))+
+  ggtitle("Threshold") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))+
+  geom_sf(data=output_threshold,aes(color=factor(Treat)))+
+  scale_color_manual(values=c("black"),
+                     labels="Treat")+
+  guides(fill=guide_legend(title=""),
+         color=guide_legend(title=""))
+
 ```
+
+
+<img src="man/figures/threshold_figure.jpg" width="300" align="center"/>
+
 
 ![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
