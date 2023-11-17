@@ -157,7 +157,7 @@ ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
 ```
 <img src="man/figures/fig_2.png" width="600" />
 
-### Running a ForSys Scenario
+## Running a ForSys Scenario
 
 *Forsys* prioritizes projects by maximizing an objective given one or
 more constraints. The objectives represent one or more management
@@ -221,7 +221,7 @@ ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
 <img src="man/figures/attainment_run1.jpg" width="300" align="center"/>
 
 
-### Using threshold 
+## Using threshold 
 
 It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
 
@@ -285,7 +285,7 @@ plot_1 <- stands_data  %>%
 As shown in the figure above, only stands above the threshold are targetted for treatments.
 
 
-### Multiple priorities
+## Multiple priorities
 
 In many prioritization studies, more than one objective is often considered.  When this is the case, it is advised that the real values are not used directly in ForSysX as the magnitude of the objectives' values are often different. Two clear examples of that are objective 1 (ranges from 0 to 2569) and objective 3 (ranges from 0 to 0.0848). If these values are used directly in ForSys, the priority areas would be defined based on objective 1 instead of on both.
 
@@ -404,7 +404,7 @@ ggarrange(plot_1,plot_2,ncol=2)
 
 
 
-### Exploring different project prioritization methods
+## Exploring different project prioritization methods
 
 *Forsys* can build projects with different shapes and following different methods. 
 The first parameter one can change is the Inverse Distance Power (IDP). This parameter controls how the project should be clustered together. A high IDP value will result in more tightly clumped stands in a project area, but sacrifices the overall objective. In *ForSysXR* the parameter is called ```inverse_distance_power``` and can be used as follows
