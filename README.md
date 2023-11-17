@@ -6,20 +6,12 @@
 
 ## Scenario planning for land management
 
-ForSys is a land management planning model that explores potential outcomes
-across many possible priorities, including but not limited to landscape
-restoration and hazardous fuel management. The model is spatially
-explicit and uses multi-criteria prioritization and optimization methods
-that can rapidly process scenarios, from small to very large-scales
-(\~10,000 acres to more than 180 million acres). The previous iteration
-of the ForSys program was called the Landscape Treatment Designer (LTD),
-and was used in several published studies. ForSys has been used in
-several research and applied case studies at a range of scales
-(projects, forests, states, continental United States) to prioritize
-landscape-scale treatments (see case studies). ForSys is available in a
-windows desktop GUI (ForSysX) and an in a modified R version (ForSysR).
+ForSys was developed by the Forest Service Rocky Mountain Research Station to provide a platform for prioritizing risk reduction and restoration investments using spatial optimization methods that are widely used in conservation planning and forest industry.  The development of ForSys was motivated by gaps in decision support tools for rendering the growing number of Forest Service land condition assessments into optimized project areas as part of prioritization and planning efforts. ForSys is designed around the concept that restoration and risk reduction activities occur at the stand polygon scale (1-20 ha; 2.5 – 50 acres) that need to be organized into project areas (5,000 – 25,000 acres) to achieve landscape-scale management goals and meet logistical and administrative constraints. ForSys solves typical spatial planning problems where treatments are allocated to optimize one or more restoration objectives accounting for multiple hierarchical spatial constraints and treatment thresholds. ForSys integrates forest landscape planning, spatial optimization, and the science and literature on scenario analyses that emphasize the importance of examining large arrays of management scenarios and considering uncertain future disturbances. ForSys has been applied to prioritization projects at a range of scales, including sub-watershed projects, national forests, regions, and the entire National Forest network.
+This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program. More detailed information can be obtained from the full [ForSysX manual](https://github.com/forsys-sp/forsysr). 
+Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) an R script ([ForSysR](https://github.com/forsys-sp/forsysr)) available for R programmers upon request, and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
 
-For details on ForSysX and [ForSysR](https://github.com/forsys-sp/forsysr) algorithms, please refer to Day et al. (2023) <!-- INSERT LINK WHEN PUBLIC -->
+
+
 
 ## Installation
 
