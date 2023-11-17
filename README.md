@@ -723,8 +723,7 @@ Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
 > Aparício BA and Ager A. (2023).
-> ForSysXR: A R package for running the ForSysX scenario planning platform for modeling multi-criteria spatial
-> priorities. R package version 0.9. Available at
+> ForSysXR: A R package to execute C++ (ForSysX) version of ForSys scenario planning model. R package version 0.9. Available at
 > <https://https://github.com/bmaparicio/ForSysXR>.
 
 ## Additional resources
