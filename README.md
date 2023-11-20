@@ -454,7 +454,7 @@ stands_data  %>%
   theme(plot.title=element_text(hjust=0.5))
 ``` 
 
-<img src="man/figures/subunits.jpg" width="400" align="center"/>
+<img src="man/figures/subunits.jpg" width="600" align="center"/>
 
 
 In the following example, we set the number of projects per subunit as three, each with a total treated area of 50 hectares.
