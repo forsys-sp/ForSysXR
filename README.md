@@ -690,6 +690,8 @@ stands_data_FBN %>%
   guides(fill=guide_legend(title="Project number"))
 ``` 
 
+<img src="man/figures/regular_run_zones.jpg" width="600" align="center"/>
+
 As shown in the figure, three restoration projects were created following the rules set in the XML. Each project is within a distance of 2500 meters from the corresponding fuelbreak network project (i.e. restoration project 1 is within 2500 meters of fuelbreak project 1, etc.).
 
 Although the simple run zones function can be useful, it may not be enough as information on previously allocated projects is not shared between zones (or XML runs). This may result in the overlap of some projects, which can be seen in the figure. To prevent stands from being allocated to more than one project when running zones, one can run zones interactively as shown in the next section.
