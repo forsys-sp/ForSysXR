@@ -739,7 +739,7 @@ plot2 <- stands_data_FBN %>%
   guides(fill=guide_legend(title="Project number"))
 ```
 
-<img src="man/figures/regular_and_interactive_runs.jpg" width="600" align="center"/>
+<img src="man/figures/regular_and_interactive_runs.jpg" width="900" align="center"/>
 
 
 
