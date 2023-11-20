@@ -484,7 +484,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ``` 
 
-<img src="man/figures/three_projects_subunits.jpg" width="400" align="center"/>
+<img src="man/figures/three_projects_subunits.jpg" width="600" align="center"/>
 
 
 ## Running ForSysXR using predefined XML
