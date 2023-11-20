@@ -436,44 +436,6 @@ set_forsysx_run (input_shapefile = stands_data,
 
 
 
-dynamically using a package called
-*patchmax*, which requires some additional arguments and a shapefile as
-the input. Here we will prioritize priority2 and build five 25,000
-hectare patches.
-
-``` r
-library(patchmax)
-
-# We will set run_with_patchmax to TRUE, then in the run functions we set the search distance weight to 1 to expand the search for high objective stands. We'll limit our search to test only 10% of the stands as patch seeds to speed up our run.
-run_outputs_6 = forsys::run(
-  return_outputs = TRUE,
-  stand_data = test_forest,
-  scenario_name = "patchmax_test",
-  stand_id_field = "stand_id",
-  stand_area_field = "area_ha",
-  stand_threshold = "threshold2 >= 1",
-  scenario_priorities = "priority2",
-  scenario_output_fields = c("area_ha", "priority1", "priority2", "priority3", "priority4"),
-  run_with_patchmax = TRUE,
-  patchmax_proj_size = 25000,
-  patchmax_proj_number = 5,
-  patchmax_SDW = 1,
-  patchmax_sample_frac = 0.1
-)
-
-# Plot treatment rank of patches
-
-plot_dat_6 <- run_outputs_6$stand_output %>% filter(DoTreat == 1) %>%
-  mutate(treatment_rank = proj_id, stand_id = as.integer(stand_id))
-plot_dat_6 <- test_forest %>% left_join(plot_dat_6 %>% select(stand_id, treatment_rank)) %>%
-  group_by(treatment_rank) %>% summarize()
-plot(plot_dat_6[,'treatment_rank'], border=NA, main="Patch rank")
-```
-
-![](README_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
-
-
-
 ## Running ForSys with subunits
 
 ForSys can also be constrained by subunits. This will allow pre-defined planning areas to be used when creating scenarios.
