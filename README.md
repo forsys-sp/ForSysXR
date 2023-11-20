@@ -707,9 +707,45 @@ run_forsysx_xml(exe_path="C:/Users/ForSysXR/ForSysXConsole.exe",
 ``` 
 
 
+To plot this and the previous result, one can run the following script:  
+
+``` r
+all_shps_results <- intersect(list.files("F:/ForSysXR/interactive_zones/temp_folder_shp",pattern = "\\.shp$"),
+                              list.files("F:/ForSysXR/interactive_zones/temp_folder_shp",pattern = "run_tutorial_zones"))
+
+all_shps_results_i <- sf::st_read(paste("F:/ForSysXR/interactive_zones/temp_folder_shp",all_shps_results[1],sep="/"))
+all_shps_results_i$ProjectNum <- 1
+
+for(j in 2:length(all_shps_results)){
+  all_shps_results_j <- sf::st_read(paste("F:/ForSysXR/interactive_zones/temp_folder_shp",all_shps_results[j],sep="/"))
+  all_shps_results_j$ProjectNum <- j
+  all_shps_results_i <- rbind(all_shps_results_i,all_shps_results_j)
+}
+
+
+plot2 <- stands_data_FBN %>%
+  filter(!ID_forsys %in% all_shps_results_i$ID_forsys) %>%
+  ggplot() +
+  geom_sf(fill="grey80",colour=NA)+
+  geom_sf(data=all_shps_results_i,aes(fill=factor(ProjectNum)),colour="black",alpha=0.5)+
+  ggtitle("Interactive run") +
+  #scale_fill_viridis_c(option = "inferno",na.value = "grey50",direction=-1)+
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5),
+        plot.margin = margin(0, 0, 0, 0, "cm"),
+        legend.text = element_text(size = 12), 
+        legend.title = element_text(size = 12), 
+        legend.key.size = unit(0.5, 'cm'))+
+  guides(fill=guide_legend(title="Project number"))
+```
+
+<img src="man/figures/regular_and_interactive_runs.jpg" width="900" align="center"/>
+
 
 
 As illustrated by the figure above, the restoration projects generated when running zones interactively differ from the previous case as projects no longer overlap.
+The projects are implemented in sequence. This means that the first project only has the limitation imposed in the XML file, while the following projects combine the limitations in the XML with the spatial limitation of including stands that are already part of another project. Hence, only the first project is the same between methods.
+
 
 
 
