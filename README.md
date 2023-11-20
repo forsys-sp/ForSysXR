@@ -6,20 +6,16 @@
 
 ## Scenario planning for land management
 
-ForSys is a land management planning model that explores potential outcomes
-across many possible priorities, including but not limited to landscape
-restoration and hazardous fuel management. The model is spatially
-explicit and uses multi-criteria prioritization and optimization methods
-that can rapidly process scenarios, from small to very large-scales
-(\~10,000 acres to more than 180 million acres). The previous iteration
-of the ForSys program was called the Landscape Treatment Designer (LTD),
-and was used in several published studies. ForSys has been used in
-several research and applied case studies at a range of scales
-(projects, forests, states, continental United States) to prioritize
-landscape-scale treatments (see case studies). ForSys is available in a
-windows desktop GUI (ForSysX) and an in a modified R version (ForSysR).
+ForSys was developed by the Forest Service Rocky Mountain Research Station to provide a platform for prioritizing risk reduction and restoration investments using spatial optimization methods that are widely used in conservation planning and forest industry.  The development of ForSys was motivated by gaps in decision support tools for rendering the growing number of Forest Service land condition assessments into optimized project areas as part of prioritization and planning efforts. ForSys is designed around the concept that restoration and risk reduction activities occur at the stand polygon scale (1-20 ha; 2.5 – 50 acres) that need to be organized into project areas (5,000 – 25,000 acres) to achieve landscape-scale management goals and meet logistical and administrative constraints. ForSys solves typical spatial planning problems where treatments are allocated to optimize one or more restoration objectives accounting for multiple hierarchical spatial constraints and treatment thresholds. ForSys integrates forest landscape planning, spatial optimization, and the science and literature on scenario analyses that emphasize the importance of examining large arrays of management scenarios and considering uncertain future disturbances. ForSys has been applied to prioritization projects at a range of scales, including sub-watershed projects, national forests, regions, and the entire National Forest network.
 
-For details on ForSysX and [ForSysR](https://github.com/forsys-sp/forsysr) algorithms, please refer to Day et al. (2023) <!-- INSERT LINK WHEN PUBLIC -->
+
+This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program.
+
+More detailed information can be obtained from the full [ForSysX manual](https://github.com/forsys-sp/forsysr). 
+Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) an R script ([ForSysR](https://github.com/forsys-sp/forsysr)) available for R programmers upon request, and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
+
+
+
 
 ## Installation
 
@@ -157,7 +153,7 @@ ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
 ```
 <img src="man/figures/fig_2.png" width="600" />
 
-### Running a ForSys Scenario
+## Running a ForSys Scenario
 
 *Forsys* prioritizes projects by maximizing an objective given one or
 more constraints. The objectives represent one or more management
@@ -221,7 +217,7 @@ ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
 <img src="man/figures/attainment_run1.jpg" width="300" align="center"/>
 
 
-### Using threshold 
+## Using threshold 
 
 It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
 
@@ -253,34 +249,39 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-Not surprisingly, the treatment rank of the projects selected
-corresponds directly to those areas where priority1 was highest, as
-plotted below. Projeck rank \#1 (darkest blue) is the highest ranked
-project.
+<img src="man/figures/threshold_figure.jpg" width="300" align="center"/>
+
+
+To assess the impact of the use of the threshold in the treated area in each project, one can run the following script
 
 ``` r
-plot_dat <- test_forest %>%
-  group_by(proj_id) %>% summarize() %>%
-  left_join(run_outputs$project_output %>% select(proj_id, treatment_rank))
-plot(plot_dat[,'treatment_rank'], main="Project rank")
+output_threshold <- sf::st_read("C:/Users/ForSysXR/run_tutorial_threshold_2_1_2_49-50.shp") %>%
+  filter(Treat==1)
+
+plot_1 <- stands_data  %>%
+  mutate(threshold_bin = ifelse(threshold > 2, 1, 0)) %>%
+  ggplot() +
+  geom_sf(aes(fill=factor(threshold_bin)),colour=NA) +
+  scale_fill_manual(values = c("gray50", "gray"),
+                    labels=c('Below threshold', 'Above threshold'))+
+  ggtitle("Threshold") +
+  theme_void()+
+  theme(plot.title=element_text(hjust=0.5))+
+  geom_sf(data=output_threshold,aes(color=factor(Treat)))+
+  scale_color_manual(values=c("black"),
+                     labels="Treat")+
+  guides(fill=guide_legend(title=""),
+         color=guide_legend(title=""))
+
 ```
 
-![](README_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
-Below we plot the stands rather than the project rank and only retain
-those stands that were treated.
+<img src="man/figures/threshold_figure.jpg" width="300" align="center"/>
 
-``` r
-plot_dat_2 <- test_forest %>% select(stand_id) %>%
-  left_join(run_outputs$stand_output %>% mutate(stand_id = as.integer(stand_id))) %>%
-  select(stand_id, priority1, proj_id) %>%
-  left_join(run_outputs$project_output %>% select(proj_id, treatment_rank))
-plot(plot_dat_2[,c('treatment_rank','priority1')], border=NA)
-```
+As shown in the figure above, only stands above the threshold are targetted for treatments.
 
-![](README_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
-### Multiple priorities
+## Multiple priorities
 
 In many prioritization studies, more than one objective is often considered.  When this is the case, it is advised that the real values are not used directly in ForSysX as the magnitude of the objectives' values are often different. Two clear examples of that are objective 1 (ranges from 0 to 2569) and objective 3 (ranges from 0 to 0.0848). If these values are used directly in ForSys, the priority areas would be defined based on objective 1 instead of on both.
 
@@ -399,7 +400,7 @@ ggarrange(plot_1,plot_2,ncol=2)
 
 
 
-### Exploring different project prioritization methods
+## Exploring different project prioritization methods
 
 *Forsys* can build projects with different shapes and following different methods. 
 The first parameter one can change is the Inverse Distance Power (IDP). This parameter controls how the project should be clustered together. A high IDP value will result in more tightly clumped stands in a project area, but sacrifices the overall objective. In *ForSysXR* the parameter is called ```inverse_distance_power``` and can be used as follows
@@ -717,9 +718,8 @@ As illustrated by the figure above, the restoration projects generated when runn
 Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
-> Aparício BA and Ager A. (2023).
-> ForSysXR: A R package for running the ForSysX scenario planning platform for modeling multi-criteria spatial
-> priorities. R package version 0.9. Available at
+> Aparício, B.A., Bunzel, K. and  Ager A. (2023).
+> ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model. R package version 0.9. Available at
 > <https://https://github.com/bmaparicio/ForSysXR>.
 
 ## Additional resources
