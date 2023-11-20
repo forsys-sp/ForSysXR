@@ -744,6 +744,7 @@ plot2 <- stands_data_FBN %>%
 
 
 As illustrated by the figure above, the restoration projects generated when running zones interactively differ from the previous case as projects no longer overlap.
+The projects are implemented in sequence. This means that the first project only has the limitation imposed in the XML file, while the following projects combine the limitations in the XML with the spatial limitation of including stands that are already part of another project. Hence, only the first project is the same between methods.
 
 
 
