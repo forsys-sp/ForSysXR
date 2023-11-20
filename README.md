@@ -267,7 +267,7 @@ plot_1 <- stands_data  %>%
   ggtitle("Threshold") +
   theme_void()+
   theme(plot.title=element_text(hjust=0.5))+
-  geom_sf(data=output_threshold,aes(color=factor(Treat)))+
+  geom_sf(data=output_threshold,aes(color=factor(Treat)),fill=NA)+
   scale_color_manual(values=c("black"),
                      labels="Treat")+
   guides(fill=guide_legend(title=""),
