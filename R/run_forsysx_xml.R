@@ -136,7 +136,7 @@ run_forsysx_xml <- function(exe_path,
 
 
 
-            stand_id_position <- grep(stand_id, colnames(shapefile_output_use))
+            stand_id_position <- grep(paste("^",stand_id,"$",sep=""), colnames(shapefile_output_use))
 
             names(shapefile_output_use)[stand_id_position] <- "V1"
 
@@ -189,10 +189,10 @@ run_forsysx_xml <- function(exe_path,
             excl_field <- gsub("\\\\","/",excl_field)
 
 
-            excl_field_position <- grep(excl_field, colnames(shapefile_input_use))
+            excl_field_position <- grep(paste("^",excl_field,"$",sep=""), colnames(shapefile_input_use))
             names(shapefile_input_use)[excl_field_position] <- "exclude_field"
 
-            stand_id_position_2 <- grep(stand_id, colnames(shapefile_input_use))
+            stand_id_position_2 <- grep(paste("^",stand_id,"$",sep=""), colnames(shapefile_input_use))
             names(shapefile_input_use)[stand_id_position_2] <- "V1"
 
 
