@@ -249,7 +249,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/threshold_figure.jpg" width="600" align="center"/>
+<img src="man/figures/threshold_figure_projects.jpg" width="600" align="center"/>
 
 
 To assess the impact of the use of the threshold in the treated area in each project, one can run the following script
