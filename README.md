@@ -90,7 +90,7 @@ head(stands_data)
 plot(stands_data[,1])
 ```
 
-<img src="man/figures/fig_1.png" width="300" />
+<img src="man/figures/fig_1.png" width="600" />
 
 The figure plotted shows the stands in the study area. It is composed of 1028 different stands.
 
@@ -191,7 +191,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="300" align="center"/>
+<img src="man/figures/run_tutorial_1_1_49-50_inR.jpg" width="600" align="center"/>
 
 
 Not surprisingly, the treatment rank of the projects selected
@@ -214,7 +214,7 @@ ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   theme_classic()
 ```
 
-<img src="man/figures/attainment_run1.jpg" width="300" align="center"/>
+<img src="man/figures/attainment_run1.jpg" width="600" align="center"/>
 
 
 ## Using threshold 
@@ -249,7 +249,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/threshold_figure.jpg" width="300" align="center"/>
+<img src="man/figures/threshold_figure.jpg" width="600" align="center"/>
 
 
 To assess the impact of the use of the threshold in the treated area in each project, one can run the following script
@@ -276,7 +276,7 @@ plot_1 <- stands_data  %>%
 ```
 
 
-<img src="man/figures/threshold_figure.jpg" width="300" align="center"/>
+<img src="man/figures/threshold_figure.jpg" width="600" align="center"/>
 
 As shown in the figure above, only stands above the threshold are targetted for treatments.
 
@@ -345,7 +345,7 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
 
 ``` 
 
-<img src="man/figures/run_tutorial_multicriteria.jpg" width="300" align="center"/>
+<img src="man/figures/run_tutorial_multicriteria.jpg" width="600" align="center"/>
 
 One can plot the attainment for each objective and the overall attainment as follows 
 
@@ -430,7 +430,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/run_tutorial_IDP_1.jpg" width="300" align="center"/>
+<img src="man/figures/run_tutorial_IDP_1.jpg" width="600" align="center"/>
 
 
 
@@ -689,6 +689,8 @@ stands_data_FBN %>%
   theme(plot.title=element_text(hjust=0.5))+
   guides(fill=guide_legend(title="Project number"))
 ``` 
+
+<img src="man/figures/regular_run_zones.jpg" width="600" align="center"/>
 
 As shown in the figure, three restoration projects were created following the rules set in the XML. Each project is within a distance of 2500 meters from the corresponding fuelbreak network project (i.e. restoration project 1 is within 2500 meters of fuelbreak project 1, etc.).
 
