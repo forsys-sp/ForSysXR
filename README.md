@@ -278,7 +278,47 @@ plot_1 <- stands_data  %>%
 
 <img src="man/figures/threshold_figure.jpg" width="600" align="center"/>
 
-As shown in the figure above, only stands above the threshold are targetted for treatments.
+As shown in the figure above, only stands above the threshold are targeted for treatments.
+
+
+
+
+## Exploring different project prioritization methods
+
+*Forsys* can build projects with different shapes and follow different methods. 
+The first parameter one can change is the Inverse Distance Power (IDP). This parameter controls how the project should be clustered together. A high IDP value will result in more tightly clumped stands in a project area, but sacrifices the overall objective. In *ForSysXR* the parameter is called ```inverse_distance_power``` and can be used as follows
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_IDP_1",
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 output_adjacency_matrix ="C:/Users/ForSysXR",
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 threshold=c("threshold",">",2),
+                 inverse_distance_power=3,
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/threshold_figure_projects_idp_3.jpg" width="600" align="center"/>
+
+
+The figure above shows the projects when considering the same threshold as previously but with an inverse distance power of 3. As illustrated, now the projects are more clustered together than when not using any IDP.
+
 
 
 ## Multiple priorities
@@ -398,39 +438,6 @@ ggarrange(plot_1,plot_2,ncol=2)
 
 <img src="man/figures/multiobjective_attainment.jpg" width="800" align="center"/>
 
-
-
-## Exploring different project prioritization methods
-
-*Forsys* can build projects with different shapes and following different methods. 
-The first parameter one can change is the Inverse Distance Power (IDP). This parameter controls how the project should be clustered together. A high IDP value will result in more tightly clumped stands in a project area, but sacrifices the overall objective. In *ForSysXR* the parameter is called ```inverse_distance_power``` and can be used as follows
-
-``` r
-set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_IDP_1",
-                 stand_id = "Stand_ID",
-                 area = "Area_ha",
-                 available = "availuse",
-                 exclude_field = "water",
-                 seed_stands_only_available_stands = 1,
-                 x_coordinate = "X_Coord",
-                 y_coordinate = "Y_Coord",
-                 max_number_projects = 10,
-                 output_adjacency_matrix ="C:/Users/ForSysXR",
-                 inverse_distance_power=1,
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
-                 effect_fields = c("obj_1","obj_2","obj_3"),
-                 objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
-                 run_forsysx = 1,
-                 plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
-                 save_outputs = c("stand_csv","shapefile","image"))
-```
-
-<img src="man/figures/run_tutorial_IDP_1.jpg" width="600" align="center"/>
 
 
 
