@@ -526,7 +526,7 @@ stands_data_FBN  %>%
   guides(fill=guide_legend(title="FBN number"))
 ```
 
-<img src="man/figures/FBN_projects.jpg" width="400" align="center"/>
+<img src="man/figures/FBN_projects.jpg" width="600" align="center"/>
 
 
 As illustrated in the image above, there are three fuelbreak network projects. The number 1 is the most priority one and should be implemented first, while the third project has the least priority. 
