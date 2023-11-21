@@ -151,7 +151,7 @@ plot_5 <- stands_data  %>%
 ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
 
 ```
-<img src="man/figures/fig_2.png" width="600" />
+<img src="man/figures/fig_2.png" width="900" />
 
 ## Running a ForSys Scenario
 
