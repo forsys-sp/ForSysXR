@@ -659,7 +659,7 @@ stands_data_FBN %>%
   guides(fill=guide_legend(title="Project number"))
 ``` 
 
-<img src="man/figures/regular_run_zones.jpg" width="600" align="center"/>
+<img src="man/figures/regular_run_zones.jpg" width="900" align="center"/>
 
 As shown in the figure, three restoration projects were created following the rules set in the XML. Each project is within a distance of 2500 meters from the corresponding fuelbreak network project (i.e. restoration project 1 is within 2500 meters of fuelbreak project 1, etc.).
 
