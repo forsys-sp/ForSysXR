@@ -595,7 +595,7 @@ for(i in 1:3){
 ggpubr::ggarrange(plot_1,plot_2,plot_3,nrow=1,ncol=3,common.legend = TRUE,legend="bottom")
 ```
 
-<img src="man/figures/distance_to_FBN_projects.jpg" width="600" align="center"/>
+<img src="man/figures/distance_to_FBN_projects.jpg" width="900" align="center"/>
 
 
 The first step to use ForSysXR is the creation of the XML file that defines the ForSysX run. Because in this case, the only difference between the runs is the input shapefile (i.e. all run parameters should be the same), one can create the XML within a simple for loop in R. This will create the three XML files without running ForSysX
@@ -659,7 +659,7 @@ stands_data_FBN %>%
   guides(fill=guide_legend(title="Project number"))
 ``` 
 
-<img src="man/figures/regular_run_zones.jpg" width="900" align="center"/>
+<img src="man/figures/regular_run_zones.jpg" width="600" align="center"/>
 
 As shown in the figure, three restoration projects were created following the rules set in the XML. Each project is within a distance of 2500 meters from the corresponding fuelbreak network project (i.e. restoration project 1 is within 2500 meters of fuelbreak project 1, etc.).
 
