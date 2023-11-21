@@ -175,8 +175,8 @@ set_forsysx_run (input_shapefile = stands_data,
                  available = "availuse",
                  exclude_field = "water",
                  seed_stands_only_available_stands = 1,
-                 x_coordinate = "Point_X",
-                 y_coordinate = "Point_Y",
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
                  max_number_projects = 10,
                  output_adjacency_matrix ="C:/Users/ForSysXR",
                  constraints_name = "Area_ha",
@@ -413,8 +413,8 @@ set_forsysx_run (input_shapefile = stands_data,
                  available = "availuse",
                  exclude_field = "water",
                  seed_stands_only_available_stands = 1,
-                 x_coordinate = "Point_X",
-                 y_coordinate = "Point_Y",
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
                  max_number_projects = 10,
                  output_adjacency_matrix ="C:/Users/ForSysXR",
                  inverse_distance_power=1,
@@ -484,7 +484,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ``` 
 
-<img src="man/figures/three_projects_subunits.jpg" width="400" align="center"/>
+<img src="man/figures/three_projects_subunits.jpg" width="600" align="center"/>
 
 
 ## Running ForSysXR using predefined XML
