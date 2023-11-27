@@ -21,6 +21,8 @@ set_forsysx_run(
   inverse_distance_power = 0,
   maximize_distance = 0,
   MaximizeDistanceOpt = 0,
+  patchbuster_identifier = NULL,
+  patchbuster_weight = NULL,
   adjacency_matrix,
   output_adjacency_matrix,
   constraints_name,

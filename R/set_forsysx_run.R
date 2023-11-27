@@ -57,6 +57,8 @@ set_forsysx_run <- function(input_shapefile,
                             inverse_distance_power=0, #default is 0
                             maximize_distance = 0, #default is 0 (not use)
                             MaximizeDistanceOpt =0, #0 has to be the default. This is only useful for FBN
+                            patchbuster_identifier = NULL,
+                            patchbuster_weight = NULL,
                             adjacency_matrix,
                             output_adjacency_matrix,
                             constraints_name,
@@ -452,8 +454,18 @@ set_forsysx_run <- function(input_shapefile,
   #patch_buster
   #weight
   #patch_identifier
-  #inverse_distance_power
-  #maximize_distance
+
+  if (!missing(patchbuster_identifier)){
+    xml_data_use <- gsub("my_patchbuster_id",patchbuster_identifier,unlist(xml_data_use))
+    xml_data_use <- gsub("RecursiveOpt=\"0\"","RecursiveOpt=\"1\"",unlist(xml_data_use))
+    }
+
+  if (!missing(patchbuster_weight)){
+    xml_data_use <- gsub("my_patchbuster_weight",patchbuster_weight,unlist(xml_data_use))
+  }
+
+
+
 
 
 
