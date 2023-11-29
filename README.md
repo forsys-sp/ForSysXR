@@ -727,7 +727,7 @@ the current official version, please use:
 
 > Aparício, B.A., Bunzel, K. and  Ager A. (2023).
 > ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model. R package version 0.9. Available at
-> <https://https://github.com/bmaparicio/ForSysXR>.
+> <https://https://github.com/forsys-sp/ForSysXR>.
 
 ## Additional resources
 
