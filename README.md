@@ -33,7 +33,7 @@ remotes::install_github("forsys-sp/patchmax")
 
 After installing ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
-[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist.zip).
+[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist_2023-11-16.zip).
 This step is crucial as it downloads ForSysX executable that will later
 be run from R.
 
