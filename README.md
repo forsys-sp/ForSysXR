@@ -683,7 +683,7 @@ To run ForSysXR with zones interactively one can simply use the parameter ```run
 
 ``` r
 run_forsysx_xml(exe_path="C:/Users/ForSysXR/ForSysXConsole.exe", 
-                xml_folder="C:/Users/ForSysXR/temp_folder_shp/xml_to_use",
+                xml_folder="C:/Users/ForSysXR/temp_folder_shp",
                 run_zones_interactive=TRUE)
 ``` 
 
