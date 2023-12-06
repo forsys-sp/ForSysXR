@@ -282,7 +282,7 @@ plot_1 <- stands_data  %>%
                      labels="Treat")+
   guides(fill=guide_legend(title=""),
          color=guide_legend(title=""))
-
+plot_1
 ```
 
 
