@@ -460,10 +460,15 @@ set_forsysx_run <- function(input_shapefile,
   if (!missing(patchbuster_identifier)){
     xml_data_use <- gsub("my_patchbuster_id",patchbuster_identifier,unlist(xml_data_use))
     xml_data_use <- gsub("RecursiveOpt=\"0\"","RecursiveOpt=\"1\"",unlist(xml_data_use))
+  } else {
+    xml_data_use <- gsub("my_patchbuster_id","",unlist(xml_data_use))
+
     }
 
   if (!missing(patchbuster_weight)){
     xml_data_use <- gsub("my_patchbuster_weight",patchbuster_weight,unlist(xml_data_use))
+  } else {
+    xml_data_use <- gsub("my_patchbuster_weight","",unlist(xml_data_use))
   }
 
 

@@ -65,6 +65,10 @@ set_forsysx_run(
 
 \item{inverse_distance_power}{When this value is not zero, inverse distance weighting of the objective value is used in the stand selection process. A higher value will produce more tightly clumped stands in a project area, but sacrifices the overall objective. A value of zero means that the objective value is not modified by distance}
 
+\item{patchbuster_identifier}{Optional. Field containing the patch identifier. Only use when setting a patchbuster run}
+
+\item{patchbuster_weight}{Optional. Weight for the patchbuster function. Only use when setting a patchbuster run.}
+
 \item{adjacency_matrix}{A csv file containing the adjacency file. Can be generated using the parameter output_adjacency_matrix.}
 
 \item{output_adjacency_matrix}{Path where the adjacency matrix should be stored. Ignore if adjacency file was generated previous, and use the parameter adjacency_matrix}
