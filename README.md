@@ -6,13 +6,13 @@
 
 ## Scenario planning for land management
 
-ForSys was developed by the Forest Service Rocky Mountain Research Station to provide a platform for prioritizing risk reduction and restoration investments using spatial optimization methods that are widely used in conservation planning and forest industry.  The development of ForSys was motivated by gaps in decision support tools for rendering the growing number of Forest Service land condition assessments into optimized project areas as part of prioritization and planning efforts. ForSys is designed around the concept that restoration and risk reduction activities occur at the stand polygon scale (1-20 ha; 2.5 – 50 acres) that need to be organized into project areas (5,000 – 25,000 acres) to achieve landscape-scale management goals and meet logistical and administrative constraints. ForSys solves typical spatial planning problems where treatments are allocated to optimize one or more restoration objectives accounting for multiple hierarchical spatial constraints and treatment thresholds. ForSys integrates forest landscape planning, spatial optimization, and the science and literature on scenario analyses that emphasize the importance of examining large arrays of management scenarios and considering uncertain future disturbances. ForSys has been applied to prioritization projects at a range of scales, including sub-watershed projects, national forests, regions, and the entire National Forest network.
+ForSys was developed by the Forest Service Rocky Mountain Research Station to provide a platform for prioritizing risk reduction and restoration investments using spatial optimization methods that are widely used in conservation planning and the forest industry.  The development of ForSys was motivated by gaps in decision support tools for rendering the growing number of Forest Service land condition assessments into optimized project areas as part of prioritization and planning efforts. ForSys is designed around the concept that restoration and risk reduction activities occur at the stand polygon scale (1-20 ha; 2.5 – 50 acres) that need to be organized into project areas (5,000 – 25,000 acres) to achieve landscape-scale management goals and meet logistical and administrative constraints. ForSys solves typical spatial planning problems where treatments are allocated to optimize one or more restoration objectives accounting for multiple hierarchical spatial constraints and treatment thresholds. ForSys integrates forest landscape planning, spatial optimization, and the science and literature on scenario analyses that emphasize the importance of examining large arrays of management scenarios and considering uncertain future disturbances. ForSys has been applied to prioritization projects at a range of scales, including sub-watershed projects, national forests, regions, and the entire national forest network.
 
 
 This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program.
 
 More detailed information can be obtained from the full [ForSysX manual](https://github.com/forsys-sp/forsysr). 
-Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) an R script ([ForSysR](https://github.com/forsys-sp/forsysr)) available for R programmers upon request, and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
+Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) a publicly available R package ([ForSysR](https://github.com/forsys-sp/forsysr)), and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
 
 
 
@@ -39,17 +39,17 @@ if (!require(remotes)) install.packages("remotes")
 remotes::install_github("forsys-sp/ForSysXR")
 ```-->
 
-After installing ForSysXR package, the user needs to download
+After installing the ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
 [here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist_2023-11-16.zip).
-This step is crucial as it downloads ForSysX executable that will later
+This step is crucial as it downloads the ForSysX executable that will later
 be run from R.
 
 ## Usage
 
 Below we demonstrate how the *ForSysXR* package can be used and highlight the flexibility of the algorithm in solving multiple problems.
-For brevity, the dataset used is distributed with the package. First, we will
-load the *forsys* package.
+For simplicity, the dataset used is distributed with the package. First, we will
+load the *forsysXR* package.
 
 ``` r
 library(ForSysXR)
@@ -66,7 +66,7 @@ library(ggpubr)
 Although *forsys* can support many different types of treatment unit
 data, here our treatment units are represented as polygons in a spatial
 vector format. Each polygon represents a different treatment unit. 
-Please note that geodatabase format is not supported by *ForSysX*. Only shapefile format is currently supported
+Please note that geodatabase format is not supported by *ForSysX*. Only shapefile format is currently supported.
 
 ``` r
 # load treatment unit data
@@ -170,7 +170,7 @@ more constraints. The objectives represent one or more management
 priorities, while a constraint can be perceived as the condition required to stop the prioritization process. Common constraints are total area treated and/or total cost.
 Thresholds are environmental or categorical conditions that
 trigger the need to treat an individual treatment unit or stand (e.g., 
-particular ownership or minimum forest cover). *Forsys* then builds
+distance to road or minimum forest cover). *Forsys* then builds
 projects and ranks them in order of their priority. Projects can be
 either predefined units (e.g., watersheds) or can be built dynamically.
 
@@ -210,7 +210,7 @@ plotted above. Project rank \#1 (darkest red) is the highest-ranked
 project.
 
 
-The amount of objective targeted for treatment per project can be plotted as follows
+The amount of objective targeted for treatment per project can be plotted as follows:
 
 
 ``` r
@@ -227,9 +227,9 @@ ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
 <img src="man/figures/attainment_run1.jpg" width="600" align="center"/>
 
 
-## Using threshold 
+## Using a treatment threshold 
 
-It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
+It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may not be targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
 
 
 We run *forsys* with the following arguments. Note the use of adjacency_matrix (uses the adjacency created above instead of generating a new file) and the parameter threshold.
