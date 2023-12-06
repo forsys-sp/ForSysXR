@@ -20,15 +20,14 @@ Note that the ForSys platform currently exists in three formats: 1) an executabl
 ## Installation
 
 The current official version of the *forsys* package can be installed
-from [GitHub](https://github.com/forsys-sp/forsysr/) using the following
+from [GitHub](https://github.com/forsys-sp/ForSysXR/) using the following
 code. 
 
 We recommend updating other packages when prompted.
 
 ``` r
 if (!require(remotes)) install.packages("remotes")
-remotes::install_github("forsys-sp/forsysr")
-remotes::install_github("forsys-sp/patchmax")
+remotes::install_github("forsys-sp/ForSysXR")
 ```
 
 After installing ForSysXR package, the user needs to download
