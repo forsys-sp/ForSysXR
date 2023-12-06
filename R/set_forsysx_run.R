@@ -59,8 +59,8 @@ set_forsysx_run <- function(input_shapefile,
                             inverse_distance_power=0, #default is 0
                             maximize_distance = 0, #default is 0 (not use)
                             MaximizeDistanceOpt =0, #0 has to be the default. This is only useful for FBN
-                            patchbuster_identifier = NULL,
-                            patchbuster_weight = NULL,
+                            patchbuster_identifier,
+                            patchbuster_weight,
                             adjacency_matrix,
                             output_adjacency_matrix,
                             constraints_name,
