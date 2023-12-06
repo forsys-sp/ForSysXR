@@ -406,7 +406,8 @@ set_forsysx_run <- function(input_shapefile,
 
 
   #MaximizeDistanceOpt
-  xml_data_use <- gsub(paste("MaximizeDistanceOpt=\"",MaximizeDistanceOpt,"\"",sep=""),"",unlist(xml_data_use))
+
+  xml_data_use <- gsub(paste("MaximizeDistanceOpt=\"0\"",sep=""),paste("MaximizeDistanceOpt=\"",MaximizeDistanceOpt,"\"",sep=""),unlist(xml_data_use))
 
   #IdwPower
   xml_data_use <- gsub("my_idw_value",inverse_distance_power,unlist(xml_data_use))
@@ -468,7 +469,7 @@ set_forsysx_run <- function(input_shapefile,
   if (!missing(patchbuster_weight)){
     xml_data_use <- gsub("my_patchbuster_weight",patchbuster_weight,unlist(xml_data_use))
   } else {
-    xml_data_use <- gsub("my_patchbuster_weight","",unlist(xml_data_use))
+    xml_data_use <- gsub("my_patchbuster_weight","1",unlist(xml_data_use))
   }
 
 
