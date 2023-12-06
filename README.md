@@ -57,6 +57,8 @@ library(ForSysXR)
 # In order to run the examples below, these additional libraries are required:
 library(sf)
 library(dplyr)
+library(ggplot2)
+library(ggpubr)
 ```
 
 ### Loading data
