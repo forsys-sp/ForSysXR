@@ -19,7 +19,16 @@ Note that the ForSys platform currently exists in three formats: 1) an executabl
 
 ## Installation
 
-The current official version of the *forsys* package can be installed
+For the moment, ForSysXR is not public. To install the package on your machine, please download the zipped package [here](https://github.com/forsys-sp/ForSysXR/archive/master.zip).
+
+After the download, install the package as follows
+
+``` r
+library("devtools")
+install_local(path = "C:/Users/Downloads/ForSysXR-main.zip")
+```
+
+<!--The current official version of the *forsys* package can be installed
 from [GitHub](https://github.com/forsys-sp/ForSysXR/) using the following
 code. 
 
@@ -28,7 +37,7 @@ We recommend updating other packages when prompted.
 ``` r
 if (!require(remotes)) install.packages("remotes")
 remotes::install_github("forsys-sp/ForSysXR")
-```
+```-->
 
 After installing ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
