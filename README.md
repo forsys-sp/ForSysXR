@@ -657,7 +657,7 @@ for(j in 2:length(all_shps_results)){
   all_shps_results_i <- rbind(all_shps_results_i,all_shps_results_j)
 }
 
-stands_data_FBN %>%
+plot1 <- stands_data_FBN %>%
   filter(!ID_forsys %in% all_shps_results_i$ID_forsys) %>%
   ggplot() +
   geom_sf(fill="grey80",colour=NA)+
@@ -667,6 +667,8 @@ stands_data_FBN %>%
   theme_void()+
   theme(plot.title=element_text(hjust=0.5))+
   guides(fill=guide_legend(title="Project number"))
+
+plot1
 ``` 
 
 <img src="man/figures/regular_run_zones.jpg" width="600" align="center"/>
@@ -718,6 +720,10 @@ plot2 <- stands_data_FBN %>%
         legend.title = element_text(size = 12), 
         legend.key.size = unit(0.5, 'cm'))+
   guides(fill=guide_legend(title="Project number"))
+
+
+ggarrange(plot1,plot2,nrow=1,ncol=2,legend="bottom",common.legend = TRUE)
+
 ```
 
 <img src="man/figures/regular_and_interactive_runs.jpg" width="900" align="center"/>
