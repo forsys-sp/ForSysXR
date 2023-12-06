@@ -400,7 +400,7 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
 One can plot the attainment for each objective and the overall attainment as follows 
 
 ``` r
-result_table <- read.csv("C:/Users/aparicio/Desktop/ForSysXR/run_tutorial_multiobjectives_300_Results.csv")
+result_table <- read.csv("C:/Users/ForSysXR/run_tutorial_multiobjectives_Results.csv")
 head(result_table)
 
 #area_treated <- result_table[,"Treat_Area_ha"]
