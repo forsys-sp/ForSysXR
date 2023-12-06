@@ -662,7 +662,7 @@ plot1 <- stands_data_FBN %>%
   ggplot() +
   geom_sf(fill="grey80",colour=NA)+
   geom_sf(data=all_shps_results_i,aes(fill=factor(ProjectNum)),colour="black",alpha=0.4)+
-  ggtitle("Restoration projects") +
+  ggtitle("Regular run") +
   #scale_fill_viridis_c(option = "inferno",na.value = "grey50",direction=-1)+
   theme_void()+
   theme(plot.title=element_text(hjust=0.5))+
