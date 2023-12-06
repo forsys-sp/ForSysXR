@@ -19,21 +19,29 @@ Note that the ForSys platform currently exists in three formats: 1) an executabl
 
 ## Installation
 
-The current official version of the *forsys* package can be installed
-from [GitHub](https://github.com/forsys-sp/forsysr/) using the following
+For the moment, ForSysXR is not public. To install the package on your machine, please download the zipped package [here](https://github.com/forsys-sp/ForSysXR/archive/master.zip).
+
+After the download, install the package as follows
+
+``` r
+library("devtools")
+install_local(path = "C:/Users/Downloads/ForSysXR-main.zip")
+```
+
+<!--The current official version of the *forsys* package can be installed
+from [GitHub](https://github.com/forsys-sp/ForSysXR/) using the following
 code. 
 
 We recommend updating other packages when prompted.
 
 ``` r
 if (!require(remotes)) install.packages("remotes")
-remotes::install_github("forsys-sp/forsysr")
-remotes::install_github("forsys-sp/patchmax")
-```
+remotes::install_github("forsys-sp/ForSysXR")
+```-->
 
 After installing ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
-[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist.zip).
+[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist_2023-11-16.zip).
 This step is crucial as it downloads ForSysX executable that will later
 be run from R.
 
@@ -727,7 +735,7 @@ the current official version, please use:
 
 > Aparício, B.A., Bunzel, K. and  Ager A. (2023).
 > ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model. R package version 0.9. Available at
-> <https://https://github.com/bmaparicio/ForSysXR>.
+> <https://https://github.com/forsys-sp/ForSysXR>.
 
 ## Additional resources
 
