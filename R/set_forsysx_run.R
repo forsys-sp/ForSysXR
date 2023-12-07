@@ -29,6 +29,7 @@
 #' @param master_subunit If master subunits should be used
 #' @param output_xml Path and name (with xml extention) where the xml file for the run should be stored.
 #' @param run_forsysx Binary. If 1 will run ForSysX. If 0 will end after saving the XML file
+#' @param overwrite_data Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.
 #' @param exe_path Path to the ForSysXConsole.exe
 #'
 #' @import dplyr sf ggplot2
@@ -74,6 +75,7 @@ set_forsysx_run <- function(input_shapefile,
                             output_xml,
                             run_forsysx,
                             save_outputs,
+                            overwrite_data=FALSE,
                             plot_results=FALSE,
                             exe_path #,xml_path
                             ) {
@@ -133,10 +135,26 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
+
+  if (file.exists(paste0(outputs_base_name,"_Results.csv")) & overwrite_data==FALSE){
+    stop("Output file already exists. If you want to replace the file, use overwrite_data=TRUE")
+  }
+
+
+
+  if (file.exists(paste0(outputs_base_name,"_stand_data.shp")) & overwrite_data==FALSE){
+    stop("Input shapefile already exists. If you want to replace the file, use overwrite_data=TRUE")
+  }
+
+
+
 #this is ONLY if we are either plotting (plot=TRUE) or generating the adjacency matrix
   if(class(input_shapefile)[1]=="sf"){
     my_shp <- (input_shapefile)
-    sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
+    if(overwrite_data==TRUE){
+    sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""),append=FALSE)}else{
+      sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
+    }
     input_shapefile <- paste(outputs_base_name,"_stand_data.shp",sep="")
   }
 

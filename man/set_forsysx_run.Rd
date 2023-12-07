@@ -36,6 +36,7 @@ set_forsysx_run(
   output_xml,
   run_forsysx,
   save_outputs,
+  overwrite_data = FALSE,
   plot_results = FALSE,
   exe_path
 )
@@ -92,6 +93,8 @@ set_forsysx_run(
 \item{output_xml}{Path and name (with xml extention) where the xml file for the run should be stored.}
 
 \item{run_forsysx}{Binary. If 1 will run ForSysX. If 0 will end after saving the XML file}
+
+\item{overwrite_data}{Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
 
