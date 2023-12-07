@@ -1,0 +1,14 @@
+cff-version: 1.2.0 
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Aparício"
+  given-names: "Bruno"
+  orcid: "https://orcid.org/0000-0002-2958-1430"
+- family-names: "Bunzel"
+  given-names: "Ken"
+- family-names: "Ager"
+  given-names: "Alan"
+title: "ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model"
+version: 0.9
+date-released: 2023-12-07
+url: "https://github.com/forsys-sp/ForSysXR"
