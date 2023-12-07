@@ -337,6 +337,13 @@ In many prioritization studies, more than one objective is often considered.  Wh
 
 ForSysX and ForSysXR allow the user to normalize the objectives using the PCP (percentage contribution concerning the total problem of all treatable units) and SPM (percentage difference from the maximum value of the objective). Hence, the sum of the PCP of all stands is 100 and the maximum SPM value of any stand is 100. Usually, the SPM is used as an objective and the PCP as an effect.
 
+
+Note that it is important to consider stand size in these calculations, otherwise stand selection will be biased towards
+larger stands. For datasets where there is a large range in stand size, metrics should be
+weighted to account for size. The Calculate PCP and SPM function has the option to Multiply
+by area of stand to automatically account for stand size in calculation. 
+
+
 To normalize the objectives, the function normalize_objectives can be used
 
 ``` r
