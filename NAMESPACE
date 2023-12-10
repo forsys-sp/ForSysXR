@@ -2,6 +2,7 @@
 
 export(calculate_pcp)
 export(calculate_spm)
+export(check_input_shapefile)
 export(higherNeighborsDataFrame)
 export(neighborsDataFrame_expp)
 export(normalize_objectives)
