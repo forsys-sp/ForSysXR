@@ -28,12 +28,19 @@ check_input_shapefile <- function(input_shapefile,
     if(input_shapefile_format!= ".shp"){
       stop("input_shapefile has to be a shapefile!")}
 
+
+    # if(missing(stand_id)){
+    #   stop("The mandatory stand id field is missing. Please specify it as stand_id = 'stand_id_field'")}
+
+
+
     cat("Loading stand shapefile\n")
     my_shp <- sf::st_read(input_shapefile,quiet = TRUE)
 
 
 
     fields_changed <- c()
+    issues_found <- c()
 
     #stand_id
     stand_id_index <- which(colnames(my_shp)==stand_id)
@@ -48,8 +55,13 @@ check_input_shapefile <- function(input_shapefile,
     }
 
 
+    if(is.integer(stand_id_data[,1])==FALSE  & make_valid == FALSE){
+      issues_found <- c(issues_found,"The stand id field is not an integer")
+    }
+
+
     if(length(unique(stand_id_data[,1]))!=nrow(my_shp) & make_valid == FALSE){
-      stop("The stand id field is not unique for each stand")
+      issues_found <- c(issues_found,"The stand id field requires an unique id for each stand, but non-unique ids were found")
     }
 
     if(length(unique(stand_id_data[,1]))!=nrow(my_shp) & make_valid == TRUE){
@@ -66,7 +78,7 @@ check_input_shapefile <- function(input_shapefile,
       area_data <- data.frame(my_shp[,area_index])
 
       if(is.numeric(area_data[,1])==FALSE & is.integer(area_data[,1])==FALSE & make_valid == FALSE){
-        stop("The area field is not numeric")
+        issues_found <- c(issues_found,"The area field is not numeric")
       }
 
       if(is.numeric(area_data[,1])==FALSE & is.integer(area_data[,1])==FALSE & make_valid == TRUE){
@@ -85,7 +97,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,exclude_field_index]<-as.integer(exclude_field_data[,1])
 
       if(is.integer(exclude_field_data[,1])==FALSE & make_valid == FALSE){
-        stop("The exclude field is not an integer")
+        issues_found <- c(issues_found,"The exclude field is not an integer")
       }
 
       if(is.integer(exclude_field_data[,1])==FALSE & make_valid == TRUE){
@@ -104,7 +116,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,available_index]<-as.integer(available_data[,1])
 
       if(is.integer(available_data[,1])==FALSE & make_valid == FALSE){
-        stop("The available field is not an integer")
+        issues_found <- c(issues_found,"The available field is not an integer")
       }
 
       if(is.integer(available_data[,1])==FALSE & make_valid == TRUE){
@@ -126,7 +138,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,subunit_field_index]<-as.integer(subunit_field_data[,1])
 
       if(is.integer(subunit_field_data[,1])==FALSE & make_valid == FALSE){
-        stop("The subunit field is not an integer")
+        issues_found <- c(issues_found,"The subunit field is not an integer")
       }
 
       if(is.integer(subunit_field_data[,1])==FALSE & make_valid == TRUE){
@@ -146,7 +158,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,master_subunit_field_index]<-as.integer(master_subunit_field_data[,1])
 
       if(is.integer(master_subunit_field_data[,1])==FALSE & make_valid == FALSE){
-        stop("The master subunit field is not an integer")
+        issues_found <- c(issues_found,"The master subunit field is not an integer")
       }
 
       if(is.integer(master_subunit_field_data[,1])==FALSE & make_valid == TRUE){
@@ -156,16 +168,60 @@ check_input_shapefile <- function(input_shapefile,
     }
 
 
+    # if(make_valid == TRUE & length(fields_changed)>=1){
+    #   cat("Writing stand shapefile \n")
+    #   sf::st_write(my_shp,input_shapefile,append = FALSE,quiet = TRUE)
+    #   cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
+    # }
+
+
+
+
     if(make_valid == TRUE & length(fields_changed)>=1){
       cat("Writing stand shapefile \n")
       sf::st_write(my_shp,input_shapefile,append = FALSE,quiet = TRUE)
-      cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
+
+      all_fields_changed<-c()
+      for(e in 1:length(fields_changed)){
+        all_fields_changed<-c(all_fields_changed,(paste("•",noquote(fields_changed)[e], "\n", sep=" ")))
+      }
+      #sf::st_write(my_shp,input_shapefile,append = FALSE)
+      cat("The input shapefile in the local machine was overwritten. The following fields were updated to match ForSysX required formats: \n",
+          noquote(all_fields_changed))
+
+      #cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
     }
+
+
+
+
+
+
 
     if(make_valid == TRUE & length(fields_changed)==0){
       #sf::st_write(my_shp,input_shapefile,append = FALSE)
-      cat("The input shapefile was not updated. All fields already match ForSysX required formats")
+      cat("All fields match ForSysX required formats. The input shapefile was not updated.")
     }
+
+
+
+    if(make_valid == FALSE & length(issues_found)==0){
+      #sf::st_write(my_shp,input_shapefile,append = FALSE)
+      cat("All fields match ForSysX required formats. No changes are required.")
+    }
+
+
+    if(make_valid == FALSE & length(issues_found)>=1){
+      all_issues_found<-c()
+      for(e in 1:length(issues_found)){
+        all_issues_found<-c(all_issues_found,(paste("•",noquote(issues_found)[e], "\n", sep=" ")))
+      }
+      #sf::st_write(my_shp,input_shapefile,append = FALSE)
+      cat("Changes in the input shapefiles are required. \nRe-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the local machine (does not change the variable in golbal environment). \nThe problems found with the shapefile are listed below: \n",
+          noquote(all_issues_found))
+
+    }
+
 
 
   }
@@ -183,12 +239,14 @@ check_input_shapefile <- function(input_shapefile,
     result1 <- gsub(".*input_shapefile", "", result)
     result2 <- gsub(",.*", "", result1)
     result3 <- gsub("=", "", result2)
+    result3 <- gsub("\\(", "", result3)
     result4 <- gsub(" ", "", result3)
 
 
 
 
     fields_changed <- c()
+    issues_found <- c()
 
     my_shp <- input_shapefile
 
@@ -205,8 +263,13 @@ check_input_shapefile <- function(input_shapefile,
     }
 
 
+    if(is.integer(stand_id_data[,1])==FALSE  & make_valid == FALSE){
+      issues_found <- c(issues_found,"The stand id field is not an integer")
+    }
+
+
     if(length(unique(stand_id_data[,1]))!=nrow(my_shp) & make_valid == FALSE){
-      stop("The stand id field is not unique for each stand")
+      issues_found <- c(issues_found,"The stand id field requires an unique id for each stand, but non-unique ids were found")
     }
 
     if(length(unique(stand_id_data[,1]))!=nrow(my_shp) & make_valid == TRUE){
@@ -223,7 +286,7 @@ check_input_shapefile <- function(input_shapefile,
       area_data <- data.frame(my_shp[,area_index])
 
       if(is.numeric(area_data[,1])==FALSE & is.integer(area_data[,1])==FALSE & make_valid == FALSE){
-        stop("The area field is not numeric")
+        issues_found <- c(issues_found,"The area field is not numeric")
       }
 
       if(is.numeric(area_data[,1])==FALSE & is.integer(area_data[,1])==FALSE & make_valid == TRUE){
@@ -242,7 +305,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,exclude_field_index]<-as.integer(exclude_field_data[,1])
 
       if(is.integer(exclude_field_data[,1])==FALSE & make_valid == FALSE){
-        stop("The exclude field is not an integer")
+        issues_found <- c(issues_found,"The exclude field is not an integer")
       }
 
       if(is.integer(exclude_field_data[,1])==FALSE & make_valid == TRUE){
@@ -261,7 +324,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,available_index]<-as.integer(available_data[,1])
 
       if(is.integer(available_data[,1])==FALSE & make_valid == FALSE){
-        stop("The available field is not an integer")
+        issues_found <- c(issues_found,"The available field is not an integer")
       }
 
       if(is.integer(available_data[,1])==FALSE & make_valid == TRUE){
@@ -283,7 +346,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,subunit_field_index]<-as.integer(subunit_field_data[,1])
 
       if(is.integer(subunit_field_data[,1])==FALSE & make_valid == FALSE){
-        stop("The subunit field is not an integer")
+        issues_found <- c(issues_found,"The subunit field is not an integer")
       }
 
       if(is.integer(subunit_field_data[,1])==FALSE & make_valid == TRUE){
@@ -303,7 +366,7 @@ check_input_shapefile <- function(input_shapefile,
       #my_shp[,master_subunit_field_index]<-as.integer(master_subunit_field_data[,1])
 
       if(is.integer(master_subunit_field_data[,1])==FALSE & make_valid == FALSE){
-        stop("The master subunit field is not an integer")
+        issues_found <- c(issues_found,"The master subunit field is not an integer")
       }
 
       if(is.integer(master_subunit_field_data[,1])==FALSE & make_valid == TRUE){
@@ -320,13 +383,40 @@ check_input_shapefile <- function(input_shapefile,
       suppressWarnings(assign(result4,my_shp,pos = 1))
       #list2env(input_shapefile, envir = .GlobalEnv)
 
-      cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
+      all_fields_changed<-c()
+      for(e in 1:length(fields_changed)){
+        all_fields_changed<-c(all_fields_changed,(paste("•",noquote(fields_changed)[e], "\n", sep=" ")))
+      }
+      #sf::st_write(my_shp,input_shapefile,append = FALSE)
+      cat("The input shapefile in the global environment was updated. The following fields were updated to match ForSysX required formats: \n",
+          noquote(all_fields_changed))
+
+      #cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
     }
 
 
     if(make_valid == TRUE & length(fields_changed)==0){
       #sf::st_write(my_shp,input_shapefile,append = FALSE)
-      cat("The input shapefile was not updated. All fields already match ForSysX required formats")
+      cat("All fields match ForSysX required formats. The input shapefile was not updated.")
+    }
+
+
+    if(make_valid == FALSE & length(issues_found)==0){
+      #sf::st_write(my_shp,input_shapefile,append = FALSE)
+      cat("All fields match ForSysX required formats. No changes are required.")
+    }
+
+
+
+    if(make_valid == FALSE & length(issues_found)>=1){
+      all_issues_found<-c()
+      for(e in 1:length(issues_found)){
+        all_issues_found<-c(all_issues_found,(paste("•",noquote(issues_found)[e], "\n", sep=" ")))
+      }
+      #sf::st_write(my_shp,input_shapefile,append = FALSE)
+      cat("Changes in the input shapefiles are required. \nRe-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the golbal environment (does not change the shapefile in local machine). \nThe problems found with the shapefile are listed below: \n",
+          noquote(all_issues_found))
+
     }
 
 
