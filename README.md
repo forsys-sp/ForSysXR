@@ -180,7 +180,7 @@ check_input_shapefile(input_shapefile =  stands_data,
                       subunit_field="subunit",
                       make_valid = TRUE)
 ```
-    ##All fields match ForSysX required formats. The input shapefile was not updated.
+    ## All fields match ForSysX required formats. The input shapefile was not updated.
 
 The message above means that the input shapefile is ready to be used in ForSysXR as no issues were found. 
 As an example of what to expect when issues are found and how to easily solve it, one can modify the existing shapefile and re-run the the check_input_shapefile, this time with make_valid set to FALSE
@@ -201,11 +201,11 @@ check_input_shapefile(input_shapefile =  modified_stands_data,
                       subunit_field="subunit",
                       make_valid = FALSE)
 ```
-    ##Changes in the input shapefiles are required. 
-    ##Re-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the golbal environment (does not change the shapefile in local machine). 
-    ##The problems found with the shapefile are listed below: 
-    ##• The stand id field is not an integer 
-    ##• The available field is not an integer 
+    ## Changes in the input shapefiles are required. 
+    ## Re-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the golbal environment (does not change the shapefile in local machine). 
+    ## The problems found with the shapefile are listed below: 
+    ## • The stand id field is not an integer 
+    ## • The available field is not an integer 
 
 To easily correct the issues, one can set the make_valid back to TRUE. This will overwrite the shapefile (either in the global environment when the shapefile is loaded in R, or on the local machine when the input_shapefile is the path for the file in the user's machine). Note that the default is true.
 
@@ -218,9 +218,9 @@ check_input_shapefile(input_shapefile =  modified_stands_data,
                       subunit_field="subunit",
                       make_valid = TRUE)
 ```
-    ##The input shapefile in the global environment was updated. The following fields were updated to match ForSysX required formats: 
-    ##• Stand_ID 
-    ##• availuse
+    ## The input shapefile in the global environment was updated. The following fields were updated to match ForSysX required formats: 
+    ## • Stand_ID 
+    ## • availuse
 
 To be completely sure that the shapefile was corrected, one can also do as follows:
 
