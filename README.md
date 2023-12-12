@@ -207,7 +207,42 @@ check_input_shapefile(input_shapefile =  modified_stands_data,
     ##• The stand id field is not an integer 
     ##• The available field is not an integer 
 
-The make_valid parameter allows the user to correct the shapefile issues and overwrite the shapefile (either in the global environment or on the local machine - make_valid = TRUE). Note that the default is true.
+To easily correct the issues, one can set the make_valid back to TRUE. This will overwrite the shapefile (either in the global environment when the shapefile is loaded in R, or on the local machine when the input_shapefile is the path for the file in the user's machine). Note that the default is true.
+
+``` r
+check_input_shapefile(input_shapefile =  modified_stands_data,
+                      stand_id="Stand_ID",
+                      area="Area_ha",
+                      available="availuse",
+                      exclude_field="water",
+                      subunit_field="subunit",
+                      make_valid = TRUE)
+```
+    ##The input shapefile in the global environment was updated. The following fields were updated to match ForSysX required formats: 
+    ##• Stand_ID 
+    ##• availuse
+
+To be completely sure that the shapefile was corrected, one can also do as follows:
+
+``` r
+str(modified_stands_data)
+``` 
+
+    ## Classes ‘sf’ and 'data.frame':	1028 obs. of  12 variables:
+    ## $ Stand_ID : int  1 2 3 4 5 6 7 8 9 10 ...
+    ## $ Area_ha  : num  2.15 1.31 1.31 1.28 1.39 ...
+    ## $ X_Coord  : num  577104 571959 572198 576909 577109 ...
+    ## $ Y_Coord  : num  4455304 4450037 4450204 4451242 4451299 ...
+    ## $ availuse : int  1 1 1 1 1 1 1 1 1 1 ...
+    ## $ water    : int  0 0 0 0 0 0 0 0 0 0 ...
+    ## $ obj_1    : num  649 1093 1072 253 270 ...
+    ## $ obj_2    : num  2.63 2.42 2.4 2.38 2.39 ...
+    ## $ obj_3    : num  0.001712 0.000454 0.000899 0.003738 0.003869 ...
+    ## $ threshold: num  1.75 1.63 2 2.32 2.82 ...
+    ## $ subunit  : int  2 1 1 2 2 2 2 2 2 2 ...
+
+As showed above, the Stand_ID and the availuse fields are integers and no longer numeric.
+Note that in this function, only the parameters input_shapefile, stand_id, and area are mandatory. However, we recommend validating all the fields listed above whenever they are present in the input shapefile.
 
 
 ## Running a ForSys Scenario
