@@ -179,9 +179,8 @@ check_input_shapefile(input_shapefile =  stands_data,
                       exclude_field="water",
                       subunit_field="subunit",
                       make_valid = TRUE)
-
-# All fields match ForSysX required formats. The input shapefile was not updated.
 ```
+    ##All fields match ForSysX required formats. The input shapefile was not updated.
 
 The make_valid parameter allows the user to correct the shapefile issues and overwrite the shapefile (either in the global environment or on the local machine - make_valid = TRUE). Note that the default is true.
 
