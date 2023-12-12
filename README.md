@@ -163,6 +163,29 @@ ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
 ```
 <img src="man/figures/fig_2.png" width="900" />
 
+
+## Before running a ForSys Scenario
+
+ForSysX (and ForSysXR) require that fields in the input shapefile follow a specific format. 
+Hence, before setting a ForSys run, it is highly recommended to evaluate if the shapefile can be used without issues. If issues are detected, they can easily be corrected within the ForSysXR package.
+
+To evaluate the validity of the input shapefile, one can do as follows:
+
+``` r
+check_input_shapefile(input_shapefile =  stands_data,
+                      stand_id="Stand_ID",
+                      area="Area_ha",
+                      available="availuse",
+                      exclude_field="water",
+                      subunit_field="subunit",
+                      make_valid = TRUE)
+
+# All fields match ForSysX required formats. The input shapefile was not updated.
+```
+
+The make_valid parameter allows the user to correct the shapefile issues and overwrite the shapefile (either in the global environment or on the local machine - make_valid = TRUE). Note that the default is true.
+
+
 ## Running a ForSys Scenario
 
 *Forsys* prioritizes projects by maximizing an objective given one or
