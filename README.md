@@ -188,7 +188,8 @@ As an example of what to expect when issues are found and how to easily solve it
 ``` r
 modified_stands_data <- stands_data
 
-#change the fields Stand_ID and availuse from integer to numeric. This should trigger an issue as ForSysXR require these fields to be integer
+#change the fields Stand_ID and availuse from integer to numeric. This should trigger
+#an issue as ForSysXR require these fields to be integer
 modified_stands_data$Stand_ID <- as.numeric(modified_stands_data$Stand_ID)
 modified_stands_data$availuse <- as.numeric(modified_stands_data$availuse)
 
@@ -203,8 +204,8 @@ check_input_shapefile(input_shapefile =  modified_stands_data,
     ##Changes in the input shapefiles are required. 
     ##Re-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the golbal environment (does not change the shapefile in local machine). 
     ##The problems found with the shapefile are listed below: 
-     ##• The stand id field is not an integer 
-     ##• The available field is not an integer 
+    ##• The stand id field is not an integer 
+    ##• The available field is not an integer 
 
 The make_valid parameter allows the user to correct the shapefile issues and overwrite the shapefile (either in the global environment or on the local machine - make_valid = TRUE). Note that the default is true.
 
