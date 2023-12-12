@@ -303,7 +303,7 @@ The amount of objective targeted for treatment per project can be plotted as fol
 
 
 ``` r
-result_table <- read.csv("C:/Users/ForSysXR/run_tutorial_1_Results.csv")
+result_table <- read.csv(paste(my_output_folder,"run_tutorial_1_Results.csv",sep="/"))
 
 ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   geom_line()+
@@ -325,7 +325,7 @@ We run *forsys* with the following arguments. Note the use of adjacency_matrix (
 
 ``` r
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_threshold_2",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_threshold_2",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -334,16 +334,16 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 adjacency_matrix ="C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
                  constraints_name = "Area_ha",
                  constraints_value = "50.00",
                  constraints_slack = "1.00",
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/test_tutorial_vs3_threshold.xml",
+                 output_xml = paste(my_output_folder,"run_tutorial_threshold_2.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  threshold=c("threshold",">",2),
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
@@ -354,7 +354,7 @@ set_forsysx_run (input_shapefile = stands_data,
 To assess the impact of the use of the threshold in the treated area in each project, one can run the following script
 
 ``` r
-output_threshold <- sf::st_read("C:/Users/ForSysXR/run_tutorial_threshold_2_1_2_49-50.shp") %>%
+output_threshold <- sf::st_read(paste(my_output_folder,"run_tutorial_threshold_2_1_2_49-50.shp",sep="/")) %>%
   filter(Treat==1)
 
 plot_1 <- stands_data  %>%
@@ -389,7 +389,7 @@ The first parameter one can change is the Inverse Distance Power (IDP). This par
 
 ``` r
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_IDP_1",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_IDP_1",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -398,16 +398,16 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 output_adjacency_matrix ="C:/Users/ForSysXR",
+                 output_adjacency_matrix = my_output_folder,
                  constraints_name = "Area_ha",
                  constraints_value = "50.00",
                  constraints_slack = "1.00",
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 output_xml = paste(my_output_folder,"tutorial_objective1.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  threshold=c("threshold",">",2),
                  inverse_distance_power=3,
                  save_outputs = c("stand_csv","shapefile","image"))
@@ -436,7 +436,10 @@ by area of stand to automatically account for stand size in calculation.
 To normalize the objectives, the function normalize_objectives can be used
 
 ``` r
-normalize_objectives(stands_data, fields=c("obj_1","obj_2","obj_3"), availability_txt="availuse",output_name="C:/Users/ForSysXR")
+normalize_objectives(stands_data,
+                     fields = c("obj_1","obj_2","obj_3"),
+                     availability_txt = "availuse",
+                     output_name = my_output_folder)
 
 ## Simple feature collection with 1028 features and 16 fields
 ## Geometry type: POLYGON
@@ -465,8 +468,8 @@ This shapefile will be used to run ForSysX with multiobjectives. In the example,
 
 
 ``` r
-set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized.shp",
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_multiobjectives",
+set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_normalized.shp",sep="/"),
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_multiobjectives",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -475,7 +478,7 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 adjacency_matrix = "C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
                  constraints_name = "Area_ha",
                  constraints_value = "50",
                  constraints_slack = "1.00",
@@ -483,10 +486,10 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
                  objectives = c("obj_1_SPM","Treat","1","1","1",
                                 "obj_2_SPM","Treat","1","1","1",
                                 "obj_3_SPM","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/test_tutorial_multiobjectives.xml",
+                 output_xml = paste(my_output_folder,"test_tutorial_multiobjectives.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  save_outputs = c("stand_csv","shapefile","image"))
 
 ``` 
@@ -496,7 +499,7 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
 One can plot the attainment for each objective and the overall attainment as follows 
 
 ``` r
-result_table <- read.csv("C:/Users/ForSysXR/run_tutorial_multiobjectives_Results.csv")
+result_table <- read.csv(paste(my_output_folder,"run_tutorial_multiobjectives_Results.csv",sep="/"))
 head(result_table)
 
 #area_treated <- result_table[,"Treat_Area_ha"]
@@ -574,7 +577,7 @@ In the following example, we set the number of projects per subunit as three, ea
 
 ``` r
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_subunits",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_subunits",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -583,17 +586,17 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 3,
-                 adjacency_matrix = "C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
                  constraints_name = "Area_ha",
                  constraints_value = 50,
                  constraints_slack = "1.00",
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/test_tutorial_multiobjectives.xml",
+                 output_xml = paste(my_output_folder,"test_tutorial_subunits.xml",sep="/"),
                  run_forsysx = 1,
                  subunit_field = "subunit",
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  save_outputs = c("stand_csv","shapefile","image"))
 ``` 
 
@@ -605,8 +608,8 @@ set_forsysx_run (input_shapefile = stands_data,
 ForSysXR can be used to run predefined XML files. This can be useful to include in R scripts or loops. This function is similar to run zones in ForSysX
 
 ``` r
-run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
-                xml_path = "C:/Users/ForSysXR/run_tutorial_1.xml")
+run_forsysx_xml(exe_path = my_exe_path,
+                xml_path = paste(my_output_folder,"run_tutorial_1.xml",sep="/")
 ``` 
 
 
