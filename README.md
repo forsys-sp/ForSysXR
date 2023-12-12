@@ -259,9 +259,16 @@ either predefined units (e.g., watersheds) or can be built dynamically.
 The example below sets a simple *ForSysX* run. It uses the stands_data shown above to delineate the top 50 ha
 within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each.
 
+
 ``` r
+#To increase the flow of this tutorial, we can start by storing some paths
+#as variables since they will be present in almost all the upcoming exercises.
+
+my_output_folder <- "C:/Users/ForSysXR"
+my_exe_path <-"C:/Users/ForSysXR/ForSysXConsole.exe"
+
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_1",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_1",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -270,16 +277,16 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 output_adjacency_matrix ="C:/Users/ForSysXR",
+                 output_adjacency_matrix = my_output_folder,
                  constraints_name = "Area_ha",
                  constraints_value = "50.00",
                  constraints_slack = "1.00",
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 output_xml = paste(my_output_folder,"tutorial_objective1.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
