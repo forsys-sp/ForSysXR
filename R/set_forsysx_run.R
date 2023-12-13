@@ -152,26 +152,6 @@ set_forsysx_run <- function(input_shapefile,
   if(class(input_shapefile)[1]=="sf"){
     my_shp <- (input_shapefile)
 
-    stand_id_index <- which(colnames(my_shp)==stand_id)
-    exclude_field_index <- which(colnames(my_shp)==exclude_field)
-    available_index <- which(colnames(my_shp)==available)
-
-    stand_id_data <- data.frame(my_shp[,stand_id_index])
-    stand_id_data[,1]
-
-
-    exclude_field_data <- data.frame(my_shp[,exclude_field_index])
-    exclude_field_data[,1]
-
-
-    available_data <- data.frame(my_shp[,available_index])
-    available_data[,1]
-
-
-    my_shp[,stand_id_index]<-as.integer(stand_id_data[,1])
-    my_shp[,exclude_field_index]<-as.integer(exclude_field_data[,1])
-    my_shp[,available_index]<-as.integer(available_data[,1])
-
 
     if(overwrite_data==TRUE){
     sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""),append=FALSE)}else{
