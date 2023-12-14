@@ -30,6 +30,7 @@
 #' @param output_xml Path and name (with xml extention) where the xml file for the run should be stored.
 #' @param run_forsysx Binary. If 1 will run ForSysX. If 0 will end after saving the XML file
 #' @param overwrite_data Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.
+#' @param load_results Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE
 #' @param exe_path Path to the ForSysXConsole.exe
 #'
 #' @import dplyr sf ggplot2
@@ -77,6 +78,7 @@ set_forsysx_run <- function(input_shapefile,
                             save_outputs,
                             overwrite_data=FALSE,
                             plot_results=FALSE,
+                            load_results=FALSE,
                             exe_path #,xml_path
                             ) {
 
@@ -514,6 +516,64 @@ set_forsysx_run <- function(input_shapefile,
     run_forsysx_console(exe_path, output_xml)
 
   } else {cat("XML file saved",'\n')}
+
+
+
+
+
+
+
+
+  # if(missing(load_results)){
+  #   load_results<- FALSE
+  #
+  # }
+
+
+  if(load_results==TRUE){
+    all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+
+    all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+    all_elements_use <- as.character(all_elements_use)
+
+    path_with_results <- paste(all_elements_use, collapse = '/')
+
+    #list patterns
+    #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+    last_name <- all_elements[,ncol(all_elements)]
+    #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+    output_csv_run = intersect(list.files(path_with_results, ".csv$"), list.files(path_with_results,pattern = last_name))
+
+    #load the _Results
+    prj_results <- read.csv(paste(path_with_results,"/",last_name,"_Results.csv",sep=""))
+
+    #exclude this file from the output_csv_run
+    exclude_this_file_csv <- paste(last_name,"_Results.csv",sep="")
+
+
+    if(any(grepl("stand_csv", save_outputs, fixed = TRUE))==TRUE){
+    output_csv_run_use <- output_csv_run[!output_csv_run %in% exclude_this_file_csv]
+
+    if(length(output_csv_run_use)!=1){
+      stop("Could not load ForSysX results in R. Multiple files match the name given. Please use a unique name in outputs_base_name or load the csv results manually.")
+    } else {
+      stnd_results <- read.csv(paste(path_with_results,output_csv_run_use,sep="/"))
+    }
+
+    suppressWarnings(assign("stnd_results",stnd_results,pos = 1)) #,pos = 1
+    }
+
+
+    suppressWarnings(assign("prj_results",prj_results,pos = 1)) #,pos = 1
+
+
+  }
+
+
+
+
 
 
   #plot the results if the shapefile is saved
