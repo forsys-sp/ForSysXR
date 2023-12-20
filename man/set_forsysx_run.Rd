@@ -19,7 +19,6 @@ set_forsysx_run(
   max_project_diameter = -1,
   max_number_projects,
   inverse_distance_power = 0,
-  maximize_distance = 0,
   MaximizeDistanceOpt = 0,
   patchbuster_identifier,
   patchbuster_weight,
@@ -67,6 +66,8 @@ set_forsysx_run(
 
 \item{inverse_distance_power}{When this value is not zero, inverse distance weighting of the objective value is used in the stand selection process. A higher value will produce more tightly clumped stands in a project area, but sacrifices the overall objective. A value of zero means that the objective value is not modified by distance}
 
+\item{MaximizeDistanceOpt}{Binary. If 1, then Maximize Distance will be used and the effect of inverse distance weighting is reversed. Useful when creating fuelbreak networks. Default is 0.}
+
 \item{patchbuster_identifier}{Optional. Field containing the patch identifier. Only use when setting a patchbuster run}
 
 \item{patchbuster_weight}{Optional. Weight for the patchbuster function. Only use when setting a patchbuster run.}
@@ -95,15 +96,15 @@ set_forsysx_run(
 
 \item{run_forsysx}{Binary. If 1 will run ForSysX. If 0 will end after saving the XML file}
 
+\item{save_outputs}{Vector with the outputs that must be saved. Options are "shapefile", "stand_csv" and/or "image". At least one output must be saved.}
+
 \item{overwrite_data}{Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.}
+
+\item{plot_results}{Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE}
 
 \item{load_results}{Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
-
-\item{available_for_management}{If the input_shapefile contains information on available and unavailable stands. <\emph{logical}>}
-
-\item{exclude_stands}{If the input_shapefile contains information on stands that should be excluded from the prioritization. <\emph{logical}>}
 }
 \description{
 Primary function for running the ForSysX treatment planner from R without an existent XML

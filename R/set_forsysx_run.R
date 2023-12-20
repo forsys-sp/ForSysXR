@@ -5,9 +5,7 @@
 #' @param outputs_base_name Path and name where the outputs should be stored
 #' @param stand_id Field from input_shapefile containing the unique identifier for individual stands
 #' @param area Field from input_shapefile containing the area of each stand
-#' @param available_for_management If the input_shapefile contains information on available and unavailable stands. <\emph{logical}>
 #' @param available Field from input_shapefile containing the available stands
-#' @param exclude_stands If the input_shapefile contains information on stands that should be excluded from the prioritization. <\emph{logical}>
 #' @param exclude_field Field from input_shapefile identifying the stands to be excluded
 #' @param x_coordinate Field from input_shapefile identifying the x coordinate of each stand
 #' @param y_coordinate Field from input_shapefile identifying the y coordinate of each stand
@@ -27,11 +25,15 @@
 #' @param objectives Field(s) from input_shapefile identifying the treatment priorities
 #' @param subunit_field Field from input_shapefile identifying the pre-defined planning areas
 #' @param master_subunit If master subunits should be used
+#' @param save_outputs Vector with the outputs that must be saved. Options are "shapefile", "stand_csv" and/or "image". At least one output must be saved.
 #' @param output_xml Path and name (with xml extention) where the xml file for the run should be stored.
 #' @param run_forsysx Binary. If 1 will run ForSysX. If 0 will end after saving the XML file
 #' @param overwrite_data Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.
 #' @param load_results Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE
 #' @param exe_path Path to the ForSysXConsole.exe
+#' @param seed_stands_only_available_stands
+#' @param MaximizeDistanceOpt Binary. If 1, then Maximize Distance will be used and the effect of inverse distance weighting is reversed. Useful when creating fuelbreak networks. Default is 0.
+#' @param plot_results Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE
 #'
 #' @import dplyr sf ggplot2
 #' @return
@@ -59,7 +61,7 @@ set_forsysx_run <- function(input_shapefile,
                             #weight,
                             #patch_identifier,
                             inverse_distance_power=0, #default is 0
-                            maximize_distance = 0, #default is 0 (not use)
+                            #maximize_distance = 0, #default is 0 (not use)
                             MaximizeDistanceOpt =0, #0 has to be the default. This is only useful for FBN
                             patchbuster_identifier,
                             patchbuster_weight,
@@ -238,14 +240,14 @@ set_forsysx_run <- function(input_shapefile,
       xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",0,"\"",sep=""),unlist(xml_data_use))
     }
 
-
+  if (!missing(available)) {
   if (length(available)==1) {
     xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))
     xml_data_use <- gsub("Availability=\"1\"","Availability=\"1\"",unlist(xml_data_use))
     xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
   } else{
     stop("One and only one field must be used to specify the available stands")
-  }
+  }}
 
 
   #available_for_management -falta fazer este
@@ -266,12 +268,13 @@ set_forsysx_run <- function(input_shapefile,
     }
 
 
-  if (length(exclude_field)==1) {
-    xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",1,"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
-  } else{
+  if (!missing(exclude_field)) {
+    if(length(exclude_field)==1){
+      xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",1,"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+    } else{
     stop("One and only one field must be used to specify the excluded stands")
-  }
+  }}
 
 
   # xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",exclude_stands,"\"",sep=""),unlist(xml_data_use))
@@ -622,6 +625,14 @@ set_forsysx_run <- function(input_shapefile,
     }
 
   }
+
+
+  if(any(grepl("shapefile", save_outputs, fixed = TRUE))==FALSE){
+    if(plot_results==TRUE){
+      warning("Unable to plot results as the output shapefile was chosen to be stored.")
+    }
+  }
+
 
   }
 
