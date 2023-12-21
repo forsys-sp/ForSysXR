@@ -26,7 +26,7 @@ set_forsysx_run(
   output_adjacency_matrix,
   constraints_name,
   constraints_value,
-  constraints_slack,
+  constraints_slack = "",
   effect_fields,
   objectives,
   threshold,
