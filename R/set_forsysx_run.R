@@ -17,7 +17,7 @@
 #' @param output_adjacency_matrix Path where the adjacency matrix should be stored. Ignore if adjacency file was generated previous, and use the parameter adjacency_matrix
 #' @param constraints_name Field from input_shapefile that will be used as a constraint. Typical area or cost.
 #' @param constraints_value Constraint value
-#' @param constraints_slack Constraint slack.
+#' @param constraints_slack Constraint slack. Default is blank (i.e. will not use slack to tag valid and invalid projects)
 #' @param threshold Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value
 #' @param patchbuster_identifier Optional. Field containing the patch identifier. Only use when setting a patchbuster run
 #' @param patchbuster_weight Optional. Weight for the patchbuster function. Only use when setting a patchbuster run.
