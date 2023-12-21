@@ -6,6 +6,9 @@ authors:
   orcid: "https://orcid.org/0000-0002-2958-1430"
 - family-names: "Bunzel"
   given-names: "Ken"
+- family-names: "Day"
+  given-names: "Michelle
+  orcid: "https://orcid.org/0000-0002-0188-4093"
 - family-names: "Ager"
   given-names: "Alan"
 title: "ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model"
