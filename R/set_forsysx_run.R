@@ -31,7 +31,7 @@
 #' @param overwrite_data Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.
 #' @param load_results Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE
 #' @param exe_path Path to the ForSysXConsole.exe
-#' @param seed_stands_only_available_stands
+#' @param seed_stands_only_available_stands. Binary. If 1, then only the stands available for management are used as seed stands for potential projects. If 0 then all stands can be used as seed stands for potential projects. Default is 0.
 #' @param MaximizeDistanceOpt Binary. If 1, then Maximize Distance will be used and the effect of inverse distance weighting is reversed. Useful when creating fuelbreak networks. Default is 0.
 #' @param plot_results Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE
 #'
@@ -45,7 +45,7 @@ set_forsysx_run <- function(input_shapefile,
                             stand_id,area,
                             #available_for_management, #default is to not have stands with availability info
                             available,
-                            seed_stands_only_available_stands,
+                            seed_stands_only_available_stands=0,
                             #exclude_stands, #the default is not to have info on exclude in stands
                             exclude_field,
                             #load_objective_steps,

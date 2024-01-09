@@ -11,7 +11,7 @@ set_forsysx_run(
   stand_id,
   area,
   available,
-  seed_stands_only_available_stands,
+  seed_stands_only_available_stands = 0,
   exclude_field,
   x_coordinate,
   y_coordinate,
@@ -105,6 +105,8 @@ set_forsysx_run(
 \item{load_results}{Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
+
+\item{seed_stands_only_available_stands.}{Binary. If 1, then only the stands available for management are used as seed stands for potential projects. If 0 then all stands can be used as seed stands for potential projects. Default is 0.}
 }
 \description{
 Primary function for running the ForSysX treatment planner from R without an existent XML
