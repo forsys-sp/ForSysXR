@@ -7,9 +7,9 @@
 plot_projects(input_shapefile, outputs_base_name)
 }
 \arguments{
-\item{input_shapefile}{Shapefile containing the stands that were used in the prioritization process}
+\item{input_shapefile}{Shapefile containing the stands that were used in the prioritization process. Same as defined in set_forsysx_run}
 
-\item{outputs_base_name}{Path and name where the outputs should be stored}
+\item{outputs_base_name}{Path and name where the outputs should be stored. Same as defined in set_forsysx_run}
 }
 \description{
 Plots the projects created by a ForSysX run

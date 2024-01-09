@@ -1,7 +1,7 @@
 #' Plots the projects created by a ForSysX run
 #'
-#' @param input_shapefile Shapefile containing the stands that were used in the prioritization process
-#' @param outputs_base_name Path and name where the outputs should be stored
+#' @param input_shapefile Shapefile containing the stands that were used in the prioritization process. Same as defined in set_forsysx_run
+#' @param outputs_base_name Path and name where the outputs should be stored. Same as defined in set_forsysx_run
 #'
 #' @import dplyr sf ggplot2 shiny
 #' @return
