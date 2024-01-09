@@ -35,7 +35,7 @@
 #' @param MaximizeDistanceOpt Binary. If 1, then Maximize Distance will be used and the effect of inverse distance weighting is reversed. Useful when creating fuelbreak networks. Default is 0.
 #' @param plot_results Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE
 #'
-#' @import dplyr sf ggplot2
+#' @import dplyr sf ggplot2 shiny
 #' @return
 #' @export
 #'
@@ -581,8 +581,24 @@ set_forsysx_run <- function(input_shapefile,
 
   #plot the results if the shapefile is saved
 
+  #get the number of shapefiles exported#
+
+  all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+
+  all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+  all_elements_use <- as.character(all_elements_use)
+
+  path_with_results <- paste(all_elements_use, collapse = '/')
+
+
+  last_name <- all_elements[,ncol(all_elements)]
+
+  number_scenarios_created <- intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+
+
+
   if(any(grepl("shapefile", save_outputs, fixed = TRUE))==TRUE){
-    if(plot_results==TRUE){
+    if(plot_results==TRUE & length(number_scenarios_created) == 1){
       all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
 
       all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
@@ -627,9 +643,104 @@ set_forsysx_run <- function(input_shapefile,
   }
 
 
+
+  if(any(grepl("shapefile", save_outputs, fixed = TRUE))==TRUE){
+    if(plot_results==TRUE & length(number_scenarios_created) > 1){
+
+      output_shp_run = intersect(list.files(path_with_results, paste(as.numeric(constraints_value),".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+
+
+      #output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run,sep="/"))
+
+      plot_data <- list()
+      all_name_output_shiny <- data.frame()
+
+      for(e in 1:length(number_scenarios_created)){
+        output_shp_run_plot <- sf::st_read(paste(path_with_results,output_shp_run[[e]],sep="/"))
+
+        name_output_shiny <- output_shp_run[[e]]
+
+        plot_data[[paste("ttt_", e, sep = "")]] <- my_shp  %>%
+          #mutate_at(c('diss'), ~na_if(., 0)) %>%
+          #st_combine() %>%
+          ggplot() +
+          geom_sf(aes(fill=diss),fill="grey",color=NA) +
+          #ggtitle("Projects ranking") +
+          theme_void()+
+          theme(plot.title=element_text(hjust=0.5))+
+          #guides(fill="none")+
+          geom_sf(data=output_shp_run_plot,aes(fill=ProjectNum),color=NA)+
+          scale_fill_viridis_c(option = "turbo",direction=-1)+
+          labs(fill='Project number')
+
+        all_name_output_shiny <- rbind(all_name_output_shiny,name_output_shiny)
+
+      }
+
+
+      colnames(all_name_output_shiny)<-"names"
+
+      ui <- fluidPage(
+        titlePanel("ForSysX outputs"),
+        mainPanel(
+          plotOutput("current_plot"),
+          fluidRow(
+            column(12, textOutput("plot_number")),
+            column(12, textOutput("plot_title"))
+          ),
+          actionButton("next_button", "Next Plot")
+        )
+      )
+
+      # Define the server
+      server <- function(input, output) {
+        # Initialize reactive values
+        current_plot_index <- reactiveVal(1)
+        plot_titles <- reactiveVal(paste("File: ",all_name_output_shiny$names,sep = ""))
+
+        # Function to render the current plot
+        output$current_plot <- renderPlot({
+          print(plot_data[[current_plot_index()]])
+        })
+
+        # Function to render the current plot number text
+        output$plot_number <- renderText({
+          paste("Plot", current_plot_index(), "of", length(plot_data))
+        })
+
+        # Function to render the current plot title
+        output$plot_title <- renderText({
+          plot_titles()[current_plot_index()]
+        })
+
+        # Observe the click event on the "Next Plot" button
+        observeEvent(input$next_button, {
+          # Increment the current plot index
+          current_plot_index(current_plot_index() + 1)
+
+          # Reset to the first plot if we reached the end
+          if (current_plot_index() > length(plot_data)) {
+            current_plot_index(1)
+          }
+        })
+      }
+
+      # Create the shiny app
+      return(shinyApp(ui, server))
+
+    }
+  }
+
+
+
+
+
+
+
+
   if(any(grepl("shapefile", save_outputs, fixed = TRUE))==FALSE){
     if(plot_results==TRUE){
-      warning("Unable to plot results as the output shapefile was chosen to be stored.")
+      warning("Unable to plot results as the output shapefile was not exported.")
     }
   }
 

@@ -80,7 +80,7 @@ set_forsysx_run(
 
 \item{constraints_value}{Constraint value}
 
-\item{constraints_slack}{Constraint slack.}
+\item{constraints_slack}{Constraint slack. Default is blank (i.e. will not use slack to tag valid and invalid projects)}
 
 \item{effect_fields}{Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments}
 
