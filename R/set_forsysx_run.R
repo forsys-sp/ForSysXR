@@ -1,5 +1,5 @@
-#' Primary function for running the ForSysX treatment planner from R without an existent XML
-#' existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml
+#' Primary function for running the ForSysX planning system from R without an 
+#' existing XML file. If an XML file defining the run already exists, consider using run_forsys_xml
 #'
 #' @param input_shapefile Shapefile containing the stands that will be used in the prioritization process
 #' @param outputs_base_name Path and name where the outputs should be stored
