@@ -455,7 +455,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/threshold_figure_two_thresholds_projects.jpg" width="600" align="center"/>
+<img src="man/figures/threshold_figure_two_thresholds_projects_or.jpg" width="600" align="center"/>
 
 
 
