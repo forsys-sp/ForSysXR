@@ -423,9 +423,39 @@ set_forsysx_run (input_shapefile = stands_data,
 <img src="man/figures/threshold_figure_two_thresholds_projects.jpg" width="600" align="center"/>
 
 
-The two thresholds used above can be combined using the "and" or "or" logic. This can be specified in the optional parameter threshold_logic. If the user specifies an "and" logic, stands can be selected whenever all thresholds are met; the "or" logic sets stands as selectable whenever any of the thresholds are met. 
+The two thresholds used above can be combined using the "and" or "or" logic. This can be specified in the optional parameter threshold_logic. If the user specifies an "and" logic, stands can be selected whenever all thresholds are met; the "or" logic sets stand as selectable whenever any of the thresholds are met. Multiple values can also be used, similar to when defining objectives. Users can set a minimum value, a maximum value, and a step. This is also an input of threshold_logic. If a single value should be used, then "single_value" must be specified; if multiple values with stepping should be used, then "multiple_value" must be specified.
 
-Whenever missing, the default is threshold_logic = c("single_value","and")
+Whenever missing, the default is threshold_logic = c("single_value","and").
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_two_thresholds_or",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 max_project_diameter=1000,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_two_thresholds_or.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2,
+                             "obj_2",">=",2.5),
+                 threshold_logic = c("single_value","or"),
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/threshold_figure_two_thresholds_projects.jpg" width="600" align="center"/>
 
 
 
