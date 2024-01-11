@@ -395,7 +395,7 @@ It is also possible to define more than one treatment threshold in ForSys. Multi
 
 ``` r
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = paste(my_output_folder,"run_tutorial_threshold_2",sep="/"),
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_two_thresholds",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -411,7 +411,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  constraints_slack = "1.00",
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = paste(my_output_folder,"run_tutorial_threshold_2.xml",sep="/"),
+                 output_xml = paste(my_output_folder,"run_tutorial_two_thresholds.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
                  exe_path = my_exe_path,
