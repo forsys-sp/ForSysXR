@@ -490,6 +490,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
+To plot the results:
 
 ```r
 for(i in c(1,3)){
@@ -515,10 +516,9 @@ for(i in c(1,3)){
   assign(paste("plot_",i,sep=""),plot_i)
   rm(shp_data_i,plot_i)
 }
-```
 
 ggpubr::ggarrange(plot_1,plot_3,nrow=1,ncol=2,common.legend = TRUE,legend="bottom")
-
+```
 
 
 <img src="man/figures/threshold_figure_two_thresholds_projects_and_stepping.jpg" width="600" align="center"/>
