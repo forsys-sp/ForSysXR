@@ -415,7 +415,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  plot_results=TRUE,
                  exe_path = my_exe_path,
                  threshold=c("threshold",">",2,
-                             "obj_1",">=",1),
+                             "obj_1","<=",3000),
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
