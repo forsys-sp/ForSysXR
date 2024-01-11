@@ -2,8 +2,8 @@
 % Please edit documentation in R/set_forsysx_run.R
 \name{set_forsysx_run}
 \alias{set_forsysx_run}
-\title{Primary function for running the ForSysX treatment planner from R without an existent XML
-existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml}
+\title{Primary function for running the ForSysX planning system from R without an
+existing XML file. If an XML file defining the run already exists, consider using run_forsys_xml}
 \usage{
 set_forsysx_run(
   input_shapefile,
@@ -112,6 +112,6 @@ set_forsysx_run(
 \item{seed_stands_only_available_stands.}{Binary. If 1, then only the stands available for management are used as seed stands for potential projects. If 0 then all stands can be used as seed stands for potential projects. Default is 0.}
 }
 \description{
-Primary function for running the ForSysX treatment planner from R without an existent XML
-existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml
+Primary function for running the ForSysX planning system from R without an
+existing XML file. If an XML file defining the run already exists, consider using run_forsys_xml
 }

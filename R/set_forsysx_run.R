@@ -1,4 +1,4 @@
-#' Primary function for running the ForSysX planning system from R without an 
+#' Primary function for running the ForSysX planning system from R without an
 #' existing XML file. If an XML file defining the run already exists, consider using run_forsys_xml
 #'
 #' @param input_shapefile Shapefile containing the stands that will be used in the prioritization process
@@ -383,7 +383,7 @@ set_forsysx_run <- function(input_shapefile,
 #   }
 
 
-  if(!missing(threshold)){
+  if(!missing(threshold) & missing(threshold_logic)){
   total_n_threshold <- base::length(threshold)
   total_n_threshold <- total_n_threshold/3
 
@@ -423,7 +423,7 @@ set_forsysx_run <- function(input_shapefile,
     position_unused <- tail(position_unused,diff_threshold)
 
     for(q in min(position_unused):max(position_unused)){
-      xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
+      xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"max_val_threshold",q,"\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
       }
   }
 
@@ -472,6 +472,206 @@ set_forsysx_run <- function(input_shapefile,
 
 
   }}
+
+
+
+
+
+
+
+  if(!missing(threshold) & !missing(threshold_logic)){
+
+    if(threshold_logic[1]=="multiple_value"){
+
+      total_n_threshold <- base::length(threshold)
+      total_n_threshold <- total_n_threshold/5
+
+      #integer_val <- total_n_threshold%%1==0
+
+      integer_val <- decimalplaces(total_n_threshold)
+
+      if(integer_val != 0)
+        stop("Wrong number of arguments when defining the threshold")
+
+      if(total_n_threshold > 6)
+        stop("Maximum number of threshold reached. Maximum number allowd is 6")
+
+      for (k in 1:total_n_threshold){
+
+        position_threshold <- (k-1)*5
+        xml_data_use <- gsub(paste("my_threshold",k,"\"",sep=""),paste(threshold[position_threshold+1],"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_operator",k,sep=""),
+                             if(threshold[position_threshold+2]==">="){"&gt;="} else
+                               if(threshold[position_threshold+2]=="<="){"&lt;="} else
+                                 if(threshold[position_threshold+2]=="<"){"&lt;"} else
+                                   if(threshold[position_threshold+2]==">"){"&gt;"} else
+                                     if(threshold[position_threshold+2]=="=="){"=="},
+                             unlist(xml_data_use))
+        xml_data_use <- gsub(paste("min_val_threshold",k,sep=""),threshold[position_threshold+3],unlist(xml_data_use))
+        xml_data_use <- gsub(paste("max_val_threshold",k,sep=""),threshold[position_threshold+4],unlist(xml_data_use))
+
+        #if we only want to run one threshold and not steps, we do this
+        xml_data_use <- gsub(paste("step_threshold",k,sep=""),threshold[position_threshold+5],unlist(xml_data_use))
+
+      }
+
+
+      #delete the unused threshold
+      if(total_n_threshold < 6){
+        diff_threshold <- 6-total_n_threshold
+        position_unused <- (1:6)
+        position_unused <- tail(position_unused,diff_threshold)
+
+        for(q in min(position_unused):max(position_unused)){
+          xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"max_val_threshold",q,"\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
+        }
+      }
+
+
+      #if multiple thresholds used, then we need to get the thresholdLogic
+      #threshold_logic = c("single_value","and")
+
+
+
+      if(!missing(threshold_logic)){
+
+
+        if(length(threshold_logic)!=2){
+          stop("threshold_logic has to have two elements. The first has to be single_value or multiple_value, and the second and or or.")
+        }
+
+        if(threshold_logic[1]!="single_value" & threshold_logic[1]!="multiple_value"){
+          stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+        }
+
+        if(threshold_logic[2]!="and" & threshold_logic[2]!="or"){
+          stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+        }
+
+        if(threshold_logic[2]=="and"){
+          threshold_logic_val <- 0
+        }
+
+        if(threshold_logic[2]=="or"){
+          threshold_logic_val <- 1
+        }
+
+        xml_data_use <- gsub("ThresholdLogic=\"0\"", paste("ThresholdLogic=\"",threshold_logic_val,"\"", sep=""),unlist(xml_data_use))
+
+
+        if(threshold_logic[1]=="single_value"){
+          threshold_logic_single <- 1
+        }
+
+
+        if(threshold_logic[1]=="multiple_value"){
+          threshold_logic_single <- 0
+        }
+
+        xml_data_use <- gsub("ThresholdSingleValue=\"1\"", paste("ThresholdSingleValue=\"",threshold_logic_single,"\"", sep=""),unlist(xml_data_use))
+
+
+      }}
+
+
+    if(threshold_logic[1]=="single_value"){
+      total_n_threshold <- base::length(threshold)
+      total_n_threshold <- total_n_threshold/3
+
+      #integer_val <- total_n_threshold%%1==0
+
+      integer_val <- decimalplaces(total_n_threshold)
+
+      if(integer_val != 0)
+        stop("Wrong number of arguments when defining the threshold")
+
+      if(total_n_threshold > 6)
+        stop("Maximum number of threshold reached. Maximum number allowd is 6")
+
+      for (k in 1:total_n_threshold){
+
+        position_threshold <- (k-1)*3
+        xml_data_use <- gsub(paste("my_threshold",k,"\"",sep=""),paste(threshold[position_threshold+1],"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_operator",k,sep=""),
+                             if(threshold[position_threshold+2]==">="){"&gt;="} else
+                               if(threshold[position_threshold+2]=="<="){"&lt;="} else
+                                 if(threshold[position_threshold+2]=="<"){"&lt;"} else
+                                   if(threshold[position_threshold+2]==">"){"&gt;"} else
+                                     if(threshold[position_threshold+2]=="=="){"=="},
+                             unlist(xml_data_use))
+        xml_data_use <- gsub(paste("min_val_threshold",k,sep=""),threshold[position_threshold+3],unlist(xml_data_use))
+
+        #if we only want to run one threshold and not steps, we do this
+        xml_data_use <- gsub(paste("step_threshold",k,sep=""),"0",unlist(xml_data_use))
+
+      }
+
+
+      #delete the unused threshold
+      if(total_n_threshold < 6){
+        diff_threshold <- 6-total_n_threshold
+        position_unused <- (1:6)
+        position_unused <- tail(position_unused,diff_threshold)
+
+        for(q in min(position_unused):max(position_unused)){
+          xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"max_val_threshold",q,"\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
+        }
+      }
+
+
+      #if multiple thresholds used, then we need to get the thresholdLogic
+      #threshold_logic = c("single_value","and")
+
+
+
+      if(!missing(threshold_logic)){
+
+
+        if(length(threshold_logic)!=2){
+          stop("threshold_logic has to have two elements. The first has to be single_value or multiple_value, and the second and or or.")
+        }
+
+        if(threshold_logic[1]!="single_value" & threshold_logic[1]!="multiple_value"){
+          stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+        }
+
+        if(threshold_logic[2]!="and" & threshold_logic[2]!="or"){
+          stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+        }
+
+        if(threshold_logic[2]=="and"){
+          threshold_logic_val <- 0
+        }
+
+        if(threshold_logic[2]=="or"){
+          threshold_logic_val <- 1
+        }
+
+        xml_data_use <- gsub("ThresholdLogic=\"0\"", paste("ThresholdLogic=\"",threshold_logic_val,"\"", sep=""),unlist(xml_data_use))
+
+
+        if(threshold_logic[1]=="single_value"){
+          threshold_logic_single <- 1
+        }
+
+
+        if(threshold_logic[1]=="multiple_value"){
+          threshold_logic_single <- 0
+        }
+
+        xml_data_use <- gsub("ThresholdSingleValue=\"1\"", paste("ThresholdSingleValue=\"",threshold_logic_single,"\"", sep=""),unlist(xml_data_use))
+
+
+      }
+    }
+
+
+
+    }
+
+
+
+
 
 
 
