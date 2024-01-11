@@ -459,6 +459,41 @@ set_forsysx_run (input_shapefile = stands_data,
 
 
 
+To run multiple values as thresholds with a given stepping, more information has to be given when defining the threshold(s). The threshold parameter is defined by five factors in the following order: threshold name, operator, minimum value, maximum value, step.
+Also, to run multiple values, the thrshold_logic has to be updated to "multiple_value" as follows:
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_two_thresholds_multiple_value",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 max_project_diameter=1000,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_two_thresholds_multiple_value.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2,2,1,
+                             "obj_2",">=",0.5,2,1),
+                 threshold_logic = c("multiple_value","and"),
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/threshold_figure_two_thresholds_projects_and_stepping.jpg" width="600" align="center"/>
+
+
+
 
 
 ## Exploring different project prioritization methods
