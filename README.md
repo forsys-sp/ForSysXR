@@ -390,7 +390,7 @@ As shown in the figure above, only stands above the threshold are targeted for t
 
 ## Using more than one treatment threshold 
 
-It is also possible to define more than one treatment threshold in ForSys. Multiple thresholds can be specified by simply adding more factors to the threshold parameter. 
+It is also possible to define more than one treatment threshold in ForSys. Multiple thresholds can be specified by simply adding more factors to the threshold parameter. Here, we also added the parameter max_project_diameter that sets a maximum diameter for the projects (in meters).
 
 
 ``` r
@@ -404,6 +404,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
+                 max_project_diameter=1000,
                  adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
                  constraints_name = "Area_ha",
                  constraints_value = "50.00",
@@ -415,11 +416,11 @@ set_forsysx_run (input_shapefile = stands_data,
                  plot_results=TRUE,
                  exe_path = my_exe_path,
                  threshold=c("threshold",">",2,
-                             "obj_1","<=",3000),
+                             "obj_2",">=",2.5),
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/threshold_figure_updated.jpg" width="600" align="center"/>
+<img src="man/figures/threshold_figure_two_thresholds_projects.jpg" width="600" align="center"/>
 
 
 
