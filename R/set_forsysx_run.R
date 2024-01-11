@@ -19,6 +19,7 @@
 #' @param constraints_value Constraint value
 #' @param constraints_slack Constraint slack. Default is blank (i.e. will not use slack to tag valid and invalid projects)
 #' @param threshold Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value
+#' @param threshold_logic Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")
 #' @param patchbuster_identifier Optional. Field containing the patch identifier. Only use when setting a patchbuster run
 #' @param patchbuster_weight Optional. Weight for the patchbuster function. Only use when setting a patchbuster run.
 #' @param effect_fields Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments
@@ -73,6 +74,7 @@ set_forsysx_run <- function(input_shapefile,
                             effect_fields,
                             objectives,
                             threshold,
+                            threshold_logic = c("single_value","and"),
                             subunit_field,
                             master_subunit,
                             output_xml,
@@ -423,8 +425,53 @@ set_forsysx_run <- function(input_shapefile,
     for(q in min(position_unused):max(position_unused)){
       xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
       }
-}
   }
+
+
+  #if multiple thresholds used, then we need to get the thresholdLogic
+  #threshold_logic = c("single_value","and")
+
+
+
+  if(!missing(threshold_logic)){
+
+
+    if(length(threshold_logic)!=2){
+      stop("threshold_logic has to have two elements. The first has to be single_value or multiple_value, and the second and or or.")
+    }
+
+    if(threshold_logic[1]!="single_value" & threshold_logic[1]!="multiple_value"){
+      stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+    }
+
+    if(threshold_logic[2]!="and" & threshold_logic[2]!="or"){
+      stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+    }
+
+    if(threshold_logic[2]=="and"){
+      threshold_logic_val <- 0
+    }
+
+    if(threshold_logic[2]=="or"){
+      threshold_logic_val <- 1
+    }
+
+  xml_data_use <- gsub("ThresholdLogic=\"0\"", paste("ThresholdLogic=\"",threshold_logic_val,"\"", sep=""),unlist(xml_data_use))
+
+
+  if(threshold_logic[1]=="single_value"){
+    threshold_logic_single <- 1
+  }
+
+
+  if(threshold_logic[1]=="multiple_value"){
+    threshold_logic_single <- 0
+  }
+
+  xml_data_use <- gsub("ThresholdSingleValue=\"1\"", paste("ThresholdSingleValue=\"",threshold_logic_single,"\"", sep=""),unlist(xml_data_use))
+
+
+  }}
 
 
 
