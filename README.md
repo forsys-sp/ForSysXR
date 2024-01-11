@@ -423,6 +423,10 @@ set_forsysx_run (input_shapefile = stands_data,
 <img src="man/figures/threshold_figure_two_thresholds_projects.jpg" width="600" align="center"/>
 
 
+The two thresholds used above can be combined using the "and" or "or" logic. This can be specified in the optional parameter threshold_logic. If the user specifies an "and" logic, stands can be selected whenever all thresholds are met; the "or" logic sets stands as selectable whenever any of the thresholds are met. 
+
+Whenever missing, the default is threshold_logic = c("single_value","and")
+
 
 
 
