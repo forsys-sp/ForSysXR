@@ -388,6 +388,42 @@ plot_1
 As shown in the figure above, only stands above the threshold are targeted for treatments.
 
 
+## Using more than one treatment threshold 
+
+It is also possible to define more than one treatment threshold in ForSys. Multiple thresholds can be specified by simply adding more factors to the threshold parameter. 
+
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_threshold_2",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints_name = "Area_ha",
+                 constraints_value = "50.00",
+                 constraints_slack = "1.00",
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_threshold_2.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2,
+                             "obj_1","<=",3000),
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/threshold_figure_updated.jpg" width="600" align="center"/>
+
+
+
+
 
 
 ## Exploring different project prioritization methods
