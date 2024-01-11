@@ -490,6 +490,37 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
+
+```r
+for(i in c(1,3)){
+  shp_data_i <- sf::st_read(paste(my_output_folder,"/run_tutorial_two_thresholds_multiple_value_1_2_",i,"_49-50.shp",sep=""))
+  
+  stands_data$diss <- 1
+  real_value <- i-0.5
+  plot_i <- stands_data  %>%
+    #mutate_at(c('diss'), ~na_if(., 0)) %>%
+    #st_combine() %>%
+    ggplot() +
+    geom_sf(aes(fill=diss),fill="grey",color=NA) +
+    #ggtitle("Projects ranking") +
+    theme_void()+
+    theme(plot.title=element_text(hjust=0.5))+
+    #guides(fill="none")+
+    geom_sf(data=shp_data_i,aes(fill=ProjectNum),color=NA)+
+    scale_fill_viridis_c(option = "turbo",direction=-1)+
+    labs(fill='Project number',
+         title=paste("threshold > 2 & obj_2 >= ",real_value, sep=""))
+  
+  
+  assign(paste("plot_",i,sep=""),plot_i)
+  rm(shp_data_i,plot_i)
+}
+```
+
+ggpubr::ggarrange(plot_1,plot_3,nrow=1,ncol=2,common.legend = TRUE,legend="bottom")
+
+
+
 <img src="man/figures/threshold_figure_two_thresholds_projects_and_stepping.jpg" width="600" align="center"/>
 
 
