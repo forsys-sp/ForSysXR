@@ -5,7 +5,7 @@
 \alias{xml_data_threshold}
 \title{data(xml_data_threshold)}
 \format{
-An object of class \code{data.frame} with 38 rows and 1 columns.
+An object of class \code{data.frame} with 43 rows and 1 columns.
 }
 \usage{
 xml_data_threshold

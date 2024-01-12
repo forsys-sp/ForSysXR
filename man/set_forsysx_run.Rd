@@ -24,9 +24,8 @@ set_forsysx_run(
   patchbuster_weight,
   adjacency_matrix,
   output_adjacency_matrix,
-  constraints_name,
-  constraints_value,
-  constraints_slack = "",
+  constraints,
+  constraints_logic = c("single_value", "and"),
   effect_fields,
   objectives,
   threshold,
@@ -77,17 +76,15 @@ set_forsysx_run(
 
 \item{output_adjacency_matrix}{Path where the adjacency matrix should be stored. Ignore if adjacency file was generated previous, and use the parameter adjacency_matrix}
 
-\item{constraints_name}{Field from input_shapefile that will be used as a constraint. Typical area or cost.}
+\item{constraints}{Vector containing the constraint(s) field, the constraint value (or minimum, maximum and step to be used), and the slack value to be used. The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
-\item{constraints_value}{Constraint value}
-
-\item{constraints_slack}{Constraint slack. Default is blank (i.e. will not use slack to tag valid and invalid projects)}
+\item{constraints_logic}{Vector with two elements containing the constraint logic. The first element refers to if a single value should be used for the constraint ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple constraints must be combined, either selecting stands where all constraints are met ("and") or select stands where any of the constraints are met ("or"). Default is c("single_value","and")}
 
 \item{effect_fields}{Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments}
 
 \item{objectives}{Field(s) from input_shapefile identifying the treatment priorities}
 
-\item{threshold}{Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value}
+\item{threshold}{Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
 \item{threshold_logic}{Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")}
 

@@ -15,10 +15,9 @@
 #' @param inverse_distance_power When this value is not zero, inverse distance weighting of the objective value is used in the stand selection process. A higher value will produce more tightly clumped stands in a project area, but sacrifices the overall objective. A value of zero means that the objective value is not modified by distance
 #' @param adjacency_matrix A csv file containing the adjacency file. Can be generated using the parameter output_adjacency_matrix.
 #' @param output_adjacency_matrix Path where the adjacency matrix should be stored. Ignore if adjacency file was generated previous, and use the parameter adjacency_matrix
-#' @param constraints_name Field from input_shapefile that will be used as a constraint. Typical area or cost.
-#' @param constraints_value Constraint value
-#' @param constraints_slack Constraint slack. Default is blank (i.e. will not use slack to tag valid and invalid projects)
-#' @param threshold Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value
+#' @param constraints Vector containing the constraint(s) field, the constraint value (or minimum, maximum and step to be used), and the slack value to be used. The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
+#' @param constraints_logic Vector with two elements containing the constraint logic. The first element refers to if a single value should be used for the constraint ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple constraints must be combined, either selecting stands where all constraints are met ("and") or select stands where any of the constraints are met ("or"). Default is c("single_value","and")
+#' @param threshold Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
 #' @param threshold_logic Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")
 #' @param patchbuster_identifier Optional. Field containing the patch identifier. Only use when setting a patchbuster run
 #' @param patchbuster_weight Optional. Weight for the patchbuster function. Only use when setting a patchbuster run.
@@ -68,9 +67,11 @@ set_forsysx_run <- function(input_shapefile,
                             patchbuster_weight,
                             adjacency_matrix,
                             output_adjacency_matrix,
-                            constraints_name,
-                            constraints_value,
-                            constraints_slack ="",
+                            #constraints_name,
+                            #constraints_value,
+                            #constraints_slack ="",
+                            constraints,
+                            constraints_logic = c("single_value","and"),
                             effect_fields,
                             objectives,
                             threshold,
@@ -303,16 +304,298 @@ set_forsysx_run <- function(input_shapefile,
   xml_data_use <- gsub("my_max_diameter",max_project_diameter,unlist(xml_data_use))
   xml_data_use <- gsub("my_project_number",max_number_projects,unlist(xml_data_use))
 
-  xml_data_use <- gsub("Field=\"my_constraint\"",paste("Field=\"",constraints_name,"\"",sep=""),unlist(xml_data_use))
-  xml_data_use <- gsub("MinValue=\"my_constraint_val\"",paste("MinValue=\"",constraints_value,"\"",sep=""),unlist(xml_data_use))
-  xml_data_use <- gsub("MaxValue=\"my_constraint_val\"",paste("MaxValue=\"",constraints_value,"\"",sep=""),unlist(xml_data_use))
-  xml_data_use <- gsub("my_slack",constraints_slack,unlist(xml_data_use))
 
 
-  #effect_fields vai ser um vector com um máximo de 10 efeitos para começar
-  #vou ter de detectar quantos elementos há
-  #depois vou apagar os efeitos que nao vao ser usados
-  #e vou utilizar os nomes da lista para substituir a lista default.
+  #new constraints - works with vector now
+
+  #constraints <- c("area_ha", 50, "")
+
+
+
+  if(missing(constraints_logic)){
+  #if missing constraints_logic, then it is always single_value
+
+    if(!(length(constraints) %in% c(3,6,9,12,15,18))){
+      stop("Wrong number of constraints. Expected three arguments per constraint - name, value and slack")
+    }
+
+    #length(constraints)
+
+
+  total_n_constraints <- base::length(constraints)
+  total_n_constraints <- total_n_constraints/3
+
+  #integer_val <- total_n_constraints%%1==0
+
+  integer_val <- decimalplaces(total_n_constraints)
+
+  if(integer_val != 0)
+    stop("Wrong number of arguments when defining the constraints")
+
+  if(total_n_constraints > 6)
+    stop("Maximum number of constraints reached. Maximum number allowd is 6")
+
+  for (k in 1:total_n_constraints){
+
+
+    position_constraints <- (k-1)*3
+
+    constraints_name <- constraints[position_constraints+1]
+    constraints_value <- constraints[position_constraints+2]
+    constraints_slack <- constraints[position_constraints+3]
+
+    xml_data_use <- gsub(paste("my_constraint",k,"\"",sep=""),paste(constraints_name,"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("my_min_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("my_max_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("step_constraint",k,"\"",sep=""),"0",unlist(xml_data_use))
+    xml_data_use <- gsub(paste("my_slack",k,sep=""),constraints_slack,unlist(xml_data_use))
+
+
+  }
+
+
+  #delete the unused constraints
+  if(total_n_constraints < 6){
+    diff_constraints <- 6-total_n_constraints
+    position_unused <- (1:6)
+    position_unused <- tail(position_unused,diff_constraints)
+
+    for(q in min(position_unused):max(position_unused)){
+      xml_data_use <- gsub(paste("<Constraint Field=\"my_constraint",q,"\""," MinValue=\"my_min_constraint_val",q,"\""," MaxValue=\"my_max_constraint_val",q,"\""," MinField=\"\" MaxField=\"\" Step=\"step_constraint",q,"\""," Slack=\"my_slack",q,"\" />",sep=""),"",unlist(xml_data_use))
+    }
+  }
+
+
+
+
+
+  }
+
+
+
+  # xml_data_use <- gsub("Field=\"my_constraint\"",paste("Field=\"",constraints_name,"\"",sep=""),unlist(xml_data_use))
+  # xml_data_use <- gsub("MinValue=\"my_constraint_val\"",paste("MinValue=\"",constraints_value,"\"",sep=""),unlist(xml_data_use))
+  # xml_data_use <- gsub("MaxValue=\"my_constraint_val\"",paste("MaxValue=\"",constraints_value,"\"",sep=""),unlist(xml_data_use))
+  # xml_data_use <- gsub("my_slack",constraints_slack,unlist(xml_data_use))
+
+  #constraints <- c("area_ha", 50, "")
+
+  #constraints_logic <- c("single_value","and")
+
+  if(!missing(constraints_logic)){
+
+    if(constraints_logic[1] == "single_value"){
+
+      if(!(length(constraints) %in% c(3,6,9,12,15,18))){
+        stop("Wrong number of constraints. Expected three arguments per constraint - name, value and slack")
+      }
+
+      #length(constraints)
+
+
+      total_n_constraints <- base::length(constraints)
+      total_n_constraints <- total_n_constraints/3
+
+      #integer_val <- total_n_constraints%%1==0
+
+      integer_val <- decimalplaces(total_n_constraints)
+
+      if(integer_val != 0)
+        stop("Wrong number of arguments when defining the constraints")
+
+      if(total_n_constraints > 6)
+        stop("Maximum number of constraints reached. Maximum number allowd is 6")
+
+      for (k in 1:total_n_constraints){
+
+
+        position_constraints <- (k-1)*3
+
+        constraints_name <- constraints[position_constraints+1]
+        constraints_value <- constraints[position_constraints+2]
+        constraints_slack <- constraints[position_constraints+3]
+
+        xml_data_use <- gsub(paste("my_constraint",k,"\"",sep=""),paste(constraints_name,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_min_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_max_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("step_constraint",k,sep=""),"0",unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_slack",k,sep=""),constraints_slack,unlist(xml_data_use))
+
+
+      }
+
+
+      #delete the unused constraints
+      if(total_n_constraints < 6){
+        diff_constraints <- 6-total_n_constraints
+        position_unused <- (1:6)
+        position_unused <- tail(position_unused,diff_constraints)
+
+        for(q in min(position_unused):max(position_unused)){
+          xml_data_use <- gsub(paste("<Constraint Field=\"my_constraint",q,"\""," MinValue=\"my_min_constraint_val",q,"\""," MaxValue=\"my_max_constraint_val",q,"\""," MinField=\"\" MaxField=\"\" Step=\"step_constraint",q,"\""," Slack=\"my_slack",q,"\" />",sep=""),"",unlist(xml_data_use))
+        }
+      }
+
+
+
+      #and or or
+
+
+
+      if(length(constraints_logic)!=2){
+        stop("constraints_logic has to have two elements. The first has to be single_value or multiple_value, and the second and or or.")
+      }
+
+      if(constraints_logic[1]!="single_value" & constraints_logic[1]!="multiple_value"){
+        stop("constraints_logic has to be single_value or multiple_value followed by and or or.")
+      }
+
+      if(constraints_logic[2]!="and" & constraints_logic[2]!="or"){
+        stop("constraints_logic has to be single_value or multiple_value followed by and or or.")
+      }
+
+      if(constraints_logic[2]=="and"){
+        constraints_logic_val <- 0
+      }
+
+      if(constraints_logic[2]=="or"){
+        constraints_logic_val <- 1
+      }
+
+      xml_data_use <- gsub("ConstraintLogic=\"0\"", paste("ConstraintLogic=\"",constraints_logic_val,"\"", sep=""),unlist(xml_data_use))
+
+
+      if(constraints_logic[1]=="single_value"){
+        constraints_logic_single <- 1
+      }
+
+
+      if(constraints_logic[1]=="multiple_value"){
+        constraints_logic_single <- 0
+      }
+
+      xml_data_use <- gsub("ConstraintSingleValue=\"1\"", paste("ConstraintSingleValue=\"",constraints_logic_single,"\"", sep=""),unlist(xml_data_use))
+
+
+
+
+    }
+  }
+
+
+
+  #constraints <- c("area_ha", 50, 150, 50, "")
+
+  #constraints_logic <- c("multiple_value","and")
+
+  if(!missing(constraints_logic)){
+
+    if(constraints_logic[1] == "multiple_value"){
+
+      if(!(length(constraints) %in% c(5,10,15,20,25,30))){
+        stop("Wrong number of constraints. Expected five arguments per constraint - name, minumum value, maximum value, step and slack")
+      }
+
+      #length(constraints)
+
+
+      total_n_constraints <- base::length(constraints)
+      total_n_constraints <- total_n_constraints/5
+
+      #integer_val <- total_n_constraints%%1==0
+
+      integer_val <- decimalplaces(total_n_constraints)
+
+      if(integer_val != 0)
+        stop("Wrong number of arguments when defining the constraints")
+
+      if(total_n_constraints > 6)
+        stop("Maximum number of constraints reached. Maximum number allowd is 6")
+
+      for (k in 1:total_n_constraints){
+
+
+        position_constraints <- (k-1)*5
+
+        constraints_name <- constraints[position_constraints+1]
+        min_constraints_value <- constraints[position_constraints+2]
+        max_constraints_value <- constraints[position_constraints+3]
+        step_constraints_value <- constraints[position_constraints+4]
+        constraints_slack <- constraints[position_constraints+5]
+
+        xml_data_use <- gsub(paste("my_constraint",k,"\"",sep=""),paste(constraints_name,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_min_constraint_val",k,"\"",sep=""),paste(min_constraints_value,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_max_constraint_val",k,"\"",sep=""),paste(max_constraints_value,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("step_constraint",k,"\"",sep=""),paste(step_constraints_value,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub(paste("my_slack",k,sep=""),constraints_slack,unlist(xml_data_use))
+
+
+      }
+
+
+      #delete the unused constraints
+      if(total_n_constraints < 6){
+        diff_constraints <- 6-total_n_constraints
+        position_unused <- (1:6)
+        position_unused <- tail(position_unused,diff_constraints)
+
+        for(q in min(position_unused):max(position_unused)){
+          xml_data_use <- gsub(paste("<Constraint Field=\"my_constraint",q,"\""," MinValue=\"my_min_constraint_val",q,"\""," MaxValue=\"my_max_constraint_val",q,"\""," MinField=\"\" MaxField=\"\" Step=\"step_constraint",q,"\""," Slack=\"my_slack",q,"\" />",sep=""),"",unlist(xml_data_use))
+        }
+      }
+
+
+
+      #and or or
+
+
+
+      if(length(constraints_logic)!=2){
+        stop("constraints_logic has to have two elements. The first has to be single_value or multiple_value, and the second and or or.")
+      }
+
+      if(constraints_logic[1]!="single_value" & constraints_logic[1]!="multiple_value"){
+        stop("constraints_logic has to be single_value or multiple_value followed by and or or.")
+      }
+
+      if(constraints_logic[2]!="and" & constraints_logic[2]!="or"){
+        stop("constraints_logic has to be single_value or multiple_value followed by and or or.")
+      }
+
+      if(constraints_logic[2]=="and"){
+        constraints_logic_val <- 0
+      }
+
+      if(constraints_logic[2]=="or"){
+        constraints_logic_val <- 1
+      }
+
+      xml_data_use <- gsub("ConstraintLogic=\"0\"", paste("ConstraintLogic=\"",constraints_logic_val,"\"", sep=""),unlist(xml_data_use))
+
+
+      if(constraints_logic[1]=="single_value"){
+        constraints_logic_single <- 1
+      }
+
+
+      if(constraints_logic[1]=="multiple_value"){
+        constraints_logic_single <- 0
+      }
+
+      xml_data_use <- gsub("ConstraintSingleValue=\"1\"", paste("ConstraintSingleValue=\"",constraints_logic_single,"\"", sep=""),unlist(xml_data_use))
+
+
+
+      constraints_value <- seq(from=as.numeric(min_constraints_value),to=as.numeric(max_constraints_value),by=as.numeric(step_constraints_value))
+
+
+    }
+  }
+
+
+
+
+
 
 
 
@@ -840,7 +1123,8 @@ set_forsysx_run <- function(input_shapefile,
 
   last_name <- all_elements[,ncol(all_elements)]
 
-  number_scenarios_created <- intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+
+  number_scenarios_created <- intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),collapse='|',".shp$",sep="")), list.files(path_with_results,pattern = last_name))
 
 
 
@@ -859,7 +1143,7 @@ set_forsysx_run <- function(input_shapefile,
       last_name <- all_elements[,ncol(all_elements)]
       #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
 
-      output_shp_run = intersect(list.files(path_with_results, paste(as.numeric(constraints_value),".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+      output_shp_run = intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),collapse='|',".shp$",sep="")), list.files(path_with_results,pattern = last_name))
 
 
       output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run,sep="/"))
@@ -894,7 +1178,7 @@ set_forsysx_run <- function(input_shapefile,
   if(any(grepl("shapefile", save_outputs, fixed = TRUE))==TRUE){
     if(plot_results==TRUE & length(number_scenarios_created) > 1){
 
-      output_shp_run = intersect(list.files(path_with_results, paste(as.numeric(constraints_value),".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+      output_shp_run = intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),collapse='|',".shp$",sep="")), list.files(path_with_results,pattern = last_name))
 
 
       #output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run,sep="/"))
