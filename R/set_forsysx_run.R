@@ -173,6 +173,11 @@ set_forsysx_run <- function(input_shapefile,
   }}
 
 
+  if(any(nchar(names(my_shp)))>10){
+    stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
+  }
+
+
 
   input_shapefile_use <- gsub("/","\\\\\\\\",input_shapefile)
 
