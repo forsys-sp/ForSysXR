@@ -159,6 +159,11 @@ set_forsysx_run <- function(input_shapefile,
   if(class(input_shapefile)[1]=="sf"){
     my_shp <- (input_shapefile)
 
+    if(max(nchar(names(my_shp)))>10){
+      stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
+    }
+
+
 
     if(overwrite_data==TRUE){
     sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""),append=FALSE)}else{
@@ -167,15 +172,19 @@ set_forsysx_run <- function(input_shapefile,
     input_shapefile <- paste(outputs_base_name,"_stand_data.shp",sep="")
   }
 
+
+
   if(class(input_shapefile)[1]=="character"){
     if(plot_results==TRUE | !missing(output_adjacency_matrix)){
     my_shp <- sf::st_read(input_shapefile)
+
+    if(max(nchar(names(my_shp)))>10){
+      stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
+    }
+
   }}
 
 
-  if(max(nchar(names(my_shp)))>10){
-    stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
-  }
 
 
 
