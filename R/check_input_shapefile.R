@@ -217,7 +217,7 @@ check_input_shapefile <- function(input_shapefile,
         all_issues_found<-c(all_issues_found,(paste("•",noquote(issues_found)[e], "\n", sep=" ")))
       }
       #sf::st_write(my_shp,input_shapefile,append = FALSE)
-      cat("Changes in the input shapefiles are required. \nRe-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the local machine (does not change the variable in golbal environment). \nThe problems found with the shapefile are listed below: \n",
+      cat("Changes in the input shapefiles are required. \nRe-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the local machine (does not change the variable in global environment). \nThe problems found with the shapefile are listed below: \n",
           noquote(all_issues_found))
 
     }
@@ -376,6 +376,72 @@ check_input_shapefile <- function(input_shapefile,
     }
 
 
+
+
+
+    #check if fields have less than 10 characters in the name
+    all_names_shp <- names(my_shp)
+
+    if(max(nchar(all_names_shp))>10){
+
+      original_names_shapefile <- names(my_shp)
+      names_needing_change <- which(nchar(all_names_shp)>10)
+
+
+      for (b in names_needing_change){
+        all_names_shp[[b]] <- abbreviate(all_names_shp[[b]],10, dot = "FALSE", strict = "TRUE")
+      }
+
+
+
+
+      #identify the difference
+      old_names_replaced <- setdiff(original_names_shapefile,all_names_shp)
+      new_names_to_replace <- setdiff(all_names_shp,original_names_shapefile)
+
+
+      if(length(old_names_replaced)>=1 & make_valid == FALSE){
+        issues_found <- c(issues_found,paste("The fields with the names ",paste0(old_names_replaced, collapse=", ")," have more than 10 characters.", sep=""))
+      }
+
+
+      if(length(old_names_replaced)>=1 & make_valid == TRUE){
+        names(my_shp)<- all_names_shp
+        fields_changed_name <- paste("Fields with a long name (more than 10 characters) were changed:",paste(old_names_replaced,new_names_to_replace,sep = " was changed to ", collapse = ", "))
+        fields_changed<-c(fields_changed,fields_changed_name)
+      }
+
+
+
+
+      #change the input values given by the user to make sure we use the abbreviated names instead of the ones that will cause forsys to fail
+
+
+    }
+
+
+
+    #check if all fields are unique
+    if(any(duplicated(names(my_shp)))==TRUE & make_valid == FALSE){
+      issues_found <- c(issues_found,paste("Fields with the same name detected.", sep=""))
+      }
+
+
+
+    if(any(duplicated(names(my_shp)))==TRUE & make_valid == TRUE){
+      names(my_shp)<- all_names_shp
+      duplicated_names <- paste("Fields with the same name detected, but could not automatically change. Manual change is required", sep="")
+      warning(duplicated_names)
+    }
+
+
+
+
+
+
+
+
+
     if(make_valid == TRUE & length(fields_changed)>=1){
       #input_shapefile <- my_shp
 
@@ -414,10 +480,12 @@ check_input_shapefile <- function(input_shapefile,
         all_issues_found<-c(all_issues_found,(paste("•",noquote(issues_found)[e], "\n", sep=" ")))
       }
       #sf::st_write(my_shp,input_shapefile,append = FALSE)
-      cat("Changes in the input shapefiles are required. \nRe-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the golbal environment (does not change the shapefile in local machine). \nThe problems found with the shapefile are listed below: \n",
+      cat("Changes in the input shapefiles are required. \nRe-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the global environment (does not change the shapefile in local machine). \nThe problems found with the shapefile are listed below: \n",
           noquote(all_issues_found))
 
     }
+
+
 
 
   }
