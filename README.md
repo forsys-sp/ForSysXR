@@ -49,7 +49,7 @@ remotes::install_github("forsys-sp/ForSysXR")
 
 After installing the ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
-[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist_2023-11-16.zip).
+[here](https://github.com/forsys-sp/ForSysXR/raw/main/ForSysXDLLDist_2023-11-16.zip).
 This step is crucial as it downloads the ForSysX executable that will later
 be run from R.
 
@@ -981,4 +981,4 @@ contains information on the *forsys* package.
 
 If you have any questions about the *ForSysXR* package or suggestions for
 improving it, please [post an issue on the code
-repository](https://github.com/bmaparicio/ForSysXR/issues).
+repository](https://github.com/forsys-sp/ForSysXR/issues).
