@@ -34,7 +34,7 @@
 #' @param seed_stands_only_available_stands. Binary. If 1, then only the stands available for management are used as seed stands for potential projects. If 0 then all stands can be used as seed stands for potential projects. Default is 0.
 #' @param MaximizeDistanceOpt Binary. If 1, then Maximize Distance will be used and the effect of inverse distance weighting is reversed. Useful when creating fuelbreak networks. Default is 0.
 #' @param plot_results Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE
-#'
+#' @param build_report Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE
 #' @import dplyr sf ggplot2 shiny
 #' @return
 #' @export
@@ -84,6 +84,7 @@ set_forsysx_run <- function(input_shapefile,
                             overwrite_data=FALSE,
                             plot_results=FALSE,
                             load_results=FALSE,
+                            build_report=FALSE,
                             exe_path #,xml_path
                             ) {
 
@@ -176,7 +177,7 @@ set_forsysx_run <- function(input_shapefile,
 
   if(class(input_shapefile)[1]=="character"){
     if(plot_results==TRUE | !missing(output_adjacency_matrix)){
-    my_shp <- sf::st_read(input_shapefile)
+    my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
 
     if(max(nchar(names(my_shp)))>10){
       stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
@@ -361,7 +362,7 @@ set_forsysx_run <- function(input_shapefile,
     xml_data_use <- gsub(paste("my_constraint",k,"\"",sep=""),paste(constraints_name,"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("my_min_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("my_max_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("step_constraint",k,"\"",sep=""),"0",unlist(xml_data_use))
+    xml_data_use <- gsub(paste("step_constraint",k,"\"",sep=""),paste("0",'"',sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("my_slack",k,sep=""),constraints_slack,unlist(xml_data_use))
 
 
@@ -644,6 +645,7 @@ set_forsysx_run <- function(input_shapefile,
   if(total_n_objective > 5)
     stop("Maximum number of objectives reached. Maximum number allowd is 5")
 
+  list_objectives <- data.frame()
   for (k in 1:total_n_objective){
 
   position_obj <- (k-1)*5
@@ -652,6 +654,8 @@ set_forsysx_run <- function(input_shapefile,
   xml_data_use <- gsub(paste("minweight_my_objective_",k,sep=""),objectives[position_obj+3],unlist(xml_data_use))
   xml_data_use <- gsub(paste("maxweight_my_objective_",k,sep=""),objectives[position_obj+4],unlist(xml_data_use))
   xml_data_use <- gsub(paste("step_my_objective_",k,sep=""),objectives[position_obj+5],unlist(xml_data_use))
+
+  list_objectives <- rbind(list_objectives,objectives[position_obj+1])
 
   }
 
@@ -1103,17 +1107,32 @@ set_forsysx_run <- function(input_shapefile,
     if(any(grepl("stand_csv", save_outputs, fixed = TRUE))==TRUE){
     output_csv_run_use <- output_csv_run[!output_csv_run %in% exclude_this_file_csv]
 
-    if(length(output_csv_run_use)!=1){
-      stop("Could not load ForSysX results in R. Multiple files match the name given. Please use a unique name in outputs_base_name or load the csv results manually.")
-    } else {
+    if(length(output_csv_run_use)==1){
       stnd_results <- read.csv(paste(path_with_results,output_csv_run_use,sep="/"))
     }
 
-    suppressWarnings(assign("stnd_results",stnd_results,pos = 1)) #,pos = 1
+    if(length(output_csv_run_use)>1){
+      stnd_results <- data.frame()
+      for(e in 1:length(output_csv_run_use)){
+        stnd_results_e <- read.csv(paste(path_with_results,output_csv_run_use[e],sep="/"))
+        get_name_stnd <- output_csv_run_use[e]
+        stnd_results_e$file_name <-get_name_stnd
+        stnd_results<-rbind(stnd_results,stnd_results_e)
+      }
+
+    }
+
+    #if(length(output_csv_run_use)!=1){
+    #  stop("Could not load ForSysX results in R. Multiple files match the name given. Please use a unique name in outputs_base_name or load the csv results manually.")
+    #} else {
+    #  stnd_results <- read.csv(paste(path_with_results,output_csv_run_use,sep="/"))
+    #}
+
+    suppressWarnings(assign(paste(last_name,"_stnd_results",sep=""),stnd_results,pos = 1)) #,pos = 1
     }
 
 
-    suppressWarnings(assign("prj_results",prj_results,pos = 1)) #,pos = 1
+    suppressWarnings(assign(paste(last_name,"_prj_results",sep=""),prj_results,pos = 1)) #,pos = 1
 
 
   }
@@ -1138,7 +1157,10 @@ set_forsysx_run <- function(input_shapefile,
   last_name <- all_elements[,ncol(all_elements)]
 
 
-  number_scenarios_created <- intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),collapse='|',".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+  number_scenarios_created <- intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),collapse='|',sep="")), list.files(path_with_results,pattern = last_name)) #".shp$"
+
+  number_scenarios_created <- number_scenarios_created[grepl(pattern = ".shp$", x = number_scenarios_created)]
+
 
 
 
@@ -1160,10 +1182,10 @@ set_forsysx_run <- function(input_shapefile,
       output_shp_run = intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),collapse='|',".shp$",sep="")), list.files(path_with_results,pattern = last_name))
 
 
-      output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run,sep="/"))
+      output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run,sep="/"),quiet=TRUE)
 
       if (missing(my_shp)){
-        my_shp <- sf::st_read(input_shapefile)
+        my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
       }
 
 
@@ -1201,7 +1223,7 @@ set_forsysx_run <- function(input_shapefile,
       all_name_output_shiny <- data.frame()
 
       for(e in 1:length(number_scenarios_created)){
-        output_shp_run_plot <- sf::st_read(paste(path_with_results,output_shp_run[[e]],sep="/"))
+        output_shp_run_plot <- sf::st_read(paste(path_with_results,output_shp_run[[e]],sep="/"),quiet=TRUE)
 
         name_output_shiny <- output_shp_run[[e]]
 
@@ -1290,7 +1312,1250 @@ set_forsysx_run <- function(input_shapefile,
   }
 
 
-  }
+if(build_report==TRUE){
 
+
+
+
+  #plot the attainment for report
+
+
+  #get table with inputs for markdown from the summary file written
+
+  output_summary_run = intersect(list.files(path_with_results, "Summary.txt$"), list.files(path_with_results,pattern = last_name))
+
+
+
+  all_text_summary<-readtext::readtext(paste(path_with_results,output_summary_run,sep="/"), text_field = "texts")
+
+  all_text_summary<-all_text_summary$text
+
+  all_text_summary <- gsub("\n","",all_text_summary)
+  all_text_summary <- gsub("\t"," ",all_text_summary)
+
+
+
+  if(length(number_scenarios_created) == 1){
+    all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+
+    all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+    all_elements_use <- as.character(all_elements_use)
+
+    path_with_results <- paste(all_elements_use, collapse = '/')
+
+    #list patterns
+    #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+    last_name <- all_elements[,ncol(all_elements)]
+    #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+    output_csv_run = intersect(list.files(path_with_results, ".csv$"), list.files(path_with_results,pattern = last_name))
+
+    #load the _Results
+    prj_results <- read.csv(paste(path_with_results,"/",last_name,"_Results.csv",sep=""))
+
+    #exclude this file from the output_csv_run
+    exclude_this_file_csv <- paste(last_name,"_Results.csv",sep="")
+
+    #prj_results
+
+
+
+    df_loop_effects_final <- data.frame()
+
+    for(x in 1:all_effects){
+      my_effect_chosen <- effect_fields[x]
+      df_loop_effects <- prj_results[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen))]
+      df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+      colnames(df_loop_effects) <- c("ProjectNumber", "effect", "effect_name")
+
+      df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+
+      df_loop_effects_final<-rbind(df_loop_effects_final,df_loop_effects)
+
+    }
+
+
+
+
+    plot_attainment_per_project <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+      geom_line(linewidth=1)+
+      scale_x_continuous(breaks = 1:10)+
+      xlab("Project number")+
+      ylab("Objective attainment")+
+      labs(color = "Effect name",tag="a)")+
+      theme_classic()
+
+    suppressWarnings(assign("plot_attainment_per_project",plot_attainment_per_project,pos = 1))
+
+
+
+
+
+    #plot cumulative
+
+
+
+    plot_attainment_per_project_cum <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+      geom_line(linewidth=1)+
+      scale_x_continuous(breaks = 1:10)+
+      xlab("Project number")+
+      ylab("Cumulative objective attainment")+
+      labs(color = "Effect name",tag="b)")+
+      theme_classic()
+
+    suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
+
+
+
+    plot_attainment_per_project_ggarranged<- ggpubr::ggarrange(plot_attainment_per_project,plot_attainment_per_project_cum,
+                                                ncol = 1,nrow=2,common.legend = TRUE)
+
+
+    suppressWarnings(assign("plot_attainment_per_project_ggarranged",plot_attainment_per_project_ggarranged,pos = 1))
+
+    suppressWarnings(assign("attainment_fig_constraint1",paste("Attainment per project (top) and the cumulative attainment (bottom) for the effects stored"),pos = 1))
+    #suppressWarnings(assign("caption_fig_constraint2",paste("Proportion of constraint treated and total constraint inside project (%) per project. Panel a) represent the run with lowest weight for ",list_objectives[1,1], " and highest weight for ",list_objectives[2,1],"; panel b) represent the run with highest weight for ",list_objectives[1,1]," and lowest weight for ",list_objectives[2,1],"; panel c) represent the most weight-balanced run between the two objectives"),pos = 1))
+
+
+
+
+}
+
+
+
+
+
+
+
+
+    #start to get the variables
+    objectives_pt1 <- gsub(".*Objectives: ","",all_text_summary)
+    objectives_pt1 <- gsub("Thresholds.*","",objectives_pt1)
+    objectives_pt1 <- stringr::str_sub(objectives_pt1,5)
+
+    #separate the elements
+
+    objectives_pt1_use <- (strsplit(objectives_pt1, " +")[[1]])
+    length(objectives_pt1_use)
+
+    #see how many elements can be numeric
+    choose_numeric_objective <- suppressWarnings(as.numeric(objectives_pt1_use))
+    all_objectives <- which(is.na(choose_numeric_objective)==TRUE)
+    all_values_objectives <- which(is.na(choose_numeric_objective)==FALSE)
+
+
+
+    #get the objective direction
+    objective_direction <- gsub(".*Objective Direction:","",all_text_summary)
+    objective_direction <- gsub("Check.*","",objective_direction)
+
+
+    if(length(all_objectives)>1){
+
+      all_objectives_elements <- as.list((paste(objectives_pt1_use[all_objectives],objective_direction,sep=", ")))
+      all_objectives_elements <- do.call("rbind", all_objectives_elements)
+
+      all_objectives_values <- as.list((paste(objectives_pt1_use[all_values_objectives],objective_direction,sep=", ")))
+      all_objectives_values <- do.call("rbind", all_objectives_values)
+
+      introduction_table <- cbind(all_objectives_elements,all_objectives_values)
+
+
+      introduction_table <- data.frame(cbind("Objective(s)",introduction_table))
+
+      colnames(introduction_table)<-c("Parameter","Variable","Value")
+
+
+    }
+
+
+    if(length(all_objectives)==1){
+    introduction_table <- cbind(paste(objectives_pt1_use[all_objectives],objective_direction,sep=", "),objectives_pt1_use[all_values_objectives])
+
+
+    introduction_table <- data.frame(cbind("Objective(s)",introduction_table))
+
+    colnames(introduction_table)<-c("Parameter","Variable","Value")
+}
+
+
+
+
+
+    #threshold part
+
+    thresholds_pt1 <- gsub(".*Thresholds: ","",all_text_summary)
+    thresholds_pt1 <- gsub("Constraints.*","",thresholds_pt1)
+    thresholds_pt1 <- stringr::str_sub(thresholds_pt1,5)
+
+    #separate the elements
+
+    thresholds_pt1_use <- (strsplit(thresholds_pt1, " +")[[1]])
+    length(thresholds_pt1_use)
+
+    #see how many elements can be numeric
+    choose_numeric_thresholds <- suppressWarnings(as.numeric(thresholds_pt1_use))
+    all_thresholds <- which(is.na(choose_numeric_thresholds)==TRUE)
+    all_values_thresholds <- which(is.na(choose_numeric_thresholds)==FALSE)
+
+
+    if(length(all_thresholds)==2){
+
+      table_threshold <- cbind(thresholds_pt1_use[all_thresholds][1],paste(thresholds_pt1_use[all_thresholds][2],thresholds_pt1_use[all_values_thresholds],sep=" "))
+
+
+      table_threshold <- data.frame(cbind("Threshold(s)",table_threshold))
+
+      colnames(table_threshold)<-c("Parameter","Variable","Value")
+
+      introduction_table <- rbind(introduction_table,table_threshold)
+    }
+
+
+    if(length(all_thresholds)>2){
+
+      all_thresholds_names <- seq(all_thresholds[1], length(all_thresholds), 2)
+      all_thresholds_symbol <- seq(all_thresholds[2], length(all_thresholds), 2)
+
+      all_thresholds_names<-all_thresholds[all_thresholds_names]
+      all_thresholds_symbol<-all_thresholds[all_thresholds_symbol]
+
+      all_thresholds_elements <- as.list((thresholds_pt1_use[all_thresholds_names]))
+      all_thresholds_elements <- do.call("rbind", all_thresholds_elements)
+
+
+      all_thresholds_value <- as.list(paste(thresholds_pt1_use[all_thresholds_symbol],thresholds_pt1_use[all_values_thresholds],sep=" "))
+      all_thresholds_value <- do.call("rbind", all_thresholds_value)
+
+
+
+      table_threshold <- cbind(all_thresholds_elements,all_thresholds_value)
+
+
+      table_threshold <- data.frame(cbind("Threshold(s)",table_threshold))
+
+      colnames(table_threshold)<-c("Parameter","Variable","Value")
+
+      introduction_table <- rbind(introduction_table,table_threshold)
+    }
+
+
+
+
+    #constraints
+
+    constraints_pt1 <- gsub(".*Constraints: ","",all_text_summary)
+    constraints_pt1 <- gsub("Objective Direction.*","",constraints_pt1)
+    constraints_pt1 <- stringr::str_sub(constraints_pt1,5)
+
+    #separate the elements
+
+    constraints_pt1_use <- (strsplit(constraints_pt1, " +")[[1]])
+    length(constraints_pt1_use)
+
+    #see how many elements can be numeric
+    choose_numeric_constraints <- suppressWarnings(as.numeric(constraints_pt1_use))
+    all_constraints <- which(is.na(choose_numeric_constraints)==TRUE)
+    all_values_constraints <- which(is.na(choose_numeric_constraints)==FALSE)
+
+
+
+
+    nth_element <- function(vector, starting_position, n) {
+      vector[seq(starting_position, length(vector), n)]
+    }
+
+
+    if(length(all_constraints)==2){
+
+      all_constraints_names <- seq(all_constraints[1], length(all_constraints), 2)
+      all_constraints_value_start <- nth_element(all_values_constraints, 1, 2)
+      all_constraints_value_end <- nth_element(all_values_constraints, 2, 2)
+
+      all_constraints_names<-all_constraints[all_constraints_names]
+      #all_constraints_value_start<-all_values_constraints[all_constraints_value_start]
+
+      all_constraints_elements <- as.list((constraints_pt1_use[all_constraints_names]))
+      all_constraints_elements <- do.call("rbind", all_constraints_elements)
+
+
+      all_constraints_value <- as.list(paste(constraints_pt1_use[all_constraints_value_start],"-",constraints_pt1_use[all_constraints_value_end],sep=" "))
+      all_constraints_value <- do.call("rbind", all_constraints_value)
+
+
+      table_constraints <- cbind(constraints_pt1_use[all_constraints][1],paste(constraints_pt1_use[all_values_constraints][1]," - ",constraints_pt1_use[all_values_constraints][2],sep=" "))
+
+
+      table_constraints <- data.frame(cbind("Constraint(s)",table_constraints))
+
+      colnames(table_constraints)<-c("Parameter","Variable","Value")
+
+      introduction_table <- rbind(introduction_table,table_constraints)
+    }
+
+
+
+
+
+
+
+
+
+    if(length(all_constraints)>2){
+
+      all_constraints_names <- seq(all_constraints[1], length(all_constraints), 2)
+      all_constraints_value_start <- nth_element(all_values_constraints, 1, 2)
+      all_constraints_value_end <- nth_element(all_values_constraints, 2, 2)
+
+      all_constraints_names<-all_constraints[all_constraints_names]
+      #all_constraints_value_start<-all_values_constraints[all_constraints_value_start]
+
+      all_constraints_elements <- as.list((constraints_pt1_use[all_constraints_names]))
+      all_constraints_elements <- do.call("rbind", all_constraints_elements)
+
+
+      all_constraints_value <- as.list(paste(constraints_pt1_use[all_constraints_value_start],"-",constraints_pt1_use[all_constraints_value_end],sep=" "))
+      all_constraints_value <- do.call("rbind", all_constraints_value)
+
+
+
+      table_constraint <- cbind(all_constraints_elements,all_constraints_value)
+
+
+      table_constraint <- data.frame(cbind("Constraint(s)",table_constraint))
+
+      colnames(table_constraint)<-c("Parameter","Variable","Value")
+
+      introduction_table <- rbind(introduction_table,table_constraint)
+    }
+
+
+
+    #max number of projects
+
+    Nprojects_pt1 <- gsub(".*Max Number Projects:  ","",all_text_summary)
+    Nprojects_pt1 <- gsub("Max Project Diameter.*","",Nprojects_pt1)
+
+    table_Nprojects <- rbind(c("Max Number Projects","-",Nprojects_pt1))
+    colnames(table_Nprojects)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_Nprojects)
+
+
+    #max diameter
+    diameter_pt1 <- gsub("Seed Stand Percent:  .*","",all_text_summary)
+    diameter_pt1 <- gsub(".*Max Project Diameter ","",diameter_pt1)
+    diameter_pt1 <- stringr::str_sub(diameter_pt1,11)
+
+
+    table_diameter <- rbind(c("Max Project Diameter (meters)","-",diameter_pt1))
+    colnames(table_diameter)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_diameter)
+
+
+
+    #IDP
+    IDP_pt1 <- gsub("Patch Buster:  .*","",all_text_summary)
+    IDP_pt1 <- gsub(".*Inverse Distance Power:  ","",IDP_pt1)
+
+
+    table_IDP <- rbind(c("Inverse Distance Power","-",IDP_pt1))
+    colnames(table_IDP)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_IDP)
+
+
+
+
+    #% seeds used
+    seeds_perc_pt1 <- gsub("Number of CPUs:.*","",all_text_summary)
+    seeds_perc_pt1 <- gsub(".*Seed Stand Percent:  ","",seeds_perc_pt1)
+
+
+    table_seeds_perc <- rbind(c("Seed Stand Percent","-",seeds_perc_pt1))
+    colnames(table_seeds_perc)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_seeds_perc)
+
+
+    #patch buster
+    patch_bus_pt1 <- gsub("Max Number Projects:.*","",all_text_summary)
+    patch_bus_pt1 <- gsub(".*Patch Buster:   ","",patch_bus_pt1)
+
+
+    table_patch_bus <- rbind(c("Patch Buster","-",patch_bus_pt1))
+    colnames(table_patch_bus)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_patch_bus)
+
+
+
+    #spatial optimization?
+    spat_opti_pt1 <- gsub("Inverse Distance Power.*","",all_text_summary)
+    spat_opti_pt1 <- gsub(".*Spatial Optimization:  ","",spat_opti_pt1)
+
+
+    table_spat_opti <- rbind(c("Spatial Optimization","-",spat_opti_pt1))
+    colnames(table_spat_opti)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_spat_opti)
+
+
+
+    #check availability?
+    check_avai_pt1 <- gsub("Spatial Optimization.*","",all_text_summary)
+    check_avai_pt1 <- gsub(".*Check Availability:  ","",check_avai_pt1)
+
+
+    table_check_avai <- rbind(c("Check Availability","-",check_avai_pt1))
+    colnames(table_check_avai)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_check_avai)
+
+
+    #check exclude?
+    check_exc_pt1 <- gsub("Check Availability.*","",all_text_summary)
+    check_exc_pt1 <- gsub(".*Check Excluded Stands:  ","",check_exc_pt1)
+
+
+    table_check_exc <- rbind(c("Check Excluded Stands","-",check_exc_pt1))
+    colnames(table_check_exc)<-c("Parameter","Variable","Value")
+
+    introduction_table <- rbind(introduction_table,table_check_exc)
+
+
+
+
+
+
+
+        suppressWarnings(assign("introduction_table",introduction_table,pos = 1))
+
+
+
+
+
+        #plot % of project that are treated
+        #constraints_pt1 <- gsub(".*Constraints: ","",all_text_summary)
+        #constraints_pt1 <- gsub("Objective Direction.*","",constraints_pt1)
+        #constraints_pt1 <- stringr::str_sub(constraints_pt1,5)
+        #
+        #constraints_pt1_use <- (strsplit(constraints_pt1, " +")[[1]])
+
+
+
+
+
+
+
+        #plot projects in report
+
+        if(any(grepl("shapefile", save_outputs, fixed = TRUE))==TRUE){
+          if(length(number_scenarios_created) == 1){
+            all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+
+            all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+            all_elements_use <- as.character(all_elements_use)
+
+            path_with_results <- paste(all_elements_use, collapse = '/')
+
+            #list patterns
+            #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+            last_name <- all_elements[,ncol(all_elements)]
+            #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+            output_shp_run = intersect(list.files(path_with_results,pattern = paste(as.numeric(constraints_value),collapse='|',".shp$",sep="")), list.files(path_with_results,pattern = last_name))
+
+
+            output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run,sep="/"),quiet=TRUE)
+
+
+
+            if(class(input_shapefile)[1]=="character"){
+              my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
+                }
+
+
+
+            my_shp$diss <- 1
+
+            my_plot_projects_report <- my_shp  %>%
+              #mutate_at(c('diss'), ~na_if(., 0)) %>%
+              #st_combine() %>%
+              ggplot() +
+              geom_sf(aes(fill=diss),fill="grey",color=NA) +
+              #ggtitle("Projects ranking") +
+              theme_void()+
+              theme(plot.title=element_text(hjust=0.5))+
+              #guides(fill="none")+
+              geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
+              scale_fill_viridis_c(option = "turbo",direction=-1)+
+              labs(fill='Project number')
+
+            suppressWarnings(assign("my_plot_projects_report",my_plot_projects_report,pos = 1))
+            suppressWarnings(assign("caption_fig1","Location of the projects created by ForSysX. Warmer colors represent higher priority",pos = 1))
+
+          }
+
+        } else {
+          my_plot_projects_report <- cat("No projects to show. Did you export the shapefile in ForSysX run?")
+          suppressWarnings(assign("my_plot_projects_report",my_plot_projects_report,pos = 1))
+        }
+
+
+
+
+
+
+
+        if(any(grepl("shapefile", save_outputs, fixed = TRUE))==TRUE){
+          if(length(number_scenarios_created) > 1){ #em vez de number_scenarios, quero o numero de cenarios so dos objectivos
+
+
+            if(class(input_shapefile)[1]=="character"){
+              my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
+            }
+
+            all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+
+            all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+            all_elements_use <- as.character(all_elements_use)
+
+            path_with_results <- paste(all_elements_use, collapse = '/')
+
+            #list patterns
+            #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+            last_name <- all_elements[,ncol(all_elements)]
+            #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+            output_shp_run = intersect(list.files(path_with_results,pattern = ".shp$"), list.files(path_with_results,pattern = last_name))
+
+            #select only the scenarios where:
+            #the first objective is the lowest and the second the highest
+            #the second objective is the lowest and the first the highest
+            #the two are 50-50 (or the most similar)
+
+            output_shp_run_only_names <- gsub(paste0(last_name,"_"),"",output_shp_run)
+
+            output_shp_run_only_names_use <- (strsplit(output_shp_run_only_names, "_"))
+
+            only_value_objective_one <- sapply(output_shp_run_only_names_use, "[[", 1)
+            only_value_objective_two <- sapply(output_shp_run_only_names_use, "[[", 2)
+
+            #put all the combinations in a table
+
+            objective_values_df_use <- data.frame(cbind(as.numeric(only_value_objective_one),as.numeric(only_value_objective_two)))
+
+
+
+            #get the number of objectives used
+
+
+
+              #get the lowest first objective with the highest second objective
+              min_objective_for_obj1 <- which(objective_values_df_use$X1==min(objective_values_df_use$X1))
+
+              min_objective_for_obj1_in_df <- objective_values_df_use[min_objective_for_obj1,]
+
+              max_objective_for_obj2 <- which(min_objective_for_obj1_in_df$X2==max(min_objective_for_obj1_in_df$X2))
+
+              lowest_obj1_highest_obj2_df <- min_objective_for_obj1_in_df[max_objective_for_obj2,]
+
+
+
+              #get the highest first objective with the lowest second objective
+              max_objective_for_obj1 <- which(objective_values_df_use$X1==max(objective_values_df_use$X1))
+
+              max_objective_for_obj1_in_df <- objective_values_df_use[max_objective_for_obj1,]
+
+              min_objective_for_obj2 <- which(max_objective_for_obj1_in_df$X2==min(max_objective_for_obj1_in_df$X2))
+
+              highest_obj1_lowest_obj2_df <- max_objective_for_obj1_in_df[min_objective_for_obj2,]
+
+
+
+              #get the most balanced weights between the objectives where none of the scenarios is 0
+              objective_values_df_use$difference <- abs(objective_values_df_use$X1-objective_values_df_use$X2)
+
+              objective_values_df_use_no0 <- subset(objective_values_df_use,X1 >0 & X2>0)
+
+              most_balanced_non_zero <- which(objective_values_df_use_no0$difference==min(objective_values_df_use_no0$difference))
+
+              most_balanced_non_zero_df <- objective_values_df_use_no0[most_balanced_non_zero,]
+
+
+
+
+              #load the scenarios chosen and then plot them
+
+              output_shp_run_lowest1_highest2 = intersect(list.files(path_with_results,pattern = ".shp$"), list.files(path_with_results,pattern = paste(last_name,lowest_obj1_highest_obj2_df$X1,lowest_obj1_highest_obj2_df$X2,sep="_")))
+              output_shp_run_highest1_lowest2 = intersect(list.files(path_with_results,pattern = ".shp$"), list.files(path_with_results,pattern = paste(last_name,highest_obj1_lowest_obj2_df$X1,highest_obj1_lowest_obj2_df$X2,sep="_")))
+              output_shp_run_balanced = intersect(list.files(path_with_results,pattern = ".shp$"), list.files(path_with_results,pattern = paste(last_name,most_balanced_non_zero_df$X1,most_balanced_non_zero_df$X2,sep="_")))
+
+
+            output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run_lowest1_highest2,sep="/"),quiet=TRUE)
+
+            my_shp$diss <- 1
+
+            my_plot_projects_report1 <- my_shp  %>%
+              #mutate_at(c('diss'), ~na_if(., 0)) %>%
+              #st_combine() %>%
+              ggplot() +
+              geom_sf(aes(fill=diss),fill="grey",color=NA) +
+              #ggtitle("Projects ranking") +
+              theme_void()+
+              theme(plot.title=element_text(hjust=0.5))+
+              #guides(fill="none")+
+              geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
+              scale_fill_viridis_c(option = "turbo",direction=-1)+
+              labs(fill='Project number',tag = "a)")
+
+
+            output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run_highest1_lowest2,sep="/"),quiet=TRUE)
+
+            my_shp$diss <- 1
+
+            my_plot_projects_report2 <- my_shp  %>%
+              #mutate_at(c('diss'), ~na_if(., 0)) %>%
+              #st_combine() %>%
+              ggplot() +
+              geom_sf(aes(fill=diss),fill="grey",color=NA) +
+              #ggtitle("Projects ranking") +
+              theme_void()+
+              theme(plot.title=element_text(hjust=0.5))+
+              #guides(fill="none")+
+              geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
+              scale_fill_viridis_c(option = "turbo",direction=-1)+
+              labs(fill='Project number',tag = "b)")
+
+
+            output_shp_run <- sf::st_read(paste(path_with_results,output_shp_run_balanced,sep="/"),quiet=TRUE)
+
+            my_shp$diss <- 1
+
+            my_plot_projects_report3 <- my_shp  %>%
+              #mutate_at(c('diss'), ~na_if(., 0)) %>%
+              #st_combine() %>%
+              ggplot() +
+              geom_sf(aes(fill=diss),fill="grey",color=NA) +
+              #ggtitle("Projects ranking") +
+              theme_void()+
+              theme(plot.title=element_text(hjust=0.5))+
+              #guides(fill="none")+
+              geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
+              scale_fill_viridis_c(option = "turbo",direction=-1)+
+              labs(fill='Project number',tag = "c)")
+
+
+
+            my_plot_projects_report<- ggpubr::ggarrange(my_plot_projects_report1,my_plot_projects_report2,my_plot_projects_report3,
+                              ncol = 3,common.legend = TRUE)
+
+            suppressWarnings(assign("my_plot_projects_report",my_plot_projects_report,pos = 1))
+            #suppressWarnings(assign("my_plot_projects_report",list_objectives,pos = 1))
+            suppressWarnings(assign("caption_fig1",paste("Location of the projects created by ForSysX. Warmer colors represent higher priority. Panel a) represent the run with lowest weight for ",list_objectives[1,1], " and highest weight for ",list_objectives[2,1],"; panel b) represent the run with highest weight for ",list_objectives[1,1]," and lowest weight for ",list_objectives[2,1],"; panel c) represent the most weight-balanced run between the two objectives"),pos = 1))
+
+          }
+
+        }
+
+
+
+
+
+
+
+
+        #constraints
+
+        constraints_pt1 <- gsub(".*Constraints: ","",all_text_summary)
+        constraints_pt1 <- gsub("Objective Direction.*","",constraints_pt1)
+        constraints_pt1 <- stringr::str_sub(constraints_pt1,5)
+
+        #separate the elements
+
+        constraints_pt1_use <- (strsplit(constraints_pt1, " +")[[1]])
+        length(constraints_pt1_use)
+
+        constraints_name_for_figure<-constraints_pt1_use[as.numeric(all_constraints_names)]
+
+        df_loop_constraints_final <- data.frame()
+
+        if(length(number_scenarios_created) == 1){
+        for(x in 1:length(constraints_name_for_figure)){
+          my_constraint_chosen <- constraints_name_for_figure[x]
+          df_loop_constraints <- prj_results[,c("ProjectNumber",paste0("Treat_",my_constraint_chosen),paste0("Total_",my_constraint_chosen))]
+          df_loop_constraints$constraint_name <- paste0(my_constraint_chosen)
+
+
+          colnames(df_loop_constraints) <- c("ProjectNumber", "Treat_constraint","Total_constraint", "constraint_name")
+
+          df_loop_constraints$treat_constraint_cumulative <- cumsum(df_loop_constraints$Treat_constraint)
+          df_loop_constraints$total_constraint_cumulative <- cumsum(df_loop_constraints$Total_constraint)
+
+          #get percentage of constraint treated of the total constraint inside the project
+          df_loop_constraints$perc_treated_constraint_in_proj <- df_loop_constraints$Treat_constraint/df_loop_constraints$Total_constraint*100
+
+
+          df_loop_constraints_final<-rbind(df_loop_constraints_final,df_loop_constraints)
+
+        }
+
+
+
+        plot_treated_constraint <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+          geom_line(linewidth=1)+
+          scale_x_continuous(breaks = 1:10)+
+          xlab("Project number")+
+          ylab("Treated constraint")+
+          labs(color = "Constraint name")+
+          theme_classic()
+
+        suppressWarnings(assign("plot_treated_constraint",plot_treated_constraint,pos = 1))
+
+
+
+        plot_perc_treated_constraint_in_proj <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+          geom_line(linewidth=1)+
+          scale_x_continuous(breaks = 1:10)+
+          xlab("Project number")+
+          ylab("Proportion of constraint treated and total constraint inside project (%)")+
+          labs(color = "Constraint name")+
+          theme_classic()
+
+
+        plot_treated_constraint_in_proj_ggarrange <- ggpubr::ggarrange(plot_treated_constraint,
+                                                                       plot_perc_treated_constraint_in_proj,
+                                                                       ncol = 1,nrow=2,common.legend = TRUE)
+
+
+        suppressWarnings(assign("plot_treated_constraint_in_proj_ggarrange",plot_treated_constraint_in_proj_ggarrange,pos = 1))
+
+        #suppressWarnings(assign("attainment_fig_constraint1",paste("Attainment per project (top) and the cumulative attainment (bottom) for the effects stored"),pos = 1))
+        suppressWarnings(assign("caption_fig_constraint1",paste("Treated constraint(s) per project (top) and Proportion of constraint treated and total constraint inside project (%) per project (bottom)."),pos = 1))
+
+
+
+        #suppressWarnings(assign("plot_perc_treated_constraint_in_proj",plot_perc_treated_constraint_in_proj,pos = 1))
+        #suppressWarnings(assign("caption_fig_constraint1",paste("Treated constraint(s) per project"),pos = 1))
+        #suppressWarnings(assign("caption_fig_constraint2",paste("Proportion of constraint treated and total constraint inside project (%) per project"),pos = 1))
+
+        }
+
+
+
+
+
+
+
+
+
+        if(length(number_scenarios_created) > 1){
+          all_elements <- stringr::str_split(outputs_base_name, "/", simplify=T)
+
+          all_elements_use <- all_elements[,1:(ncol(all_elements)-1)]
+          all_elements_use <- as.character(all_elements_use)
+
+          path_with_results <- paste(all_elements_use, collapse = '/')
+
+          #list patterns
+          #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+          last_name <- all_elements[,ncol(all_elements)]
+          #output_shp_run <- list.files(path_with_results,pattern = paste(as.numeric(constraints_value),".shp$",sep=""))
+
+          output_csv_run = intersect(list.files(path_with_results, ".csv$"), list.files(path_with_results,pattern = last_name))
+
+          #load the _Results
+          prj_results <- read.csv(paste(path_with_results,"/",last_name,"_Results.csv",sep=""))
+
+          #exclude this file from the output_csv_run
+          exclude_this_file_csv <- paste(last_name,"_Results.csv",sep="")
+
+          #prj_results
+
+
+          #output_shp_run_lowest1_highest2
+          #output_shp_run_highest1_lowest2
+          #output_shp_run_balanced
+
+
+
+          df_loop_effects_final <- data.frame()
+
+          for(x in 1:all_effects){
+            my_effect_chosen <- effect_fields[x]
+
+            path_with_results_bars <- gsub("/","\\\\",path_with_results)
+
+
+            df_loop_effects <- subset(prj_results,PointOutputsName==paste(path_with_results_bars,output_shp_run_lowest1_highest2,sep="\\"))
+
+            df_loop_effects <- df_loop_effects[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen))]
+            df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+
+
+
+            colnames(df_loop_effects) <- c("ProjectNumber", "effect", "effect_name")
+
+            df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+
+            df_loop_effects_final<-rbind(df_loop_effects_final,df_loop_effects)
+
+          }
+
+
+
+
+          plot_attainment_per_project1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Objective attainment")+
+            labs(color = "Effect name",tag = "a)")+
+            theme_classic()
+
+
+
+
+
+
+
+          #plot cumulative
+
+
+
+          plot_attainment_per_project_cum1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Cumulative objective attainment")+
+            labs(color = "Effect name",tag = "a)")+
+            theme_classic()
+
+
+
+
+
+
+          #output_shp_run_lowest1_highest2
+          #output_shp_run_highest1_lowest2
+          #output_shp_run_balanced
+
+
+
+          df_loop_effects_final <- data.frame()
+
+          for(x in 1:all_effects){
+            my_effect_chosen <- effect_fields[x]
+
+            path_with_results_bars <- gsub("/","\\\\",path_with_results)
+
+
+            df_loop_effects <- subset(prj_results,PointOutputsName==paste(path_with_results_bars,output_shp_run_highest1_lowest2,sep="\\"))
+
+
+            df_loop_effects <- df_loop_effects[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen))]
+            df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+
+
+            colnames(df_loop_effects) <- c("ProjectNumber", "effect", "effect_name")
+
+            df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+
+            df_loop_effects_final<-rbind(df_loop_effects_final,df_loop_effects)
+
+          }
+
+
+
+
+          plot_attainment_per_project2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Objective attainment")+
+            labs(color = "Effect name",tag = "b)")+
+            theme_classic()
+
+
+
+
+
+
+
+          #plot cumulative
+
+
+
+          plot_attainment_per_project_cum2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Cumulative objective attainment")+
+            labs(color = "Effect name",tag = "b)")+
+            theme_classic()
+
+
+
+
+
+
+
+
+
+          #output_shp_run_lowest1_highest2
+          #output_shp_run_highest1_lowest2
+          #output_shp_run_balanced
+
+
+
+          df_loop_effects_final <- data.frame()
+
+          for(x in 1:all_effects){
+            my_effect_chosen <- effect_fields[x]
+
+            path_with_results_bars <- gsub("/","\\\\",path_with_results)
+
+
+            df_loop_effects <- subset(prj_results,PointOutputsName==paste(path_with_results_bars,output_shp_run_balanced,sep="\\"))
+
+
+            df_loop_effects <- df_loop_effects[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen))]
+            df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+
+
+
+            colnames(df_loop_effects) <- c("ProjectNumber", "effect", "effect_name")
+
+            df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+
+            df_loop_effects_final<-rbind(df_loop_effects_final,df_loop_effects)
+
+          }
+
+
+
+
+          plot_attainment_per_project3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Objective attainment")+
+            labs(color = "Effect name",tag = "c)")+
+            theme_classic()
+
+
+
+
+
+
+
+          #plot cumulative
+
+
+
+          plot_attainment_per_project_cum3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Cumulative objective attainment")+
+            labs(color = "Effect name",tag = "c)")+
+            theme_classic()
+
+
+
+
+          plot_attainment_per_project<- ggpubr::ggarrange(plot_attainment_per_project1,plot_attainment_per_project2,plot_attainment_per_project3,
+                                                      ncol = 3,common.legend = TRUE)
+
+
+          plot_attainment_per_project_cum<- ggpubr::ggarrange(plot_attainment_per_project_cum1,plot_attainment_per_project_cum2,plot_attainment_per_project_cum3,
+                                                          ncol = 3,common.legend = TRUE)
+
+          suppressWarnings(assign("plot_attainment_per_project",plot_attainment_per_project,pos = 1))
+          suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
+
+
+
+          plot_attainment_per_project_ggarranged<- ggpubr::ggarrange(plot_attainment_per_project1,plot_attainment_per_project2,plot_attainment_per_project3,
+                                                                     plot_attainment_per_project_cum1,plot_attainment_per_project_cum2,plot_attainment_per_project_cum3,
+                                                                     ncol = 3,nrow=2,common.legend = TRUE)
+
+
+          suppressWarnings(assign("plot_attainment_per_project_ggarranged",plot_attainment_per_project_ggarranged,pos = 1))
+
+          #suppressWarnings(assign("attainment_fig_constraint1",paste("Attainment per project (top) and the cumulative attainment (bottom) for the effects stored"),pos = 1))
+          suppressWarnings(assign("attainment_fig_constraint1",paste("Attainment per project (top) and the cumulative attainment (bottom) for the effects stored. Panel a) represent the run with lowest weight for ",list_objectives[1,1], " and highest weight for ",list_objectives[2,1],"; panel b) represent the run with highest weight for ",list_objectives[1,1]," and lowest weight for ",list_objectives[2,1],"; panel c) represent the most weight-balanced run between the two objectives"),pos = 1))
+
+
+
+
+
+
+
+          #constraint
+
+          #output_shp_run_lowest1_highest2
+          #output_shp_run_highest1_lowest2
+          #output_shp_run_balanced
+
+          constraints_name_for_figure<-constraints_pt1_use[as.numeric(all_constraints_names)]
+
+          df_loop_constraints_final <- data.frame()
+
+          for(x in 1:length(constraints_name_for_figure)){
+            my_constraint_chosen <- constraints_name_for_figure[x]
+
+            path_with_results_bars <- gsub("/","\\\\",path_with_results)
+            df_loop_constraints <- subset(prj_results,PointOutputsName==paste(path_with_results_bars,output_shp_run_lowest1_highest2,sep="\\"))
+
+
+            df_loop_constraints <- df_loop_constraints[,c("ProjectNumber",paste0("Treat_",my_constraint_chosen),paste0("Total_",my_constraint_chosen))]
+            df_loop_constraints$constraint_name <- paste0(my_constraint_chosen)
+
+
+            colnames(df_loop_constraints) <- c("ProjectNumber", "Treat_constraint","Total_constraint", "constraint_name")
+
+            df_loop_constraints$treat_constraint_cumulative <- cumsum(df_loop_constraints$Treat_constraint)
+            df_loop_constraints$total_constraint_cumulative <- cumsum(df_loop_constraints$Total_constraint)
+
+            #get percentage of constraint treated of the total constraint inside the project
+            df_loop_constraints$perc_treated_constraint_in_proj <- df_loop_constraints$Treat_constraint/df_loop_constraints$Total_constraint*100
+
+
+            df_loop_constraints_final<-rbind(df_loop_constraints_final,df_loop_constraints)
+
+          }
+
+
+
+          plot_treated_constraint1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Treated constraint")+
+            labs(color = "Constraint name",tag = "a)")+
+            theme_classic()
+
+
+
+
+
+          plot_perc_treated_constraint_in_proj1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Proportion of constraint treated and total constraint inside project (%)")+
+            labs(color = "Constraint name",tag = "a)")+
+            theme_classic()
+
+
+
+
+
+
+
+          df_loop_constraints_final <- data.frame()
+
+          for(x in 1:length(constraints_name_for_figure)){
+            my_constraint_chosen <- constraints_name_for_figure[x]
+
+            path_with_results_bars <- gsub("/","\\\\",path_with_results)
+            df_loop_constraints <- subset(prj_results,PointOutputsName==paste(path_with_results_bars,output_shp_run_highest1_lowest2,sep="\\"))
+
+
+            df_loop_constraints <- df_loop_constraints[,c("ProjectNumber",paste0("Treat_",my_constraint_chosen),paste0("Total_",my_constraint_chosen))]
+            df_loop_constraints$constraint_name <- paste0(my_constraint_chosen)
+
+
+            colnames(df_loop_constraints) <- c("ProjectNumber", "Treat_constraint","Total_constraint", "constraint_name")
+
+            df_loop_constraints$treat_constraint_cumulative <- cumsum(df_loop_constraints$Treat_constraint)
+            df_loop_constraints$total_constraint_cumulative <- cumsum(df_loop_constraints$Total_constraint)
+
+            #get percentage of constraint treated of the total constraint inside the project
+            df_loop_constraints$perc_treated_constraint_in_proj <- df_loop_constraints$Treat_constraint/df_loop_constraints$Total_constraint*100
+
+
+            df_loop_constraints_final<-rbind(df_loop_constraints_final,df_loop_constraints)
+
+          }
+
+
+
+          plot_treated_constraint2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Treated constraint")+
+            labs(color = "Constraint name",tag = "b)")+
+            theme_classic()
+
+
+
+
+
+          plot_perc_treated_constraint_in_proj2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Proportion of constraint treated and total constraint inside project (%)")+
+            labs(color = "Constraint name",tag = "b)")+
+            theme_classic()
+
+
+
+
+
+
+          df_loop_constraints_final <- data.frame()
+
+          for(x in 1:length(constraints_name_for_figure)){
+            my_constraint_chosen <- constraints_name_for_figure[x]
+
+            path_with_results_bars <- gsub("/","\\\\",path_with_results)
+            df_loop_constraints <- subset(prj_results,PointOutputsName==paste(path_with_results_bars,output_shp_run_balanced,sep="\\"))
+
+
+            df_loop_constraints <- df_loop_constraints[,c("ProjectNumber",paste0("Treat_",my_constraint_chosen),paste0("Total_",my_constraint_chosen))]
+            df_loop_constraints$constraint_name <- paste0(my_constraint_chosen)
+
+
+            colnames(df_loop_constraints) <- c("ProjectNumber", "Treat_constraint","Total_constraint", "constraint_name")
+
+            df_loop_constraints$treat_constraint_cumulative <- cumsum(df_loop_constraints$Treat_constraint)
+            df_loop_constraints$total_constraint_cumulative <- cumsum(df_loop_constraints$Total_constraint)
+
+            #get percentage of constraint treated of the total constraint inside the project
+            df_loop_constraints$perc_treated_constraint_in_proj <- df_loop_constraints$Treat_constraint/df_loop_constraints$Total_constraint*100
+
+
+            df_loop_constraints_final<-rbind(df_loop_constraints_final,df_loop_constraints)
+
+          }
+
+
+
+          plot_treated_constraint3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Treated constraint")+
+            labs(color = "Constraint name",tag = "c)")+
+            theme_classic()
+
+
+
+
+
+          plot_perc_treated_constraint_in_proj3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+            geom_line(linewidth=1)+
+            scale_x_continuous(breaks = 1:10)+
+            xlab("Project number")+
+            ylab("Proportion of constraint treated and total constraint inside project (%)")+
+            labs(color = "Constraint name",tag = "c)")+
+            theme_classic()
+
+
+
+          plot_treated_constraint<- ggpubr::ggarrange(plot_treated_constraint1,plot_treated_constraint2,plot_treated_constraint3,
+                                                                   ncol = 3,common.legend = TRUE)
+
+          plot_perc_treated_constraint_in_proj<- ggpubr::ggarrange(plot_perc_treated_constraint_in_proj1,plot_perc_treated_constraint_in_proj2,plot_perc_treated_constraint_in_proj3,
+                                                      ncol = 3,common.legend = TRUE)
+
+
+
+
+          plot_treated_constraint_in_proj_ggarrange <- ggpubr::ggarrange(plot_treated_constraint1,plot_treated_constraint2,plot_treated_constraint3,
+                                                                     plot_perc_treated_constraint_in_proj1,plot_perc_treated_constraint_in_proj2,plot_perc_treated_constraint_in_proj3,
+                                                                     ncol = 3,nrow=2,common.legend = TRUE)
+
+
+          suppressWarnings(assign("plot_treated_constraint_in_proj_ggarrange",plot_treated_constraint_in_proj_ggarrange,pos = 1))
+
+          #suppressWarnings(assign("attainment_fig_constraint1",paste("Attainment per project (top) and the cumulative attainment (bottom) for the effects stored"),pos = 1))
+          suppressWarnings(assign("caption_fig_constraint1",paste("Treated constraint(s) per project (top) and Proportion of constraint treated and total constraint inside project (%) per project (bottom). Panel a) represent the run with lowest weight for ",list_objectives[1,1], " and highest weight for ",list_objectives[2,1],"; panel b) represent the run with highest weight for ",list_objectives[1,1]," and lowest weight for ",list_objectives[2,1],"; panel c) represent the most weight-balanced run between the two objectives"),pos = 1))
+
+
+
+          #suppressWarnings(assign("plot_treated_constraint",plot_treated_constraint,pos = 1))
+          #suppressWarnings(assign("plot_perc_treated_constraint_in_proj",plot_perc_treated_constraint_in_proj,pos = 1))
+
+          #suppressWarnings(assign("caption_fig_constraint1",paste("Treated constraint(s) per project. Panel a) represent the run with lowest weight for ",list_objectives[1,1], " and highest weight for ",list_objectives[2,1],"; panel b) represent the run with highest weight for ",list_objectives[1,1]," and lowest weight for ",list_objectives[2,1],"; panel c) represent the most weight-balanced run between the two objectives"),pos = 1))
+          #suppressWarnings(assign("caption_fig_constraint2",paste("Proportion of constraint treated and total constraint inside project (%) per project. Panel a) represent the run with lowest weight for ",list_objectives[1,1], " and highest weight for ",list_objectives[2,1],"; panel b) represent the run with highest weight for ",list_objectives[1,1]," and lowest weight for ",list_objectives[2,1],"; panel c) represent the most weight-balanced run between the two objectives"),pos = 1))
+
+
+
+        }
+
+
+
+
+
+    #generate report
+  my_list_input_variable<-get_input_names_long()
+
+
+  all_matching_set_forsysx_run <- grep("set_forsysx_run", my_list_input_variable$Last.command)
+  #select the highest - most recent command
+
+  most_recent_set_forsysx_run <- max(all_matching_set_forsysx_run)
+
+  commands_given_print <- my_list_input_variable$Last.command[most_recent_set_forsysx_run:length(my_list_input_variable$Last.command)]
+
+  suppressWarnings(assign("commands_given_print",commands_given_print,pos = 1))
+
+  suppressWarnings(assign("last_name",last_name,pos = 1)) #,pos = 1
+
+  path_for_rmd <- system.file("rmd_template", package = "ForSysXR")
+  #setwd(system.file("rmd_template", package = "ForSysXR"))
+  save.image (file = paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
+
+  #rmarkdown::render("testing_2.Rmd")
+
+
+
+
+
+  cat("Generating htlm report")
+  setwd(path_with_results)
+  #suppressWarnings(suppressMessages(generate_report()))
+  capture.output(suppressWarnings(suppressMessages(generate_report(output_file=paste("report_",last_name,".html",sep="")))))
+
+  #clean-up unecessary files
+  file.remove(paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
+  suppressWarnings(rm(list = ls()[grep("commands_given_print", ls())], envir = globalenv()))
+  suppressWarnings(rm(list = ls()[grep("last_name", ls())], envir = globalenv()))
+  suppressWarnings(rm(list = ls()[grep("plot_attainment_per_project", ls())], envir = globalenv()))
+  suppressWarnings(rm(list = ls()[grep("plot_attainment_per_project_cum", ls())], envir = globalenv()))
+  suppressWarnings(rm(list = ls()[grep("plot_perc_treated_constraint_in_proj", ls())], envir = globalenv()))
+  suppressWarnings(rm(list = ls()[grep("plot_treated_constraint", ls())], envir = globalenv()))
+
+  #rm(commands_given_print)
+
+
+  #AQUI REMOVER OS STANDS E PROJS!
+  if(load_results==FALSE){
+    suppressWarnings(rm(list = ls()[grep("prj_results", ls())], envir = globalenv()))
+    #rm(list = ls()[grep("last_name", ls())], envir = globalenv())
+
+  }
+}
+
+  }
 
 

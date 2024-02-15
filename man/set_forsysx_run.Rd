@@ -38,6 +38,7 @@ set_forsysx_run(
   overwrite_data = FALSE,
   plot_results = FALSE,
   load_results = FALSE,
+  build_report = FALSE,
   exe_path
 )
 }
@@ -103,6 +104,8 @@ set_forsysx_run(
 \item{plot_results}{Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE}
 
 \item{load_results}{Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE}
+
+\item{build_report}{Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
 
