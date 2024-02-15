@@ -9,7 +9,7 @@
 ForSys was developed by the Forest Service Rocky Mountain Research Station to provide a platform for prioritizing risk reduction and restoration investments using spatial optimization methods that are widely used in conservation planning and the forest industry.  The development of ForSys was motivated by gaps in decision support tools for rendering the growing number of Forest Service land condition assessments into optimized project areas as part of prioritization and planning efforts. ForSys is designed around the concept that restoration and risk reduction activities occur at the stand polygon scale (1-20 ha; 2.5 – 50 acres) that need to be organized into project areas (5,000 – 25,000 acres) to achieve landscape-scale management goals and meet logistical and administrative constraints. ForSys solves typical spatial planning problems where treatments are allocated to optimize one or more restoration objectives accounting for multiple hierarchical spatial constraints and treatment thresholds. ForSys integrates forest landscape planning, spatial optimization, and the science and literature on scenario analyses that emphasize the importance of examining large arrays of management scenarios and considering uncertain future disturbances. ForSys has been applied to prioritization projects at a range of scales, including sub-watershed projects, national forests, regions, and the entire national forest network.
 
 
-This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program.
+The ForSysXR package allows the user to set and run ForSysX from R using Windows batch files and DLL wrappers. This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program.
 
 More detailed information can be obtained from the full [ForSysX manual](https://github.com/forsys-sp/forsysr). 
 Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) a publicly available R package ([ForSysR](https://github.com/forsys-sp/forsysr)), and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
@@ -49,7 +49,7 @@ remotes::install_github("forsys-sp/ForSysXR")
 
 After installing the ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
-[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist_2023-11-16.zip).
+[here](https://github.com/forsys-sp/ForSysXR/raw/main/ForSysXDLLDist_2023-11-16.zip).
 This step is crucial as it downloads the ForSysX executable that will later
 be run from R.
 
@@ -265,7 +265,7 @@ projects and ranks them in order of their priority. Projects can be
 either predefined units (e.g., watersheds) or can be built dynamically.
 
 The example below sets a simple *ForSysX* run. It uses the stands_data shown above to delineate the top 50 ha
-within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each.
+within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each. The constraints are set as a vector, where the first element is the constraint field, the second element is the constraint value and the third is the constraint slack.
 
 
 ``` r
@@ -286,9 +286,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
                  output_adjacency_matrix = my_output_folder,
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
                  output_xml = paste(my_output_folder,"tutorial_objective1.xml",sep="/"),
@@ -343,9 +341,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
                  adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
                  output_xml = paste(my_output_folder,"run_tutorial_threshold_2.xml",sep="/"),
@@ -406,9 +402,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  max_number_projects = 10,
                  max_project_diameter=1000,
                  adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
                  output_xml = paste(my_output_folder,"run_tutorial_two_thresholds.xml",sep="/"),
@@ -440,9 +434,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  max_number_projects = 10,
                  max_project_diameter=1000,
                  adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
                  output_xml = paste(my_output_folder,"run_tutorial_two_thresholds_or.xml",sep="/"),
@@ -475,9 +467,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  max_number_projects = 10,
                  max_project_diameter=1000,
                  adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
                  output_xml = paste(my_output_folder,"run_tutorial_two_thresholds_multiple_value.xml",sep="/"),
@@ -544,9 +534,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
                  output_adjacency_matrix = my_output_folder,
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
                  output_xml = paste(my_output_folder,"tutorial_objective1.xml",sep="/"),
@@ -624,9 +612,7 @@ set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_norma
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
                  adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
-                 constraints_name = "Area_ha",
-                 constraints_value = "50",
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1_PCP","obj_2_PCP","obj_3_PCP"),
                  objectives = c("obj_1_SPM","Treat","1","1","1",
                                 "obj_2_SPM","Treat","1","1","1",
@@ -732,9 +718,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  y_coordinate = "Y_Coord",
                  max_number_projects = 3,
                  adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
-                 constraints_name = "Area_ha",
-                 constraints_value = 50,
-                 constraints_slack = "1.00",
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
                  output_xml = paste(my_output_folder,"test_tutorial_subunits.xml",sep="/"),
@@ -867,9 +851,7 @@ for(i in 1:3){
                    y_coordinate = "Point_Y",
                    max_number_projects = 1,
                    output_adjacency_matrix = "C:/Users/ForSysXR/temp_folder_shp",
-                   constraints_name = "area_ha",
-                   constraints_value = 500,
-                   constraints_slack = "1.00",
+                   constraints = c("Area_ha", 500, 1.00),
                    effect_fields = c("ob2_PCP"),
                    objectives = c("ob2_SPM","Treat","1","1","1"),
                    output_xml = paste("C:/Users/ForSysXR/temp_folder_shp/test_tutorial_zones_",i,".xml",sep=""),
@@ -999,4 +981,4 @@ contains information on the *forsys* package.
 
 If you have any questions about the *ForSysXR* package or suggestions for
 improving it, please [post an issue on the code
-repository](https://github.com/bmaparicio/ForSysXR/issues).
+repository](https://github.com/forsys-sp/ForSysXR/issues).
