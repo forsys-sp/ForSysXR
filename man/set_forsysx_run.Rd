@@ -35,6 +35,7 @@ set_forsysx_run(
   output_xml,
   run_forsysx,
   save_outputs,
+  spatial_optimization = TRUE,
   overwrite_data = FALSE,
   plot_results = FALSE,
   load_results = FALSE,
@@ -98,6 +99,8 @@ set_forsysx_run(
 \item{run_forsysx}{Binary. If 1 will run ForSysX. If 0 will end after saving the XML file}
 
 \item{save_outputs}{Vector with the outputs that must be saved. Options are "shapefile", "stand_csv" and/or "image". At least one output must be saved.}
+
+\item{spatial_optimization}{Logical. If TRUE, then the treatment areas are spatially aggregated into patches (projects) of adjacent stands. If FALSE, then projects are not created and stands are sorted based on their relevance for the objective(s). Default is TRUE.}
 
 \item{overwrite_data}{Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.}
 

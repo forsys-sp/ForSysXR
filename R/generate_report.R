@@ -15,7 +15,7 @@ generate_report <- function(#data,
   ## Get directory of report markdown template
   report_dir <- system.file("rmd_template/testing_2.rmd", package = "ForSysXR")
   ## Render report into html
-  suppressWarnings(render(
+  suppressWarnings(rmarkdown::render(
     input = report_dir,
     output_format = output_format,
     output_file = output_file,

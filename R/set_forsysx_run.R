@@ -7,6 +7,7 @@
 #' @param area Field from input_shapefile containing the area of each stand
 #' @param available Field from input_shapefile containing the available stands
 #' @param exclude_field Field from input_shapefile identifying the stands to be excluded
+#' @param spatial_optimization Logical. If TRUE, then the treatment areas are spatially aggregated into patches (projects) of adjacent stands. If FALSE, then projects are not created and stands are sorted based on their relevance for the objective(s). Default is TRUE.
 #' @param x_coordinate Field from input_shapefile identifying the x coordinate of each stand
 #' @param y_coordinate Field from input_shapefile identifying the y coordinate of each stand
 #' @param seed_stand_percent Percentage of stands that will be used to seed potential projects
@@ -51,7 +52,6 @@ set_forsysx_run <- function(input_shapefile,
                             #load_objective_steps,
                             #step_file,
                             #objective_direction,
-                            #spatial_optimization,
                             x_coordinate,
                             y_coordinate,
                             seed_stand_percent=100,
@@ -81,6 +81,7 @@ set_forsysx_run <- function(input_shapefile,
                             output_xml,
                             run_forsysx,
                             save_outputs,
+                            spatial_optimization=TRUE,
                             overwrite_data=FALSE,
                             plot_results=FALSE,
                             load_results=FALSE,
@@ -280,6 +281,9 @@ set_forsysx_run <- function(input_shapefile,
 
   #Exclude stands
 
+  if (spatial_optimization==TRUE){
+
+
   if (missing(exclude_field)) {
     xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",0,"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
@@ -324,6 +328,53 @@ set_forsysx_run <- function(input_shapefile,
   #new constraints - works with vector now
 
   #constraints <- c("area_ha", 50, "")
+}
+
+
+
+
+  if (spatial_optimization==FALSE){
+
+      xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",0,"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
+
+
+
+    # xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",exclude_stands,"\"",sep=""),unlist(xml_data_use))
+    #
+    # if (exclude_stands == 0) {
+    #   xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
+    # } else {
+    #   xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+    # }
+
+
+
+
+    #load_objective_steps - falta fazer
+    #step_file - falta fazer
+    #objective_direction - falta fazer
+    #spatial_optimization - falta fazer
+
+    xml_data_use <- gsub("Point_X","",unlist(xml_data_use))
+    xml_data_use <- gsub("Point_Y","",unlist(xml_data_use))
+
+
+    xml_data_use <- gsub("my_seed_stand","",unlist(xml_data_use))
+    xml_data_use <- gsub("my_max_diameter","",unlist(xml_data_use))
+    xml_data_use <- gsub("my_project_number","",unlist(xml_data_use))
+
+
+
+    #new constraints - works with vector now
+
+    #constraints <- c("area_ha", 50, "")
+
+    xml_data_use <- gsub("Aggregate=\"1\"","Aggregate=\"0\"",unlist(xml_data_use))
+
+  }
+
+
 
 
 
@@ -1266,17 +1317,17 @@ set_forsysx_run <- function(input_shapefile,
         plot_titles <- reactiveVal(paste("File: ",all_name_output_shiny$names,sep = ""))
 
         # Function to render the current plot
-        output$current_plot <- renderPlot({
+        output$current_plot <- shiny::renderPlot({
           print(plot_data[[current_plot_index()]])
         })
 
         # Function to render the current plot number text
-        output$plot_number <- renderText({
+        output$plot_number <- shiny::renderText({
           paste("Plot", current_plot_index(), "of", length(plot_data))
         })
 
         # Function to render the current plot title
-        output$plot_title <- renderText({
+        output$plot_title <- shiny::renderText({
           plot_titles()[current_plot_index()]
         })
 
@@ -1382,7 +1433,7 @@ if(build_report==TRUE){
 
     plot_attainment_per_project <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
       geom_line(linewidth=1)+
-      scale_x_continuous(breaks = 1:10)+
+      scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
       xlab("Project number")+
       ylab("Objective attainment")+
       labs(color = "Effect name",tag="a)")+
@@ -1400,7 +1451,7 @@ if(build_report==TRUE){
 
     plot_attainment_per_project_cum <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
       geom_line(linewidth=1)+
-      scale_x_continuous(breaks = 1:10)+
+      scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
       xlab("Project number")+
       ylab("Cumulative objective attainment")+
       labs(color = "Effect name",tag="b)")+
@@ -2011,7 +2062,7 @@ if(build_report==TRUE){
 
         plot_treated_constraint <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
           geom_line(linewidth=1)+
-          scale_x_continuous(breaks = 1:10)+
+          scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Treated constraint")+
           labs(color = "Constraint name")+
@@ -2023,7 +2074,7 @@ if(build_report==TRUE){
 
         plot_perc_treated_constraint_in_proj <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
           geom_line(linewidth=1)+
-          scale_x_continuous(breaks = 1:10)+
+          scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Proportion of constraint treated and total constraint inside project (%)")+
           labs(color = "Constraint name")+
@@ -2075,6 +2126,8 @@ if(build_report==TRUE){
           #load the _Results
           prj_results <- read.csv(paste(path_with_results,"/",last_name,"_Results.csv",sep=""))
 
+          #names(prj_results)[names(prj_results) == 'ProjectNum'] <- 'ProjectNumber'
+
           #exclude this file from the output_csv_run
           exclude_this_file_csv <- paste(last_name,"_Results.csv",sep="")
 
@@ -2117,7 +2170,7 @@ if(build_report==TRUE){
 
           plot_attainment_per_project1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Objective attainment")+
             labs(color = "Effect name",tag = "a)")+
@@ -2135,7 +2188,7 @@ if(build_report==TRUE){
 
           plot_attainment_per_project_cum1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Cumulative objective attainment")+
             labs(color = "Effect name",tag = "a)")+
@@ -2182,7 +2235,7 @@ if(build_report==TRUE){
 
           plot_attainment_per_project2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Objective attainment")+
             labs(color = "Effect name",tag = "b)")+
@@ -2200,7 +2253,7 @@ if(build_report==TRUE){
 
           plot_attainment_per_project_cum2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Cumulative objective attainment")+
             labs(color = "Effect name",tag = "b)")+
@@ -2251,7 +2304,7 @@ if(build_report==TRUE){
 
           plot_attainment_per_project3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Objective attainment")+
             labs(color = "Effect name",tag = "c)")+
@@ -2269,7 +2322,7 @@ if(build_report==TRUE){
 
           plot_attainment_per_project_cum3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Cumulative objective attainment")+
             labs(color = "Effect name",tag = "c)")+
@@ -2344,7 +2397,7 @@ if(build_report==TRUE){
 
           plot_treated_constraint1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Treated constraint")+
             labs(color = "Constraint name",tag = "a)")+
@@ -2356,7 +2409,7 @@ if(build_report==TRUE){
 
           plot_perc_treated_constraint_in_proj1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Proportion of constraint treated and total constraint inside project (%)")+
             labs(color = "Constraint name",tag = "a)")+
@@ -2398,7 +2451,7 @@ if(build_report==TRUE){
 
           plot_treated_constraint2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Treated constraint")+
             labs(color = "Constraint name",tag = "b)")+
@@ -2410,7 +2463,7 @@ if(build_report==TRUE){
 
           plot_perc_treated_constraint_in_proj2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Proportion of constraint treated and total constraint inside project (%)")+
             labs(color = "Constraint name",tag = "b)")+
@@ -2451,7 +2504,7 @@ if(build_report==TRUE){
 
           plot_treated_constraint3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Treated constraint")+
             labs(color = "Constraint name",tag = "c)")+
@@ -2463,7 +2516,7 @@ if(build_report==TRUE){
 
           plot_perc_treated_constraint_in_proj3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
             geom_line(linewidth=1)+
-            scale_x_continuous(breaks = 1:10)+
+            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Proportion of constraint treated and total constraint inside project (%)")+
             labs(color = "Constraint name",tag = "c)")+
