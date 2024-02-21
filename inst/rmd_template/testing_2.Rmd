@@ -98,7 +98,7 @@ The figure below shows the location of the projects created, color-codded by the
 
 
 ```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig1, sep=" ")}
-my_plot_projects_report
+suppressWarnings(print(my_plot_projects_report))
 ```
 
 
@@ -111,7 +111,7 @@ The figures below show the attainment per project (top) and the cumulative attai
 is of particular interest when the effect is showed as PCP.
   
 ```{r, echo=FALSE, fig.cap=paste("Figure 2.", attainment_fig_constraint1, sep=" "),fig.height = 10,  fig.align = "center"}
-plot_attainment_per_project_ggarranged
+suppressWarnings(print(plot_attainment_per_project_ggarranged))
 
 ```
 
@@ -121,7 +121,7 @@ plot_attainment_per_project_ggarranged
 ### Amount of constraint treated
 
 ```{r, echo=FALSE, fig.cap=paste("Figure 4.", caption_fig_constraint1, sep=" "),fig.height = 10,  fig.align = "center"}
-plot_treated_constraint_in_proj_ggarrange
+suppressWarnings(print(plot_treated_constraint_in_proj_ggarrange))
 
 ```
 
@@ -157,3 +157,9 @@ interpretation of any of the ForSys family products.
 If you found any error or issue, please open a new issue [here](https://github.com/forsys-sp/ForSysXR/issues) and provide a replicable example of your data and run settings.
 
 For further support please contact Michelle Day: michelle.day@usda.gov
+
+```{r}
+(rm(list = ls()[grep("attainment_fig_constraint1", ls())], envir = globalenv()))
+    (rm(list = ls()[grep("caption_fig_constraint1", ls())], envir = globalenv()))
+    (rm(list = ls()[grep("caption_fig1", ls())], envir = globalenv()))
+```

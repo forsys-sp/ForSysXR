@@ -1302,25 +1302,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_attainment_per_project <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+        plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+          geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Objective attainment")+
           labs(color = "Effect name",linetype="Subunit",tag="a)")+
-          theme_classic()
+          theme_classic())))
 
         suppressWarnings(assign("plot_attainment_per_project",plot_attainment_per_project,pos = 1))
 
 
 
-        plot_attainment_per_project_cum <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+          geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Cumulative objective attainment")+
           labs(color = "Effect name",linetype="Subunit",tag="b)")+
-          theme_classic()
+          theme_classic())))
 
         suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
 
@@ -1345,26 +1347,28 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_attainment_per_project <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+        plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+          geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Objective attainment")+
           labs(color = "Effect name",tag="a)")+
-          theme_classic()
+          theme_classic())))
 
         suppressWarnings(assign("plot_attainment_per_project",plot_attainment_per_project,pos = 1))
 
 
 
 
-        plot_attainment_per_project_cum <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+          geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Cumulative objective attainment")+
           labs(color = "Effect name",tag="b)")+
-          theme_classic()
+          theme_classic())))
 
         suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
 
@@ -2032,25 +2036,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
   }
-        plot_treated_constraint <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+        plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+          geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Treated constraint")+
           labs(color = "Constraint name",linetype="Subunit")+
-          theme_classic()
+          theme_classic())))
 
         suppressWarnings(assign("plot_treated_constraint",plot_treated_constraint,pos = 1))
 
 
 
-        plot_perc_treated_constraint_in_proj <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+        plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+          geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
           xlab("Project number")+
           ylab("Proportion of constraint treated and total constraint inside project (%)")+
           labs(color = "Constraint name",linetype="Subunit")+
-          theme_classic()
+          theme_classic())))
 
         }else{
 
@@ -2074,25 +2080,27 @@ set_forsysx_run <- function(input_shapefile,
       }
 
 
-    plot_treated_constraint <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+    plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+      geom_point()+
       geom_line(linewidth=1)+
       scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
       xlab("Project number")+
       ylab("Treated constraint")+
       labs(color = "Constraint name",linetype="Subunit")+
-      theme_classic()
+      theme_classic())))
 
     suppressWarnings(assign("plot_treated_constraint",plot_treated_constraint,pos = 1))
 
 
 
-    plot_perc_treated_constraint_in_proj <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+    plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+      geom_point()+
       geom_line(linewidth=1)+
       scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
       xlab("Project number")+
       ylab("Proportion of constraint treated and total constraint inside project (%)")+
       labs(color = "Constraint name",linetype="Subunit")+
-      theme_classic()
+      theme_classic())))
 
     }
 
@@ -2200,13 +2208,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Objective attainment")+
         labs(color = "Effect name",linetype="Subunit",tag = "a)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2218,13 +2227,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project_cum1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project_cum1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Cumulative objective attainment")+
         labs(color = "Effect name",linetype="Subunit",tag = "a)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2275,13 +2285,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Objective attainment")+
         labs(color = "Effect name",linetype="Subunit",tag = "b)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2293,13 +2304,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project_cum2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project_cum2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Cumulative objective attainment")+
         labs(color = "Effect name",linetype="Subunit",tag = "b)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2352,13 +2364,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Objective attainment")+
         labs(color = "Effect name",linetype="Subunit",tag = "c)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2370,13 +2383,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project_cum3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project_cum3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Cumulative objective attainment")+
         labs(color = "Effect name",linetype="Subunit",tag = "c)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2460,25 +2474,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_treated_constraint1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+      plot_treated_constraint1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Treated constraint")+
         labs(color = "Constraint name",linetype="Subunit",tag = "a)")+
-        theme_classic()
+        theme_classic())))
 
 
 
 
 
-      plot_perc_treated_constraint_in_proj1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+      plot_perc_treated_constraint_in_proj1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Proportion of constraint treated and total constraint inside project (%)")+
         labs(color = "Constraint name",linetype="Subunit",tag = "a)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2528,25 +2544,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_treated_constraint2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+      plot_treated_constraint2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Treated constraint")+
         labs(color = "Constraint name",linetype="Subunit",tag = "b)")+
-        theme_classic()
+        theme_classic())))
 
 
 
 
 
-      plot_perc_treated_constraint_in_proj2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+      plot_perc_treated_constraint_in_proj2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Proportion of constraint treated and total constraint inside project (%)")+
         labs(color = "Constraint name",linetype="Subunit",tag = "b)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2595,25 +2613,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_treated_constraint3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+      plot_treated_constraint3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Treated constraint")+
         labs(color = "Constraint name",linetype="Subunit",tag = "c)")+
-        theme_classic()
+        theme_classic())))
 
 
 
 
 
-      plot_perc_treated_constraint_in_proj3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+      plot_perc_treated_constraint_in_proj3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+        geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
         xlab("Project number")+
         ylab("Proportion of constraint treated and total constraint inside project (%)")+
         labs(color = "Constraint name",linetype="Subunit",tag = "c)")+
-        theme_classic()
+        theme_classic())))
 
 
 
@@ -2707,13 +2727,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+          plot_attainment_per_project1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Objective attainment")+
             labs(color = "Effect name",tag = "a)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -2725,13 +2746,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project_cum1 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+          plot_attainment_per_project_cum1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Cumulative objective attainment")+
             labs(color = "Effect name",tag = "a)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -2772,13 +2794,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+          plot_attainment_per_project2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Objective attainment")+
             labs(color = "Effect name",tag = "b)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -2790,13 +2813,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project_cum2 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+          plot_attainment_per_project_cum2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Cumulative objective attainment")+
             labs(color = "Effect name",tag = "b)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -2841,13 +2865,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+          plot_attainment_per_project3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Objective attainment")+
             labs(color = "Effect name",tag = "c)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -2859,13 +2884,14 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project_cum3 <- ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+          plot_attainment_per_project_cum3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Cumulative objective attainment")+
             labs(color = "Effect name",tag = "c)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -2934,25 +2960,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_treated_constraint1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+          plot_treated_constraint1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Treated constraint")+
             labs(color = "Constraint name",tag = "a)")+
-            theme_classic()
+            theme_classic())))
 
 
 
 
 
-          plot_perc_treated_constraint_in_proj1 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+          plot_perc_treated_constraint_in_proj1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Proportion of constraint treated and total constraint inside project (%)")+
             labs(color = "Constraint name",tag = "a)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -2988,25 +3016,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_treated_constraint2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+          plot_treated_constraint2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Treated constraint")+
             labs(color = "Constraint name",tag = "b)")+
-            theme_classic()
+            theme_classic())))
 
 
 
 
 
-          plot_perc_treated_constraint_in_proj2 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+          plot_perc_treated_constraint_in_proj2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Proportion of constraint treated and total constraint inside project (%)")+
             labs(color = "Constraint name",tag = "b)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -3041,25 +3071,27 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_treated_constraint3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+          plot_treated_constraint3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Treated constraint")+
             labs(color = "Constraint name",tag = "c)")+
-            theme_classic()
+            theme_classic())))
 
 
 
 
 
-          plot_perc_treated_constraint_in_proj3 <- ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+          plot_perc_treated_constraint_in_proj3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+            geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
             xlab("Project number")+
             ylab("Proportion of constraint treated and total constraint inside project (%)")+
             labs(color = "Constraint name",tag = "c)")+
-            theme_classic()
+            theme_classic())))
 
 
 
@@ -3136,6 +3168,16 @@ set_forsysx_run <- function(input_shapefile,
     suppressWarnings(rm(list = ls()[grep("plot_attainment_per_project_cum", ls())], envir = globalenv()))
     suppressWarnings(rm(list = ls()[grep("plot_perc_treated_constraint_in_proj", ls())], envir = globalenv()))
     suppressWarnings(rm(list = ls()[grep("plot_treated_constraint", ls())], envir = globalenv()))
+
+    suppressWarnings(rm(list = ls()[grep("introduction_table", ls())], envir = globalenv()))
+    suppressWarnings(rm(list = ls()[grep("my_plot_projects_report", ls())], envir = globalenv()))
+
+    (rm(list = ls()[grep("attainment_fig_constraint1", ls())], envir = globalenv()))
+    (rm(list = ls()[grep("caption_fig_constraint1", ls())], envir = globalenv()))
+    (rm(list = ls()[grep("caption_fig1", ls())], envir = globalenv()))
+
+
+
 
     #rm(commands_given_print)
 
