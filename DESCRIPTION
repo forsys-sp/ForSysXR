@@ -8,15 +8,41 @@ Authors@R:
            family = "A. Aparício",
            role = c("aut", "cre"),
            email = "bruno.a.aparicio@gmail.com",),
+        person(given = "Ken",
+           family = "Bunzel",
+           role = c("aut"),
+           email = "kbunzel@kingbirdsoftware.com"),
         person(given = "Alan",
            family = "Ager",
            role = c("aut"),
-           email = "alan.ager@oregonstate.edu")
+           email = "alan.ager@oregonstate.edu"),
+        person(given = "Michelle",
+           family = "Day",
+           role = c("aut"),
+           email = "michelle.day@usda.gov")
     )
-Description: ForSys is a multi-objective spatial prioritization system that was designed to explore how specific investment strategies aimed at improving forest conditions change under a range of management constraints to achieve specific outcomes and understand tradeoffs. ForSysXR package allows to run ForSysX from R, mixing the fast ForSysX algorithm with the flexibility of ForSysR.
+Description: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 Depends: 
     R (>= 2.10)
+Imports:
+    ggplot2 (>= 3.4.4),
+    dplyr (>= 1.1.3),
+    sf (>= 1.0-14),
+    shiny (>= 1.7.5),
+    spdep (>= 1.2-8),
+    stringr (>= 1.5.0),
+    readtext (>= 0.90),
+    ggpubr (>= 0.6.0),
+    rlang (>= 1.1.1),
+    tidyverse (>= 2.0.0),
+    spsUtil (>= 0.2.2),
+    rmarkdown (>= 2.24),
+    rmdformats (>= 1.0.4),
+    knitr (>= 1.43),
+    htmltools (>= 0.5.6),
+    raster (>= 3.6-23)
+    

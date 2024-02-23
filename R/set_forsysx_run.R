@@ -740,6 +740,9 @@ set_forsysx_run <- function(input_shapefile,
 
 
   if(!missing(threshold) & missing(threshold_logic)){
+    #if(length(threshold) !=3){
+    #  stop("Wrong number of elements used in threshold (expected 3 elements). If using multiple thresholds, please specify the threshold_logic.")
+    #}
   total_n_threshold <- base::length(threshold)
   total_n_threshold <- total_n_threshold/3
 
