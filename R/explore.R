@@ -169,46 +169,58 @@ set_forsysx_run <- function(input_shapefile,
 
 
     #plot the thresholds
-    threshold_diss <- my_shp[,paste(threshold_df_final$my_threshold)[1]]
 
-    colnames(threshold_diss)<-c("threshold_field","geometry")
+    for(i in 1:total_n_threshold){
+      threshold_diss <- my_shp[,paste(threshold_df_final$my_threshold)[i]]
 
-    threshold_diss$bin <- 0
+      colnames(threshold_diss)<-c("threshold_field","geometry")
 
-
-    theshold_command_use <- noquote(paste("threshold_field", noquote(threshold_df_final$my_operator[1]), as.numeric(threshold_df_final$my_value_threshold[1]),sep=" "))
-
+      threshold_diss$bin <- 0
 
 
-    threshold_diss <- within(threshold_diss, bin[eval(parse(text=theshold_command_use))] <- 1)
+      theshold_command_use <- noquote(paste("threshold_field", noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
 
 
 
-    threshold_diss <- threshold_diss %>%
-      group_by(threshold_diss[,3][[1]]) %>%
-      summarise(m = mean(threshold_diss[,3][[1]])) %>%
-      st_cast()
-
-    colnames(threshold_diss)<-c("threshold","m","geometry")
-
-
-    theshold_command_legend_lable <- noquote(paste(noquote(threshold_df_final$my_operator[1]), as.numeric(threshold_df_final$my_value_threshold[1]),sep=" "))
-
-    threshold_plot <- threshold_diss  %>%
-      #mutate_at(c('diss'), ~na_if(., 0)) %>%
-      #st_combine() %>%
-      ggplot() +
-      geom_sf(aes(fill=factor(threshold)),color="black") +
-      #ggtitle("Projects ranking") +
-      theme_void()+
-      theme(plot.title=element_text(hjust=0.5))+
-      #guides(fill="none")+
-      labs(fill=threshold_df_final$my_threshold[1])+
-      scale_fill_manual(values=c("white", "grey80"),
-                        labels=c('0'='Not considered','1'= theshold_command_legend_lable))
+      threshold_diss <- within(threshold_diss, bin[eval(parse(text=theshold_command_use))] <- 1)
 
 
 
+      threshold_diss <- threshold_diss %>%
+        group_by(threshold_diss[,3][[1]]) %>%
+        summarise(m = mean(threshold_diss[,3][[1]])) %>%
+        st_cast()
+
+      colnames(threshold_diss)<-c("threshold","m","geometry")
+
+
+      theshold_command_legend_lable <- noquote(paste(noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
+
+      threshold_plot <- threshold_diss  %>%
+        #mutate_at(c('diss'), ~na_if(., 0)) %>%
+        #st_combine() %>%
+        ggplot() +
+        geom_sf(aes(fill=factor(threshold)),color="black") +
+        #ggtitle("Projects ranking") +
+        theme_void()+
+        theme(plot.title=element_text(hjust=0.5))+
+        #guides(fill="none")+
+        labs(fill=threshold_df_final$my_threshold[1])+
+        scale_fill_manual(values=c("white", "grey80"),
+                          labels=c('0'='Not considered','1'= theshold_command_legend_lable))
+
+
+      suppressWarnings(assign(paste("threshold_plot_",i,sep=""),threshold_plot,pos = 1)) #,pos = 1
+      rm(threshold_plot)
+    }
+
+
+    threshold_plot_1
+    threshold_plot_2
+
+
+
+    #count how many thresholds we have in the environment. Then set the number of cols and rows for ggarrange
 
 
 
