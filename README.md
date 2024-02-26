@@ -1,4 +1,5 @@
 <img src="man/figures/forsys_consortium_logo.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
+
 # ForSysXR
 
 <!--- README.md is generated from README.Rmd. Please edit that file -->
