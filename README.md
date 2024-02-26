@@ -1,8 +1,12 @@
 # ForSysXR
 
-<!--- README.md is generated from README.Rmd. Please edit that file -->
 
 <img src="man/figures/forsys_consortium_logo.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
+
+<!--- README.md is generated from README.Rmd. Please edit that file -->
+
+
+
 
 ## Scenario planning for land management
 
@@ -82,26 +86,25 @@ data(stands_data)
 # show the first rows in the attribute table
 head(stands_data)
 ```
-
-    ## Simple feature collection with 6 features and 10 fields
-    ## Geometry type: POLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: 571829.6 ymin: 4449945 xmax: 577284.2 ymax: 4455392
-    ## Projected CRS: ETRS89 / UTM zone 29N
-    ##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2
-    ## 1        1 2.149784 577104.1 4455304        1     0  649.1051 2.632802
-    ## 2        2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031
-    ## 3        3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908
-    ## 4        4 1.283715 576908.8 4451242        1     0  252.8004 2.378386
-    ## 5        5 1.393932 577108.5 4451299        1     0  269.7420 2.388572
-    ## 6        6 1.077390 574488.3 4452205        1     0  146.1724 2.339832
-    ##   obj_3        threshold                  geometry
-    ## 1 0.0017115583  1.750002 POLYGON ((577284.2 4455239,...
-    ## 2 0.0004543819  1.627590 POLYGON ((571986 4450002, 5...
-    ## 3 0.0008986479  1.996994 POLYGON ((572168.8 4450285,...
-    ## 4 0.0037384391  2.315409 POLYGON ((576948.2 4451149,...
-    ## 5 0.0038692370  2.815383 POLYGON ((577192.4 4451290,...
-    ## 6 0.0020394307  1.976931 POLYGON ((574485.3 4452268,...
+    ##Simple feature collection with 6 features and 11 fields
+    ##Geometry type: POLYGON
+    ##Dimension:     XY
+    ##Bounding box:  xmin: 571829.6 ymin: 4449945 xmax: 577284.2 ymax: 4455392
+    ##Projected CRS: ETRS89 / UTM zone 29N
+    ##    Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2        obj_3 threshold subunit
+    ##1        1 2.149784 577104.1 4455304        1     0  649.1051 2.632802 0.0017115583  1.750002       2
+    ##2        2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031 0.0004543819  1.627590       1
+    ##3        3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908 0.0008986479  1.996994       1
+    ##4        4 1.283715 576908.8 4451242        1     0  252.8004 2.378386 0.0037384391  2.315409       2
+    ##5        5 1.393932 577108.5 4451299        1     0  269.7420 2.388572 0.0038692370  2.815383       2
+    ##6        6 1.077390 574488.3 4452205        1     0  146.1724 2.339832 0.0020394307  1.976931       2
+    ##                    geometry
+    ##1 POLYGON ((577284.2 4455239,...
+    ##2 POLYGON ((571986 4450002, 5...
+    ##3 POLYGON ((572168.8 4450285,...
+    ##4 POLYGON ((576948.2 4451149,...
+    ##5 POLYGON ((577192.4 4451290,...
+    ##6 POLYGON ((574485.3 4452268,...
 
 ``` r
 # plot the treatment units
@@ -269,7 +272,7 @@ within each predefined project based on ‘priority1’. This run defines a tota
 
 
 ``` r
-#To increase the flow of this tutorial, we can start by storing some paths
+#We can start by storing some paths
 #as variables since they will be present in almost all the upcoming exercises.
 
 my_output_folder <- "C:/Users/ForSysXR"
@@ -475,7 +478,7 @@ set_forsysx_run (input_shapefile = stands_data,
                  plot_results=TRUE,
                  exe_path = my_exe_path,
                  threshold=c("threshold",">",2,2,1,
-                             "obj_2",">=",0.5,2,1),
+                             "obj_2",">=",0.5,2.5,2),
                  threshold_logic = c("multiple_value","and"),
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
@@ -580,13 +583,13 @@ normalize_objectives(stands_data,
 ## Bounding box:  xmin: 571404.6 ymin: 4448921 xmax: 579181 ymax: 4456309
 ## Projected CRS: ETRS89 / UTM zone 29N
 ## First 10 features:
-##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2        obj_3 threshold
-##1         1 2.149784 577104.1 4455304        1     0  649.1051 2.632802 0.0017115583  1.750002
-##2         2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031 0.0004543819  1.627590
-##3         3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908 0.0008986479  1.996994
-##4         4 1.283715 576908.8 4451242        1     0  252.8004 2.378386 0.0037384391  2.315409
-##5         5 1.393932 577108.5 4451299        1     0  269.7420 2.388572 0.0038692370  2.815383
-##6         6 1.077390 574488.3 4452205        1     0  146.1724 2.339832 0.0020394307  1.976931
+##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2        obj_3 threshold subunit
+##1         1 2.149784 577104.1 4455304        1     0  649.1051 2.632802 0.0017115583  1.750002       2
+##2         2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031 0.0004543819  1.627590       1
+##3         3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908 0.0008986479  1.996994       1
+##4         4 1.283715 576908.8 4451242        1     0  252.8004 2.378386 0.0037384391  2.315409       2
+##5         5 1.393932 577108.5 4451299        1     0  269.7420 2.388572 0.0038692370  2.815383       2
+##6         6 1.077390 574488.3 4452205        1     0  146.1724 2.339832 0.0020394307  1.976931       2
 ##                         geometry obj_1_SPM obj_2_SPM obj_3_SPM  obj_1_PCP obj_2_PCP   obj_3_PCP
 ##1  POLYGON ((577284.2 4455239,... 25.264164  91.44424  6.847841 0.15205560 0.1149056 0.029964043
 ##2  POLYGON ((571986 4450002, 5... 42.535493  84.08887  1.817954 0.25600530 0.1056631 0.007954809
