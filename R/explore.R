@@ -8,12 +8,12 @@
 #' @param constraints_logic Vector with two elements containing the constraint logic. The first element refers to if a single value should be used for the constraint ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple constraints must be combined, either selecting stands where all constraints are met ("and") or select stands where any of the constraints are met ("or"). Default is c("single_value","and")
 #' @param threshold Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
 #' @param threshold_logic Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")
-#'
+#' @param report_name Name to be used in the html report file
 #' @return
 #' @export
-#'
 #' @examples
-set_forsysx_run <- function(input_shapefile,
+explore <- function(input_shapefile,
+                    report_name,
                             stand_id,
                             #area,
                             #available_for_management, #default is to not have stands with availability info
@@ -40,6 +40,7 @@ set_forsysx_run <- function(input_shapefile,
                             #subunit_field,
                             #master_subunit
 ) {
+
 
   if(class(input_shapefile)[1]=="character"){
     input_shapefile_format <- substrRight(input_shapefile,4)
@@ -70,6 +71,12 @@ set_forsysx_run <- function(input_shapefile,
     }
 
 
+  #study area contour
+  my_shp$dissp <- 1
+  my_shp_diss <- my_shp %>%
+    group_by(dissp) %>%
+    summarise(m = mean(dissp)) %>%
+    st_cast()
 
   #plotting
 
@@ -98,6 +105,44 @@ set_forsysx_run <- function(input_shapefile,
 
 
   suppressWarnings(assign("available_plot",available_plot,pos = 1))
+
+
+  #convert shapefile to WGS84
+  #st_crs(available_diss)
+
+  available_diss$available_cha <- "Available"
+  available_diss <- within(available_diss, available_cha[available == 0] <- 'Not available')
+
+  available_diss <- st_transform(available_diss, crs = 4326)
+  my_shp_diss<- st_transform(my_shp_diss, crs = 4326)
+
+  # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
+  # #palFunc <- (c("white","grey"))
+
+  palFunc <- leaflet::colorFactor(
+    palette = c('grey80', 'white'),
+    domain = available_diss$available_cha
+  )
+
+
+  available_plot_leaflet <- leaflet::leaflet() %>%
+    leaflet::addProviderTiles('Esri.NatGeoWorldMap', leaflet::providerTileOptions(minZoom = 4, maxZoom = 15)) %>%
+    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                         color = 'black', opacity=1,  weight=1, label=NA) %>%
+    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
+                color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
+                highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                group = 'available')%>%
+    leaflet::addLegend(data=available_diss, "topright",
+                       #colors = c('white', 'grey'),
+                       pal = palFunc,
+                       values = ~available_cha ,
+            title = "Availability",
+            labels = c("Not available", "Available"),
+            opacity = 1)
+
+
+  suppressWarnings(assign("available_plot_leaflet",available_plot_leaflet,pos = 1))
 
 
 
@@ -217,11 +262,11 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-    list_threshold_plots = list(ls()[grep("threshold_plot_", ls())])
+    list_threshold_plots <- (ls(envir = .GlobalEnv)[grep("threshold_plot_", ls(envir = .GlobalEnv))])
 
     my_list_final <- list()
     for(k in 1:length(list_threshold_plots)){
-      my_list <- list(get(list_threshold_plots[k]))
+      my_list <- list(get(list_threshold_plots[[k]]))
       my_list_final <- c(my_list_final,my_list)
     }
 
@@ -231,19 +276,19 @@ set_forsysx_run <- function(input_shapefile,
                       ncol = 1,nrow=length(list_threshold_plots),common.legend = FALSE)
 
     suppressWarnings(assign("threshold_final_figure",threshold_final_figure,pos = 1))
-
+    suppressWarnings(assign("n_threshold_plots",length(list_threshold_plots),pos = 1))
 }
 
 
 
   #then plot the combination of what we can treat after the availability and the combination of all thresholds
 
-
+  path_for_rmd <- system.file("rmd_template", package = "ForSysXR")
 
   #check export html document
   save.image (file = paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
 
-  capture.output(suppressWarnings(suppressMessages(generate_report_explore(output_file=paste("report_",last_name,".html",sep="")))))
+  capture.output(suppressWarnings(suppressMessages(generate_report_explore(output_file=paste("explore_",report_name,".html",sep="")))))
 
   file.remove(paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
 

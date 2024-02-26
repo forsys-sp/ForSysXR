@@ -45,5 +45,6 @@ Imports:
     knitr (>= 1.43),
     htmltools (>= 0.5.6),
     raster (>= 3.6-23),
-    pacman (>= 0.5.1)
+    pacman (>= 0.5.1),
+    leaflet (>= 2.2.0)
     

@@ -69,9 +69,12 @@ The following report was generated automatically by the explore function of ForS
 The table below refers to the settings used in the ForSysX run. Note that these values are not captured by the inputs given by the user in the R script, but rather captures the values reported in the Summary text file that is exported by ForSysX. Nevertheless, these values must match the ones inputed by the user. Review them carefully.
   
 
-```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig1, sep=" ")}
-suppressWarnings(print(available_plot))
+
+```{r echo=FALSE, fig.cap=paste("Figure 1.", sep=" ")}
+#suppressWarnings(print(available_plot_leaflet))
+tagList(available_plot_leaflet)
 ```
+
 
 ## Map of projects created
 
@@ -79,14 +82,14 @@ The figure below shows the location of the projects created, color-codded by the
 
 
 
-```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig1, sep=" ")}
+```{r echo=FALSE, fig.cap=paste("Figure 1.", sep=" ")}
 suppressWarnings(print(exclude_plot))
 ```
 
 
 
-```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig1, sep=" ")}
-suppressWarnings(print(threshold_final_figure))
+```{r echo=FALSE, fig.cap=paste("Figure 1.", sep=" "),fig.height = n_threshold_plots*5,  fig.align = "center"}
+if (exists("threshold_final_figure")){suppressWarnings(print(threshold_final_figure))}
 ```
 
 
