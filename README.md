@@ -269,7 +269,7 @@ within each predefined project based on ‘priority1’. This run defines a tota
 
 
 ``` r
-#To increase the flow of this tutorial, we can start by storing some paths
+#We can start by storing some paths
 #as variables since they will be present in almost all the upcoming exercises.
 
 my_output_folder <- "C:/Users/ForSysXR"
