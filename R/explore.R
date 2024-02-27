@@ -172,6 +172,65 @@ explore <- function(input_shapefile,
 
   suppressWarnings(assign("exclude_plot",exclude_plot,pos = 1))
 
+
+
+
+
+  palFunc_exclude <- leaflet::colorFactor(
+    palette = c('grey80', 'white'),
+    domain = exclude_diss$exclude
+  )
+
+
+
+  exclude_diss<- st_transform(exclude_diss, crs = 4326)
+
+  available_plot_leaflet <- leaflet::leaflet() %>%
+    leaflet::addProviderTiles('Esri.NatGeoWorldMap', leaflet::providerTileOptions(minZoom = 4, maxZoom = 15)) %>%
+    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                         color = 'black', opacity=1,  weight=1, label=NA) %>%
+    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
+                         color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
+                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                         group = 'available')%>%
+    leaflet::addLegend(data=available_diss, "topright",
+                       #colors = c('white', 'grey'),
+                       pal = palFunc,
+                       values = ~available_cha ,
+                       title = "Available",
+                       labels = c("No", "Yes"),
+                       group = "available",
+                       opacity = 1)%>%
+
+    leaflet::addPolygons(data = exclude_diss, fillColor = ~palFunc_exclude(exclude), fillOpacity = 0.75,
+                         color = 'black', opacity = 1, weight=0.5, label = ~exclude ,stroke = TRUE,
+                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                         group = 'exclude')%>%
+    leaflet::addLegend(data=exclude_diss, "topright",
+                       #colors = c('white', 'grey'),
+                       pal = palFunc_exclude,
+                       values = ~exclude ,
+                       title = "Exclude",
+                       labels = c("No", "Yes"),
+                       group = "exclude",
+                       opacity = 1) %>%
+
+    leaflet::addLayersControl(overlayGroups = c("available", "exclude"),
+                     options = leaflet::layersControlOptions(collapsed = F))
+
+
+
+
+  suppressWarnings(assign("available_plot_leaflet",available_plot_leaflet,pos = 1))
+
+
+
+
+
+
+
+
+
   #threshold
   #first plot individual thresholds
 
