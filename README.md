@@ -741,7 +741,7 @@ ForSysXR can be used to run predefined XML files. This can be useful to include 
 
 ``` r
 run_forsysx_xml(exe_path = my_exe_path,
-                xml_path = paste(my_output_folder,"run_tutorial_1.xml",sep="/")
+                xml_path = paste(my_output_folder,"tutorial_objective1.xml",sep="/"))
 ``` 
 
 
