@@ -42,6 +42,7 @@ explore <- function(input_shapefile,
 ) {
 
 
+
   if(class(input_shapefile)[1]=="character"){
     input_shapefile_format <- substrRight(input_shapefile,4)
     if(input_shapefile_format!= ".shp")
@@ -110,8 +111,8 @@ explore <- function(input_shapefile,
   #convert shapefile to WGS84
   #st_crs(available_diss)
 
-  available_diss$available_cha <- "Available"
-  available_diss <- within(available_diss, available_cha[available == 0] <- 'Not available')
+  available_diss$available_cha <- "Yes"
+  available_diss <- within(available_diss, available_cha[available == 0] <- 'No')
 
   available_diss <- st_transform(available_diss, crs = 4326)
   my_shp_diss<- st_transform(my_shp_diss, crs = 4326)
@@ -120,29 +121,29 @@ explore <- function(input_shapefile,
   # #palFunc <- (c("white","grey"))
 
   palFunc <- leaflet::colorFactor(
-    palette = c('grey80', 'white'),
+    palette = c('white','grey80'),
     domain = available_diss$available_cha
   )
 
-
-  available_plot_leaflet <- leaflet::leaflet() %>%
-    leaflet::addProviderTiles('Esri.NatGeoWorldMap', leaflet::providerTileOptions(minZoom = 4, maxZoom = 15)) %>%
-    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
-                         color = 'black', opacity=1,  weight=1, label=NA) %>%
-    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
-                color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
-                highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                group = 'available')%>%
-    leaflet::addLegend(data=available_diss, "topright",
-                       #colors = c('white', 'grey'),
-                       pal = palFunc,
-                       values = ~available_cha ,
-            title = "Availability",
-            labels = c("Not available", "Available"),
-            opacity = 1)
-
-
-  suppressWarnings(assign("available_plot_leaflet",available_plot_leaflet,pos = 1))
+#
+#   available_plot_leaflet <- leaflet::leaflet() %>%
+#     leaflet::addProviderTiles('Esri.NatGeoWorldMap', leaflet::providerTileOptions(minZoom = 4, maxZoom = 15)) %>%
+#     leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+#                          color = 'black', opacity=1,  weight=1, label=NA) %>%
+#     leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
+#                 color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
+#                 highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+#                 group = 'available')%>%
+#     leaflet::addLegend(data=available_diss, "topright",
+#                        #colors = c('white', 'grey'),
+#                        pal = palFunc,
+#                        values = ~available_cha ,
+#             title = "Availability",
+#             labels = c("Not available", "Available"),
+#             opacity = 1)
+#
+#
+#   suppressWarnings(assign("available_plot_leaflet",available_plot_leaflet,pos = 1))
 
 
 
@@ -155,6 +156,20 @@ explore <- function(input_shapefile,
     st_cast()
 
   colnames(exclude_diss)<-c("exclude","m","geometry")
+
+  exclude_diss$exclude_cha <- "Yes"
+  exclude_diss <- within(exclude_diss, exclude_cha[exclude == 0] <- 'No')
+
+
+  palFunc_exclude <- leaflet::colorFactor(
+    palette = c('grey80', 'white'),
+    domain = exclude_diss$exclude_cha
+  )
+
+
+
+
+  exclude_diss<- st_transform(exclude_diss, crs = 4326)
 
   exclude_plot <- exclude_diss  %>%
     #mutate_at(c('diss'), ~na_if(., 0)) %>%
@@ -172,56 +187,6 @@ explore <- function(input_shapefile,
 
   suppressWarnings(assign("exclude_plot",exclude_plot,pos = 1))
 
-
-
-
-
-  palFunc_exclude <- leaflet::colorFactor(
-    palette = c('grey80', 'white'),
-    domain = exclude_diss$exclude
-  )
-
-
-
-  exclude_diss<- st_transform(exclude_diss, crs = 4326)
-
-  available_plot_leaflet <- leaflet::leaflet() %>%
-    leaflet::addProviderTiles('Esri.NatGeoWorldMap', leaflet::providerTileOptions(minZoom = 4, maxZoom = 15)) %>%
-    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
-                         color = 'black', opacity=1,  weight=1, label=NA) %>%
-    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
-                         color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
-                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                         group = 'available')%>%
-    leaflet::addLegend(data=available_diss, "topright",
-                       #colors = c('white', 'grey'),
-                       pal = palFunc,
-                       values = ~available_cha ,
-                       title = "Available",
-                       labels = c("No", "Yes"),
-                       group = "available",
-                       opacity = 1)%>%
-
-    leaflet::addPolygons(data = exclude_diss, fillColor = ~palFunc_exclude(exclude), fillOpacity = 0.75,
-                         color = 'black', opacity = 1, weight=0.5, label = ~exclude ,stroke = TRUE,
-                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                         group = 'exclude')%>%
-    leaflet::addLegend(data=exclude_diss, "topright",
-                       #colors = c('white', 'grey'),
-                       pal = palFunc_exclude,
-                       values = ~exclude ,
-                       title = "Exclude",
-                       labels = c("No", "Yes"),
-                       group = "exclude",
-                       opacity = 1) %>%
-
-    leaflet::addLayersControl(overlayGroups = c("available", "exclude"),
-                     options = leaflet::layersControlOptions(collapsed = F))
-
-
-
-
-  suppressWarnings(assign("available_plot_leaflet",available_plot_leaflet,pos = 1))
 
 
 
@@ -292,6 +257,9 @@ explore <- function(input_shapefile,
 
       colnames(threshold_diss)<-c("threshold","m","geometry")
 
+      threshold_diss <- st_transform(threshold_diss, crs = 4326)
+
+
 
       theshold_command_legend_lable <- noquote(paste(noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
 
@@ -306,10 +274,11 @@ explore <- function(input_shapefile,
         #guides(fill="none")+
         labs(fill=threshold_df_final$my_threshold[1])+
         scale_fill_manual(values=c("white", "grey80"),
-                          labels=c('0'='Not considered','1'= theshold_command_legend_lable))
+                          labels=c('0'='Not considered','1'= paste(threshold_df_final$my_threshold[i],theshold_command_legend_lable,sep=" ")))
 
 
       suppressWarnings(assign(paste("threshold_plot_",i,sep=""),threshold_plot,pos = 1)) #,pos = 1
+      suppressWarnings(assign(paste("threshold_diss_",i,sep=""),threshold_diss,pos = 1)) #,pos = 1
       rm(threshold_plot)
     }
 
@@ -337,6 +306,222 @@ explore <- function(input_shapefile,
     suppressWarnings(assign("threshold_final_figure",threshold_final_figure,pos = 1))
     suppressWarnings(assign("n_threshold_plots",length(list_threshold_plots),pos = 1))
 }
+
+
+
+
+  list_threshold_diss_used <- (ls(envir = .GlobalEnv)[grep("threshold_diss_", ls(envir = .GlobalEnv))])
+
+
+
+  threshold_diss
+
+  threshold_df_final
+
+
+
+  #suppressWarnings(rm(list = ls()[grep("threshold", ls())], envir = globalenv()))
+
+
+
+
+  available_plot_leaflet <- if(length(list_threshold_diss_used)==1){
+
+
+    palFunc_threshold <- leaflet::colorFactor(
+      palette = c('grey80', 'white'),
+      domain = threshold_diss_1$threshold
+    )
+
+
+    leaflet::leaflet() %>%
+    leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                         color = 'black', opacity=1,  weight=1, label=NA) %>%
+    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
+                         color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
+                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                         group = 'available')%>%
+    leaflet::addLegend(data=available_diss, "topright",
+                       #colors = c('white', 'grey'),
+                       pal = palFunc,
+                       values = ~available_cha ,
+                       title = "Available",
+                       labels = c("No", "Yes"),
+                       group = "available",
+                       opacity = 1)%>%
+
+    leaflet::addPolygons(data = exclude_diss, fillColor = ~palFunc_exclude(exclude_cha), fillOpacity = 0.75,
+                         color = 'black', opacity = 1, weight=0.5, label = ~exclude_cha ,stroke = TRUE,
+                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                         group = 'exclude')%>%
+    leaflet::addLegend(data=exclude_diss, "topright",
+                       #colors = c('white', 'grey'),
+                       pal = palFunc_exclude,
+                       values = ~exclude_cha ,
+                       title = "Exclude",
+                       labels = c("No", "Yes"),
+                       group = "exclude",
+                       opacity = 1) %>%
+
+
+
+
+
+
+    #threshold
+
+      leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold), fillOpacity = 0.75,
+                           color = 'black', opacity = 1, weight=0.5, label = ~threshold ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'threshold_diss_1')%>%
+      leaflet::addLegend(data=exclude_diss, "topright",
+                         #colors = c('white', 'grey'),
+                         pal = palFunc_threshold,
+                         values = ~threshold ,
+                         title = "Threshold",
+                         labels = c("No", "Yes"),
+                         group = "threshold_diss_1",
+                         opacity = 1)%>%
+
+
+      leaflet::addLayersControl(overlayGroups = c("available", "exclude","threshold_diss_1"),
+                                options = leaflet::layersControlOptions(collapsed = F)) %>%
+
+      leaflet::hideGroup(c("available","exclude","threshold_diss_1"))}
+
+
+
+
+
+
+
+
+
+  if(length(list_threshold_diss_used)==2){
+
+
+    threshold_diss_1$threshold_original <- "Non-threshold-compliant"
+    threshold_diss_1 <- within(threshold_diss_1, threshold_original[threshold == 0] <- paste(threshold_df_final$my_operator[1],threshold_df_final$my_value_threshold[1],sep=" "))
+
+
+    threshold_diss_2$threshold_original <- "Non-threshold-compliant"
+    threshold_diss_2 <- within(threshold_diss_2, threshold_original[threshold == 0] <- paste(threshold_df_final$my_operator[2],threshold_df_final$my_value_threshold[2],sep=" "))
+
+
+
+    palFunc_threshold <- leaflet::colorFactor(
+      palette = c('grey80', 'white'),
+      domain = threshold_diss_1$threshold_original
+    )
+
+
+
+    palFunc_threshold2 <- leaflet::colorFactor(
+      palette = c('grey80', 'white'),
+      domain = threshold_diss_2$threshold_original
+    )
+
+
+
+
+
+
+    available_plot_leaflet <- leaflet::leaflet() %>%
+      leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+      leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                           color = 'black', opacity=1,  weight=1, label=NA) %>%
+      leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
+                           color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'available')%>%
+      leaflet::addLegend(data=available_diss, "topright",
+                         #colors = c('white', 'grey'),
+                         pal = palFunc,
+                         values = ~available_cha ,
+                         title = "Available",
+                         labels = c("No", "Yes"),
+                         group = "available",
+                         opacity = 1)%>%
+
+      leaflet::addPolygons(data = exclude_diss, fillColor = ~palFunc_exclude(exclude_cha), fillOpacity = 0.75,
+                           color = 'black', opacity = 1, weight=0.5, label = ~exclude_cha ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'exclude')%>%
+      leaflet::addLegend(data=exclude_diss, "topright",
+                         #colors = c('white', 'grey'),
+                         pal = palFunc_exclude,
+                         values = ~exclude_cha ,
+                         title = "Exclude",
+                         labels = c("No", "Yes"),
+                         group = "exclude",
+                         opacity = 1) %>%
+
+    leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold_original), fillOpacity = 0.75,
+                         color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
+                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                         group = 'threshold_diss_1')%>%
+      leaflet::addLegend(data=exclude_diss, "topright",
+                         #colors = c('white', 'grey'),
+                         pal = palFunc_threshold,
+                         values = ~threshold_diss_1$threshold_original ,
+                         title = threshold_df_final$my_threshold[1],
+                         labels = c("No", "Yes"),
+                         group = "threshold_diss_1",
+                         opacity = 1)%>%
+
+
+      leaflet::addPolygons(data = threshold_diss_2, fillColor = ~palFunc_threshold2(threshold_original), fillOpacity = 0.75,
+                           color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'threshold_diss_2')%>%
+      leaflet::addLegend(data=exclude_diss, "topright",
+                         #colors = c('white', 'grey'),
+                         pal = palFunc_threshold2,
+                         values = ~threshold_diss_2$threshold_original ,
+                         title = threshold_df_final$my_threshold[2],
+                         labels = c("No", "Yes"),
+                         group = "threshold_diss_2",
+                         opacity = 1)%>%
+
+
+      leaflet::addLayersControl(overlayGroups = c("available", "exclude","threshold_diss_1","threshold_diss_2"),
+                                options = leaflet::layersControlOptions(collapsed = F)) %>%
+
+      leaflet::hideGroup(c("available","exclude","threshold_diss_1","threshold_diss_2"))}
+
+
+
+  #
+  #
+  #   available_plot_leaflet<-  leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap', 'Esri.WorldImagery', 'Esri.WorldTopoMap'),
+  #                      position = "topleft", # Change position to top left
+  #                      #group = "Basemaps",
+  #                      options = leaflet::layersControlOptions(collapsed = F),
+  #                      map = available_plot_leaflet)
+  #
+  #
+
+  suppressWarnings(assign("available_plot_leaflet",available_plot_leaflet,pos = 1))
+
+
+
+
+
+
+
+
+
+
+
 
 
 

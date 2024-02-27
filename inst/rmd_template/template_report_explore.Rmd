@@ -76,6 +76,7 @@ tagList(available_plot_leaflet)
 ```
 
 
+
 ## Map of projects created
 
 The figure below shows the location of the projects created, color-codded by their ranking or priority. The project number 1 has a higher contribution for the objective(s) than project number 2, etc.
