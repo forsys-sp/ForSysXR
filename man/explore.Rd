@@ -8,8 +8,11 @@ explore(
   input_shapefile,
   report_name,
   stand_id,
+  area,
   available,
   exclude_field,
+  land_cover,
+  land_ownership,
   constraints,
   constraints_logic = c("single_value", "and"),
   threshold,
@@ -23,9 +26,15 @@ explore(
 
 \item{stand_id}{Field from input_shapefile containing the unique identifier for individual stands}
 
+\item{area}{Field from input_shapefile containing the area of each stands}
+
 \item{available}{Field from input_shapefile containing the available stands}
 
 \item{exclude_field}{Field from input_shapefile identifying the stands to be excluded}
+
+\item{land_cover}{Field from input_shapefile identifying the land cover in each stand}
+
+\item{land_ownership}{Field from input_shapefile identifying the land ownership in each stand}
 
 \item{constraints}{Vector containing the constraint(s) field, the constraint value (or minimum, maximum and step to be used), and the slack value to be used. The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
