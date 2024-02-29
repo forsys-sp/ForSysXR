@@ -317,8 +317,8 @@ result_table <- read.csv(paste(my_output_folder,"run_tutorial_1_Results.csv",sep
 ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   geom_line()+
   scale_x_continuous(breaks = 1:10)+
-  xlab("Objective attainment")+
-  ylab("Project number")+
+  xlab("Project number")+
+  ylab("Objective attainment")+
   theme_classic()
 ```
 
