@@ -964,10 +964,12 @@ The projects are implemented in sequence. This means that the first project only
 
 
 ## Exporting reports before and after a ForSys run
-
+### Before running ForSys
 It is possible to generate reports to guide the user in both the pre-run and the post-run. First, before running ForSys, it might be useful to explore the users' dataset and intended ForSys parameterization. This allows detection of potential errors in the parameterization by displaying the stands considered for the ForSys run. It can be done using the function explore as follows
 
 ``` r
+setwd(my_output_folder)
+
 explore (input_shapefile = stands_data,
          report_name="test",
          stand_id = "Stand_ID",
@@ -976,10 +978,49 @@ explore (input_shapefile = stands_data,
          exclude_field = "water",
          threshold = c("threshold",">",2,
                         "obj_3","<=",0.005),
-         objectives = c("obj_1","obj_3"),
-         export_static_report = TRUE)
-
+         objectives = c("obj_1","obj_3"))
 ```
+
+This function exports an HTML with live maps. Land ownership and land cover can also be mapped in this function. To do so, one can generate this data as follows
+
+``` r
+#generate land cover
+# Example vector of names
+landuse_vector <- c("Agriculture", "Pine forest", "Eucalyptus", "Water/Urban")
+
+# Populate the data frame with random names
+set.seed(42)
+stands_data$landuse <- sample(landuse_vector, nrow(stands_data), replace = TRUE)
+stands_data <- within(stands_data, landuse[water == 1] <- 'Water/Urban')
+
+#generate land ownership
+landownership_vector <- c("Private", "Public", "County")
+
+# Populate the data frame with random names
+nrow(stands_data)
+
+stands_data$landownership <- "Private"
+
+stands_data <- within(stands_data, landownership[Stand_ID <= 650] <- 'Public')
+stands_data <- within(stands_data, landownership[Stand_ID > 650 & Stand_ID <= 800] <- 'County')
+
+#Now re-run the function explore with these fields
+
+explore (input_shapefile = stands_data,
+         report_name="test",
+         stand_id = "Stand_ID",
+         area = "Area_ha",
+         available = "availuse",
+         exclude_field = "water",
+         threshold = c("threshold",">",2,
+                       "landownership","==","Public"),
+         land_cover = "landuse",
+         land_ownership = "landownership",
+         objectives = c("obj_1","obj_3"))
+```
+### After running ForSys 
+
+
 
 ## Citation
 
