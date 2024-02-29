@@ -964,7 +964,7 @@ The projects are implemented in sequence. This means that the first project only
 
 
 ## Exporting reports before and after a ForSys run
-# Before running ForSys
+### Before running ForSys
 It is possible to generate reports to guide the user in both the pre-run and the post-run. First, before running ForSys, it might be useful to explore the users' dataset and intended ForSys parameterization. This allows detection of potential errors in the parameterization by displaying the stands considered for the ForSys run. It can be done using the function explore as follows
 
 ``` r
@@ -1018,7 +1018,7 @@ explore (input_shapefile = stands_data,
          land_ownership = "landownership",
          objectives = c("obj_1","obj_3"))
 ```
-# After running ForSys 
+### After running ForSys 
 
 
 
