@@ -415,6 +415,9 @@ set_forsysx_run (input_shapefile = stands_data,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
+<img src="man/figures/max_diameter_figure.jpg" width="600" align="center"/>
+
+
 
 ## Using more than one treatment threshold 
 
