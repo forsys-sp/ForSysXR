@@ -387,6 +387,35 @@ plot_1
 As shown in the figure above, only stands above the threshold are targeted for treatments.
 
 
+## Maximum project diameter##
+
+Sometimes projects can grow more than desired due to landscape restrictions, as exemplified above. One way to control how much a project can grow is by setting a maximum project diameter value (in meters). An example is presented below
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_threshold_2_max_diameter",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_threshold_2_max_diameter.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2),
+                 max_project_diameter = 1000,
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+
 ## Using more than one treatment threshold 
 
 It is also possible to define more than one treatment threshold in ForSys. Multiple thresholds can be specified by simply adding more factors to the threshold parameter. Here, we also added the parameter max_project_diameter that sets a maximum diameter for the projects (in meters).
@@ -965,7 +994,7 @@ The projects are implemented in sequence. This means that the first project only
 
 ## Exporting reports before and after a ForSys run
 ### Before running ForSys
-It is possible to generate reports to guide the user in both the pre-run and the post-run. First, before running ForSys, it might be useful to explore the users' dataset and intended ForSys parameterization. This allows detection of potential errors in the parameterization by displaying the stands considered for the ForSys run. It can be done using the function explore as follows
+It is possible to generate reports to guide the user in both the pre-run and the post-run. First, before running ForSys, it might be useful to explore the users' dataset and intended ForSys parameterization. This allows detection of potential errors in the parameterization by displaying the stands considered for the ForSys run. It can be done using the function ```explore``` as follows
 
 ``` r
 setwd(my_output_folder)
@@ -1019,7 +1048,33 @@ explore (input_shapefile = stands_data,
          objectives = c("obj_1","obj_3"))
 ```
 ### After running ForSys 
+The ForSysXR package allows the user to automatically generate a post-ForSys run report with the most typical analysis. This includes plotting the projects, quantifying the attainment of different objectives, and illustrating trade-offs.
+To generate this report, the user has to add the parameter ```build_report = TRUE```
 
+``` r
+set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_normalized.shp",sep="/"),
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_report",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 3,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
+                 effect_fields = c("obj_1_PCP","obj_2_PCP","obj_3_PCP"),
+                 objectives = c("obj_1_SPM","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"test_tutorial_report.xml",sep="/"),
+                 run_forsysx = 1,
+                 #subunit_field = "subunit",
+                 #plot_results=TRUE,
+                 build_report = TRUE,
+                 exe_path = my_exe_path,
+                 save_outputs = c("stand_csv","shapefile","image"),
+                 overwrite_data = TRUE)
+```
 
 
 ## Citation
