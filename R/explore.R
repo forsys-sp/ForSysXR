@@ -7,6 +7,7 @@
 #' @param exclude_field Field from input_shapefile identifying the stands to be excluded
 #' @param land_cover Field from input_shapefile identifying the land cover in each stand
 #' @param land_ownership Field from input_shapefile identifying the land ownership in each stand
+#' @param objectives Vector containing the objective(s) field from input_shapefile
 #' @param constraints Vector containing the constraint(s) field, the constraint value (or minimum, maximum and step to be used), and the slack value to be used. The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
 #' @param constraints_logic Vector with two elements containing the constraint logic. The first element refers to if a single value should be used for the constraint ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple constraints must be combined, either selecting stands where all constraints are met ("and") or select stands where any of the constraints are met ("or"). Default is c("single_value","and")
 #' @param threshold Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
@@ -39,12 +40,14 @@ explore <- function(input_shapefile,
                             constraints,
                             constraints_logic = c("single_value","and"),
                             #effect_fields,
-                            #objectives,
+                            objectives,
                             threshold,
                             threshold_logic = c("single_value","and")#,
                             #subunit_field,
                             #master_subunit
 ) {
+
+
 
 
 
@@ -131,6 +134,7 @@ explore <- function(input_shapefile,
 
     #plot the thresholds
     theshold_command_all <- character()
+    theshold_command_all_legend <- character()
 
     for(i in 1:total_n_threshold){
       threshold_diss <- my_shp[,paste(threshold_df_final$my_threshold)[i]]
@@ -142,7 +146,12 @@ explore <- function(input_shapefile,
 
       theshold_command_use <- noquote(paste("threshold_field", noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
 
+      theshold_command_use_legend <- noquote(paste(noquote(threshold_df_final$my_threshold[i]), noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
+
       theshold_command_all <- c(theshold_command_all,theshold_command_use)
+
+      theshold_command_all_legend <- c(theshold_command_all_legend,theshold_command_use_legend)
+
 
       threshold_diss <- within(threshold_diss, bin[eval(parse(text=theshold_command_use))] <- 1)
 
@@ -212,13 +221,71 @@ explore <- function(input_shapefile,
 }
 
 
-  #threshold_diss
-
-  #threshold_df_final
 
 
+  #same for objectives
 
-  #suppressWarnings(rm(list = ls()[grep("threshold", ls())], envir = globalenv()))
+  if(!missing(objectives)){
+    #if(length(objectives) !=3){
+    #  stop("Wrong number of elements used in objectives (expected 3 elements). If using multiple objectivess, please specify the objectives_logic.")
+    #}
+    total_n_objectives <- base::length(objectives)
+    #total_n_objectives <- total_n_objectives/3
+
+    #integer_val <- total_n_objectives%%1==0
+
+    #integer_val <- decimalplaces(total_n_objectives)
+
+    if(integer_val != 0)
+      stop("Wrong number of arguments when defining the objectives")
+
+    if(total_n_objectives > 6)
+      stop("Maximum number of objectives reached. Maximum number allowd is 6")
+
+
+    objectives_df_final<-data.frame()
+    for (k in 1:total_n_objectives){
+
+      position_objectives <- k
+      my_objectives<-objectives[position_objectives]
+      #my_operator<-objectives[position_objectives+2]
+      #my_value_objectives <- objectives[position_objectives+3]
+
+      #objectives_df <- data.frame(cbind(my_objectives,my_operator,my_value_objectives))
+      objectives_df_final <- rbind(objectives_df_final,my_objectives)
+    }
+
+    colnames(objectives_df_final)<-c("objectives_list")
+
+
+
+    #plot the objectivess
+
+    for(i in 1:total_n_objectives){
+      objectives_diss <- my_shp[,paste(objectives)[i]]
+
+      colnames(objectives_diss)<-c("objectives_field","geometry")
+
+
+      objectives_diss <- st_transform(objectives_diss, crs = 4326)
+
+
+      #suppressWarnings(assign(paste("objectives_plot_",i,sep=""),objectives_plot,pos = 1)) #,pos = 1
+      suppressWarnings(assign(paste("objectives_diss_",i,sep=""),objectives_diss,pos = 1)) #,pos = 1
+      #rm(objectives_plot)
+    }
+
+
+
+
+    #count how many objectivess we have in the environment. Then set the number of cols and rows for ggarrange
+
+
+
+
+
+    list_objectives_diss_used <- (ls(envir = .GlobalEnv)[grep("objectives_diss_", ls(envir = .GlobalEnv))])
+  }
 
 
 
@@ -229,6 +296,8 @@ explore <- function(input_shapefile,
 
 
   ###new plot test######
+
+  total_area <- sum(my_shp[,paste(area)][[1]])
 
   all_groups_leaflet <- character()
 
@@ -289,6 +358,12 @@ explore <- function(input_shapefile,
 
   all_groups_leaflet<-c(all_groups_leaflet,"available")
 
+
+  available_area_sf <- subset(my_shp, get(available)==1)
+  available_area<-sum(available_area_sf[,paste(area)][[1]])
+
+  }else{
+    available_area<-total_area
   }
 
     #
@@ -337,7 +412,14 @@ explore <- function(input_shapefile,
 
     all_groups_leaflet<-c(all_groups_leaflet,"exclude")
 
+
+    not_exclude_area_sf <- subset(my_shp, get(exclude_field)==0)
+    not_exclude_area<-sum(not_exclude_area_sf[,paste(area)][[1]])
+  }else{
+    not_exclude_area<-total_area
   }
+
+
 
 
 
@@ -362,7 +444,7 @@ explore <- function(input_shapefile,
                            color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
                            highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
                            group = 'threshold_diss_1')%>%
-        leaflet::addLegend(data=exclude_diss, "topright",
+        leaflet::addLegend(data=threshold_diss_1, "topright",
                            #colors = c('white', 'grey'),
                            pal = palFunc_threshold,
                            values = ~threshold_diss_1$threshold_original ,
@@ -437,7 +519,29 @@ explore <- function(input_shapefile,
       }
 
 
+
+    threshold_df_final$area_considered <- 0
+
+    for(e in 1:nrow(threshold_df_final)){
+      threshold_df_loop_table <- threshold_df_final[e,]
+
+      theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
+
+      threshold_loop_sf <- subset(my_shp, eval(parse(text=theshold_command_use_loop)))
+
+      threshold_loop_area<-sum(threshold_loop_sf[,paste(area)][[1]])
+
+      threshold_df_final$area_considered[e] <- threshold_loop_area
+
+
+    }
+
+
+  }else{
+    threshold_df_final$area_considered <- total_area
   }
+
+
 
 
 
@@ -529,6 +633,189 @@ explore <- function(input_shapefile,
 
 
 
+  if(!missing(objectives)){
+
+    obj_total_landscape_final<-data.frame()
+
+    for(b in 1:length(objectives)){
+      obj1_total_landscape <- my_shp[,c(area,paste(objectives)[b])]
+      obj1_total_landscape <- sum(obj1_total_landscape[,paste(objectives[[b]])][[1]])
+      obj1_total_landscape <- c(obj1_total_landscape,b)
+      obj_total_landscape_final <-rbind(obj_total_landscape_final,obj1_total_landscape)
+    }
+
+    colnames(obj_total_landscape_final)<-c("objective_value","objective_order")
+    obj_total_landscape_final$threshold_order <- 0
+
+
+    #threshold will require more conditionals or a loop. Maybe a loop
+
+      get_objectives_df_avai_excl <- data.frame()
+      #objectives_diss_1$threshold_original <- "Non-threshold-compliant"
+
+      obj1_after_threshold_final <-numeric()
+      get_objectives_df_final <- data.frame()
+
+      for(a in 1:length(objectives)){
+
+      if(!missing(available)){
+        obj1_after_available <- available_area_sf[,c(area,paste(objectives)[a])]
+        obj1_after_available <- sum(obj1_after_available[,paste(objectives)[[a]]][[1]])
+      }else{
+        obj1_after_available <- obj1_total_landscape
+      }
+
+      if(!missing(exclude_field)){
+        obj1_after_exclude <- not_exclude_area_sf[,c(area,paste(objectives)[a])]
+        obj1_after_exclude <- sum(obj1_after_exclude[,paste(objectives)[[a]]][[1]])
+      }else{
+        obj1_after_exclude <- obj1_total_landscape
+      }
+
+
+
+        get_objectives_df_avai_excl <- rbind(get_objectives_df_avai_excl,c(obj1_after_available,obj1_after_exclude,a))
+        colnames(get_objectives_df_avai_excl)<-c("after_only_available","after_only_not_excluded","objective_order")
+
+
+      if(!missing(threshold)){
+
+
+
+        for(r in 1:nrow(threshold_df_final)){
+
+          threshold_df_loop_table <- threshold_df_final[r,]
+
+          theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[r], noquote(threshold_df_final$my_operator[r]), as.numeric(threshold_df_final$my_value_threshold[r]),sep=" "))
+
+          threshold_loop_sf <- subset(my_shp, eval(parse(text=theshold_command_use_loop)))
+
+          obj1_after_threshold <- threshold_loop_sf[,c(area,paste(objectives)[a])]
+          obj1_after_threshold<-sum(obj1_after_threshold[,paste(objectives[[a]])][[1]])
+
+          objective_with_threshold <- c(obj1_after_threshold,a,r)
+
+          #obj1_after_threshold_final <- data.frame(rbind(obj1_after_threshold_final,obj1_after_threshold))
+          #obj1_after_threshold_final<-(cbind(obj1_after_threshold_final,a))
+
+          get_objectives_df_final <- rbind(get_objectives_df_final,objective_with_threshold)
+
+        }
+      }else{
+      get_objectives_df_final <- obj_total_landscape_final
+    }
+}
+    colnames(get_objectives_df_final)<-c("objective_value","objective_order","threshold_order")
+
+
+
+
+
+    if(nrow(objectives_df_final)==1){
+
+
+      palFunc_objective_1 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_1)),
+                                                   objectives_diss_1$objectives_field)
+
+
+      available_plot_leaflet<-available_plot_leaflet %>%
+        leaflet::addPolygons(data = objectives_diss_1, fillColor = ~palFunc_objective_1(objectives_field), fillOpacity = 0.75,
+                             color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'objectives_diss_1')%>%
+        leaflet::addLegend(data=objectives_diss_1, "topright",
+                           #colors = c('white', 'grey'),
+                           pal = palFunc_objective_1,
+                           values = ~objectives_diss_1$objectives_field ,
+                           title = objectives_df_final$objectives_list[1],
+                           labels = c("No", "Yes"),
+                           group = "objectives_diss_1",
+                           opacity = 1)
+
+      all_groups_leaflet<-c(all_groups_leaflet,"objectives_diss_1")
+
+
+    }
+
+
+
+    if(nrow(objectives_df_final)==2){
+
+
+      #objectives_diss_1$threshold_original <- "Non-threshold-compliant"
+
+
+      palFunc_objective_1 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_1)),
+                                                  objectives_diss_1$objectives_field)
+
+
+      palFunc_objective_2 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_2)),
+                                                  objectives_diss_2$objectives_field)
+
+
+
+      available_plot_leaflet<-available_plot_leaflet %>%
+        leaflet::addPolygons(data = objectives_diss_1, fillColor = ~palFunc_objective_1(objectives_field), fillOpacity = 0.75,
+                             color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'objectives_diss_1')%>%
+        leaflet::addLegend(data=objectives_diss_1, "topright",
+                           #colors = c('white', 'grey'),
+                           pal = palFunc_objective_1,
+                           values = ~objectives_diss_1$objectives_field ,
+                           title = objectives_df_final$objectives_list[1],
+                           labels = c("No", "Yes"),
+                           group = "objectives_diss_1",
+                           opacity = 1)%>%
+
+
+        leaflet::addPolygons(data = objectives_diss_2, fillColor = ~palFunc_objective_2(objectives_field), fillOpacity = 0.75,
+                             color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'objectives_diss_2')%>%
+        leaflet::addLegend(data=objectives_diss_2, "topright",
+                           #colors = c('white', 'grey'),
+                           pal = palFunc_objective_2,
+                           values = ~objectives_diss_2$objectives_field ,
+                           title = objectives_df_final$objectives_list[2],
+                           labels = c("No", "Yes"),
+                           group = "objectives_diss_2",
+                           opacity = 1)
+
+
+      all_groups_leaflet<-c(all_groups_leaflet,"objectives_diss_1","objectives_diss_2")
+
+
+
+    }
+
+
+
+    objectives_df_final$objective_value <- 0
+
+    for(e in 1:nrow(objectives_df_final)){
+      objectives_df_loop_table_name <- objectives_df_final$objectives_list[e]
+
+
+      objectives_df_loop_table <- my_shp
+
+      objectives_loop_area<-sum(objectives_df_loop_table[,paste(objectives_df_loop_table_name)][[1]])
+
+      objectives_df_final$objective_value[e] <- objectives_loop_area
+
+
+    }
+
+
+
+  }
+
+
+
+
+
+
+
   available_plot_leaflet<-available_plot_leaflet %>%
         leaflet::addLayersControl(overlayGroups = all_groups_leaflet,
                                   options = leaflet::layersControlOptions(collapsed = F)) %>%
@@ -547,58 +834,26 @@ explore <- function(input_shapefile,
 
   ###tables#####
 
-  #get total area
-
-  total_area <- sum(my_shp[,paste(area)][[1]])
-
-  #get available area
-  available_area_sf <- subset(my_shp, get(available)==1)
-  available_area<-sum(available_area_sf[,paste(area)][[1]])
-
-  #get exclude area
-  if(!missing(exclude_field)){
-  not_exclude_area_sf <- subset(my_shp, get(exclude_field)==0)
-  not_exclude_area<-sum(not_exclude_area_sf[,paste(area)][[1]])
-  }else{
-  not_exclude_area<-total_area
-  }
-
-
-  #get the area that meets the threshold(s)
-  if(!missing(threshold)){
-
-    threshold_df_final$area_considered <- 0
-
-    for(e in 1:nrow(threshold_df_final)){
-      threshold_df_loop_table <- threshold_df_final[e,]
-
-      theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
-
-      threshold_loop_sf <- subset(my_shp, eval(parse(text=theshold_command_use_loop)))
-
-      threshold_loop_area<-sum(threshold_loop_sf[,paste(area)][[1]])
-
-      threshold_df_final$area_considered[e] <- threshold_loop_area
-
-
-    }
-
-
-  }else{
-    threshold_df_final$area_considered <- total_area
-  }
-
 
 
   #get the combination of all
-  if(!missing(available) & !missing(exclude_field)){
-    combination_area_sf <- subset(my_shp, get(available)==1 &
-                                  get(exclude_field)==0)
+
+  combination_area_sf <- my_shp
+
+  if(!missing(objectives)){
+  if(!missing(available)){
+    combination_area_sf <- subset(combination_area_sf, get(available)==1)
+  }
+
+  if(!missing(exclude_field)){
+    combination_area_sf <- subset(combination_area_sf, get(exclude_field)==0)
+  }
+
 
     #threshold part
     if(!missing(threshold)){
-      for(e in 1:nrow(threshold_df)){
-        threshold_df_loop_table <- threshold_df[e,]
+      for(e in 1:nrow(threshold_df_final)){
+        threshold_df_loop_table <- threshold_df_final[e,]
 
         theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
 
@@ -608,9 +863,18 @@ explore <- function(input_shapefile,
     }
 
 
-  }
 
   combination_area <- sum(combination_area_sf[,paste(area)][[1]])
+
+  combination_objective_final <- numeric()
+  for(z in 1:nrow(objectives_df_final)){
+
+
+    combination_objective <- sum(combination_area_sf[,paste(objectives_df_final$objectives_list[z])][[1]])
+
+    combination_objective_final <- c(combination_objective_final,combination_objective)
+  }
+
 
 
   #create a table with the area
@@ -621,11 +885,121 @@ explore <- function(input_shapefile,
 
   area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
   colnames(area_considered_table) <- "Area_considered"
-  row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all,sep=""),"Combination of criteria")
+  row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
 
 
+  name_obj_temp_final<-c("Area_considered")
+
+  for(v in 1:length(combination_objective_final)){
+    area_considered_table$objtemp<-0
+
+    area_considered_table$objtemp[nrow(area_considered_table)] <- combination_objective_final[v]
+    name_obj_temp <- paste(objectives_df_final$objectives_list[v])
+    name_obj_temp_final <- c(name_obj_temp_final,name_obj_temp)
+
+    colnames(area_considered_table)<-name_obj_temp_final
+  }
+
+
+  for(h in 1:length(objectives)){
+    get_objectives_df_avai_excl
+    area_considered_table["Stands total",(h+1)] <- obj_total_landscape_final$objective_value[[h]]
+
+    if(!missing(available)){
+      area_considered_table["Only available",(h+1)] <- get_objectives_df_avai_excl$after_only_available[[h]]
+    }
+
+    if(!missing(exclude_field)){
+      area_considered_table["Only not excluded",(h+1)] <- get_objectives_df_avai_excl$after_only_not_excluded[[h]]
+    }
+
+    if(!missing(threshold)){
+
+      get_objectives_df_final_loop_h <- subset(get_objectives_df_final,objective_order ==h)
+
+      for(w in 1:max(get_objectives_df_final$threshold_order)){
+        get_objectives_df_final_loop <- subset(get_objectives_df_final_loop_h,threshold_order == w)
+
+        area_considered_table[paste("Only", theshold_command_all_legend)[[w]],(h+1)] <- get_objectives_df_final_loop$objective_value
+
+      }
+
+    }
+
+
+
+  }
+
+
+  #get the percentage
+  for(m in 1:ncol(area_considered_table)){
+    perc_loop <- round(area_considered_table[,m]/area_considered_table[1,m]*100,0)
+    val_and_perc_loop <- paste(area_considered_table[,m]," (",perc_loop,")",sep="")
+
+    area_considered_table[,m] <-val_and_perc_loop
+
+  }
 
   suppressWarnings(assign("area_considered_table",area_considered_table,pos = 1))
+
+  }
+
+
+
+
+  if(missing(objectives)){
+    if(!missing(available)){
+      combination_area_sf <- subset(combination_area_sf, get(available)==1)
+    }
+
+    if(!missing(exclude_field)){
+      combination_area_sf <- subset(combination_area_sf, get(exclude_field)==0)
+    }
+
+
+    #threshold part
+    if(!missing(threshold)){
+      for(e in 1:nrow(threshold_df_final)){
+        threshold_df_loop_table <- threshold_df_final[e,]
+
+        theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
+
+        combination_area_sf <- subset(combination_area_sf, eval(parse(text=theshold_command_use_loop)))
+
+      }
+    }
+
+
+
+    combination_area <- sum(combination_area_sf[,paste(area)][[1]])
+
+
+    #create a table with the area
+    final_area_table_report <- data.frame()
+
+
+
+
+    area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
+    colnames(area_considered_table) <- "Area_considered"
+    row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
+
+
+    for(m in 1:ncol(area_considered_table)){
+      perc_loop <- round(area_considered_table[,m]/area_considered_table[1,m]*100,0)
+      val_and_perc_loop <- paste(area_considered_table[,m]," (",perc_loop,")",sep="")
+
+      area_considered_table[,m] <-val_and_perc_loop
+
+    }
+
+
+
+    suppressWarnings(assign("area_considered_table",area_considered_table,pos = 1))
+  }
+
+
+
 
 
 

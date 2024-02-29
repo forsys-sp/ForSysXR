@@ -15,6 +15,7 @@ explore(
   land_ownership,
   constraints,
   constraints_logic = c("single_value", "and"),
+  objectives,
   threshold,
   threshold_logic = c("single_value", "and")
 )
@@ -39,6 +40,8 @@ explore(
 \item{constraints}{Vector containing the constraint(s) field, the constraint value (or minimum, maximum and step to be used), and the slack value to be used. The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
 \item{constraints_logic}{Vector with two elements containing the constraint logic. The first element refers to if a single value should be used for the constraint ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple constraints must be combined, either selecting stands where all constraints are met ("and") or select stands where any of the constraints are met ("or"). Default is c("single_value","and")}
+
+\item{objectives}{Vector containing the objective(s) field from input_shapefile}
 
 \item{threshold}{Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
