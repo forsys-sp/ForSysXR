@@ -963,7 +963,23 @@ As illustrated by the figure above, the restoration projects generated when runn
 The projects are implemented in sequence. This means that the first project only has the limitation imposed in the XML file, while the following projects combine the limitations in the XML with the spatial limitation of including stands that are already part of another project. Hence, only the first project is the same between methods.
 
 
+## Exporting reports before and after a ForSys run
 
+It is possible to generate reports to guide the user in both the pre-run and the post-run. First, before running ForSys, it might be useful to explore the users' dataset and intended ForSys parameterization. This allows detection of potential errors in the parameterization by displaying the stands considered for the ForSys run. It can be done using the function explore as follows
+
+``` r
+explore (input_shapefile = stands_data,
+         report_name="test",
+         stand_id = "Stand_ID",
+         area = "Area_ha",
+         available = "availuse",
+         exclude_field = "water",
+         threshold = c("threshold",">",2,
+                        "obj_3","<=",0.005),
+         objectives = c("obj_1","obj_3"),
+         export_static_report = TRUE)
+
+```
 
 ## Citation
 
