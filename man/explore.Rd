@@ -17,7 +17,8 @@ explore(
   constraints_logic = c("single_value", "and"),
   objectives,
   threshold,
-  threshold_logic = c("single_value", "and")
+  threshold_logic = c("single_value", "and"),
+  export_static_report = FALSE
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ explore(
 \item{threshold}{Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
 \item{threshold_logic}{Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")}
+
+\item{export_static_report}{Logical. If TRUE, then an additional HTML report will be saved with static figures. Default is FALSE}
 }
 \description{
 Explore defined data and ForSysX run before the run

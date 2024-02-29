@@ -70,48 +70,16 @@ The table below refers to the settings used in the ForSysX run. Note that these 
   
 
 
-```{r echo=FALSE, fig.cap=paste("Figure 1.", sep=" ")}
-#suppressWarnings(print(available_plot_leaflet))
-tagList(available_plot_leaflet)
+```{r echo=FALSE}
+suppressWarnings(print(exclude_plot))
 ```
 
 
 
-## Table of considered stands
+## Map of projects created
 
-  
-```{r }
+The figure below shows the location of the projects created, color-codded by their ranking or priority. The project number 1 has a higher contribution for the objective(s) than project number 2, etc.
 
-  collapse_rows_df <- function(df, variable){
-  group_var <- enquo(variable)
-  df %>%
-    group_by(!! group_var) %>%
-    mutate(groupRow = 1:n()) %>%
-    ungroup() %>%
-    mutate(!!quo_name(group_var) := ifelse(groupRow == 1, as.character(!! group_var), "")) %>%
-    select(-c(groupRow))
-  }
-  
-  
-  
-  
-area_considered_table%>%
-    #collapse_rows_df(Parameter)%>%
-    knitr::kable(caption="Table 1. Area and objective values considered in ForSys run when each constraint is accounted individually and all together (last row). The row Stands total (first row) represents the total area or objective in the stand shapefile, ignoring all constaints given. Value between parenthesis represent the percentage of the total")
-  
-  
-  
-```
-
-
-## Map of considered stands in ForSys
-
-The figure below shows the stands considered for treatment in the ForSys run defined by the user. It reflects the availability, exclusion, and threshold fields defined. The figure relates with the area reported in the last row (Combination of criteria) in Table 1.
-
-```{r echo=FALSE, fig.cap=paste("Figure 1.", sep=" ")}
-#suppressWarnings(print(available_plot_leaflet))
-tagList(combination_area_sf_plot_leaflet)
-```
 
 
 

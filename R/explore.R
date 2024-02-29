@@ -13,6 +13,7 @@
 #' @param threshold Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
 #' @param threshold_logic Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")
 #' @param report_name Name to be used in the html report file
+#' @param export_static_report Logical. If TRUE, then an additional HTML report will be saved with static figures. Default is FALSE
 #' @return
 #' @export
 #' @examples
@@ -42,7 +43,8 @@ explore <- function(input_shapefile,
                             #effect_fields,
                             objectives,
                             threshold,
-                            threshold_logic = c("single_value","and")#,
+                            threshold_logic = c("single_value","and"),
+                            export_static_report = FALSE
                             #subunit_field,
                             #master_subunit
 ) {
@@ -333,17 +335,19 @@ explore <- function(input_shapefile,
   available_diss <- st_transform(available_diss, crs = 4326)
   my_shp_diss<- st_transform(my_shp_diss, crs = 4326)
 
+  available_diss<-subset(available_diss,available_cha=="Yes")
+
   # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
   # #palFunc <- (c("white","grey"))
 
   palFunc <- leaflet::colorFactor(
-    palette = c('white','grey80'),
+    palette = c("green"),
     domain = available_diss$available_cha
   )
 
 
   available_plot_leaflet<- available_plot_leaflet %>%
-    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.75,
+    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.5,
                          color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
                          highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
                          group = 'available')%>%
@@ -352,15 +356,37 @@ explore <- function(input_shapefile,
                        pal = palFunc,
                        values = ~available_cha ,
                        title = "Available",
-                       labels = c("No", "Yes"),
+                       labels = c("Yes"),
                        group = "available",
-                       opacity = 1)
+                       opacity = 0.5)
 
   all_groups_leaflet<-c(all_groups_leaflet,"available")
 
 
   available_area_sf <- subset(my_shp, get(available)==1)
   available_area<-sum(available_area_sf[,paste(area)][[1]])
+
+
+  if(export_static_report==TRUE){
+
+    available_plot <- available_diss  %>%
+      #mutate_at(c('diss'), ~na_if(., 0)) %>%
+      #st_combine() %>%
+      ggplot() +
+      geom_sf(aes(fill=factor(available)),color="black") +
+      geom_sf(data=my_shp_diss,fill=NA,color="black") +
+      #ggspatial::annotation_map_tile(zoom = 7) +
+      #ggtitle("Projects ranking") +
+      theme_void()+
+      theme(plot.title=element_text(hjust=0.5))+
+      #guides(fill="none")+
+      labs(fill='Availability')+
+      scale_fill_manual(values=c("lightgreen"),
+                        labels=c('1'= 'Available'))
+
+
+    suppressWarnings(assign("available_plot",available_plot,pos = 1))
+  }
 
   }else{
     available_area<-total_area
@@ -384,8 +410,10 @@ explore <- function(input_shapefile,
     exclude_diss <- within(exclude_diss, exclude_cha[exclude == 0] <- 'No')
 
 
+    exclude_diss<-subset(exclude_diss,exclude_cha=="No")
+
     palFunc_exclude <- leaflet::colorFactor(
-      palette = c('grey80', 'white'),
+      palette = c("green"),
       domain = exclude_diss$exclude_cha
     )
 
@@ -396,7 +424,7 @@ explore <- function(input_shapefile,
 
 
     available_plot_leaflet<- available_plot_leaflet %>%
-      leaflet::addPolygons(data = exclude_diss, fillColor = ~palFunc_exclude(exclude_cha), fillOpacity = 0.75,
+      leaflet::addPolygons(data = exclude_diss, fillColor = ~palFunc_exclude(exclude_cha), fillOpacity = 0.5,
                          color = 'black', opacity = 1, weight=0.5, label = ~exclude_cha ,stroke = TRUE,
                          highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
                          group = 'exclude')%>%
@@ -405,9 +433,9 @@ explore <- function(input_shapefile,
                          pal = palFunc_exclude,
                          values = ~exclude_cha ,
                          title = "Exclude",
-                         labels = c("No", "Yes"),
+                         labels = c("No"),
                          group = "exclude",
-                         opacity = 1)
+                         opacity = 0.5)
 
 
     all_groups_leaflet<-c(all_groups_leaflet,"exclude")
@@ -415,6 +443,52 @@ explore <- function(input_shapefile,
 
     not_exclude_area_sf <- subset(my_shp, get(exclude_field)==0)
     not_exclude_area<-sum(not_exclude_area_sf[,paste(area)][[1]])
+
+
+    if(export_static_report==TRUE){
+
+      available_plot <- available_diss  %>%
+        #mutate_at(c('diss'), ~na_if(., 0)) %>%
+        #st_combine() %>%
+        ggplot() +
+        geom_sf(aes(fill=factor(available)),color="black") +
+        geom_sf(data=my_shp_diss,fill=NA,color="black") +
+        #ggspatial::annotation_map_tile(zoom = 7) +
+        #ggtitle("Projects ranking") +
+        theme_void()+
+        theme(plot.title=element_text(hjust=0.5))+
+        #guides(fill="none")+
+        labs(fill='Availability')+
+        scale_fill_manual(values=c("lightgreen"),
+                          labels=c('1'= 'Available'))
+
+
+      suppressWarnings(assign("available_plot",available_plot,pos = 1))
+
+
+
+
+      exclude_plot <- exclude_diss  %>%
+        #mutate_at(c('diss'), ~na_if(., 0)) %>%
+        #st_combine() %>%
+        ggplot() +
+        geom_sf(aes(fill=factor(exclude)),color="black") +
+        geom_sf(data=my_shp_diss,fill=NA,color="black") +
+        #ggtitle("Projects ranking") +
+        theme_void()+
+        theme(plot.title=element_text(hjust=0.5))+
+        #guides(fill="none")+
+        labs(fill='Exclusion')+
+        scale_fill_manual(values=c("lightgreen"),
+                          labels=c('0'='Not exclude'))
+
+
+      suppressWarnings(assign("exclude_plot",exclude_plot,pos = 1))
+
+
+    }
+
+
   }else{
     not_exclude_area<-total_area
   }
@@ -432,15 +506,17 @@ explore <- function(input_shapefile,
       threshold_diss_1 <- within(threshold_diss_1, threshold_original[threshold == 1] <- paste(threshold_df_final$my_operator[1],threshold_df_final$my_value_threshold[1],sep=" "))
 
 
+      threshold_diss_1<-subset(threshold_diss_1,threshold==1)
+
       palFunc_threshold <- leaflet::colorFactor(
-        palette = c('grey80', 'white'),
+        palette = c("green"),
         domain = threshold_diss_1$threshold_original
       )
 
 
 
       available_plot_leaflet<-available_plot_leaflet %>%
-        leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold_original), fillOpacity = 0.75,
+        leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold_original), fillOpacity = 0.5,
                            color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
                            highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
                            group = 'threshold_diss_1')%>%
@@ -449,9 +525,9 @@ explore <- function(input_shapefile,
                            pal = palFunc_threshold,
                            values = ~threshold_diss_1$threshold_original ,
                            title = threshold_df_final$my_threshold[1],
-                           labels = c("No", "Yes"),
+                           labels = c("Yes"),
                            group = "threshold_diss_1",
-                           opacity = 1)
+                           opacity = 0.5)
 
       all_groups_leaflet<-c(all_groups_leaflet,"threshold_diss_1")
 
@@ -470,22 +546,24 @@ explore <- function(input_shapefile,
       threshold_diss_2 <- within(threshold_diss_2, threshold_original[threshold == 1] <- paste(threshold_df_final$my_operator[2],threshold_df_final$my_value_threshold[2],sep=" "))
 
 
+      threshold_diss_1<-subset(threshold_diss_1,threshold==1)
+      threshold_diss_2<-subset(threshold_diss_2,threshold==1)
 
       palFunc_threshold <- leaflet::colorFactor(
-        palette = c('grey80', 'white'),
+        palette = c("green"),
         domain = threshold_diss_1$threshold_original
       )
 
 
 
       palFunc_threshold2 <- leaflet::colorFactor(
-        palette = c('grey80', 'white'),
+        palette = c("green"),
         domain = threshold_diss_2$threshold_original
       )
 
 
       available_plot_leaflet<-available_plot_leaflet %>%
-        leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold_original), fillOpacity = 0.75,
+        leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold_original), fillOpacity = 0.5,
                                                    color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
                                                    highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
                                                    group = 'threshold_diss_1')%>%
@@ -494,12 +572,12 @@ explore <- function(input_shapefile,
                            pal = palFunc_threshold,
                            values = ~threshold_diss_1$threshold_original ,
                            title = threshold_df_final$my_threshold[1],
-                           labels = c("No", "Yes"),
+                           labels = c("Yes"),
                            group = "threshold_diss_1",
-                           opacity = 1)%>%
+                           opacity = 0.5)%>%
 
 
-        leaflet::addPolygons(data = threshold_diss_2, fillColor = ~palFunc_threshold2(threshold_original), fillOpacity = 0.75,
+        leaflet::addPolygons(data = threshold_diss_2, fillColor = ~palFunc_threshold2(threshold_original), fillOpacity = 0.5,
                              color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
                              highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
                              group = 'threshold_diss_2')%>%
@@ -508,9 +586,9 @@ explore <- function(input_shapefile,
                            pal = palFunc_threshold2,
                            values = ~threshold_diss_2$threshold_original ,
                            title = threshold_df_final$my_threshold[2],
-                           labels = c("No", "Yes"),
+                           labels = c("Yes"),
                            group = "threshold_diss_2",
-                           opacity = 1)
+                           opacity = 0.5)
 
 
       all_groups_leaflet<-c(all_groups_leaflet,"threshold_diss_1","threshold_diss_2")
@@ -877,6 +955,57 @@ explore <- function(input_shapefile,
 
 
 
+  #export final figure with only considered stands
+
+  combination_area_sf$dissp <- 1
+
+  combination_area_sf_plot <- combination_area_sf %>%
+    group_by(dissp) %>%
+    summarise(m = mean(dissp)) %>%
+    st_cast()
+
+
+  combination_area_sf_plot$considered <- "Yes"
+
+
+  combination_area_sf_plot <- st_transform(combination_area_sf_plot, crs = 4326)
+
+
+  # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
+  # #palFunc <- (c("white","grey"))
+
+  palFunc_considered_final <- leaflet::colorFactor(
+    palette = c('green'),
+    domain = combination_area_sf_plot$considered
+  )
+
+  combination_area_sf_plot_leaflet <- leaflet::leaflet() %>%
+    leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                         color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+    leaflet::addPolygons(data = combination_area_sf_plot, fillColor = ~palFunc_considered_final(considered), fillOpacity = 0.75,
+                         color = 'black', opacity = 1, weight=0.5, label = ~considered ,stroke = TRUE,
+                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                         group = 'considered')%>%
+    leaflet::addLegend(data=combination_area_sf_plot, "topright",
+                       #colors = c('darkolivegreen3'),
+                       pal = palFunc_considered_final,
+                       values = ~considered ,
+                       title = "Considered for ForSys run",
+                       labels = c("Yes"),
+                       group = "considered",
+                       opacity = 1)
+
+
+  suppressWarnings(assign("combination_area_sf_plot_leaflet",combination_area_sf_plot_leaflet,pos = 1))
+
+
+
   #create a table with the area
   final_area_table_report <- data.frame()
 
@@ -1011,6 +1140,11 @@ explore <- function(input_shapefile,
   save.image (file = paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
 
   capture.output(suppressWarnings(suppressMessages(generate_report_explore(output_file=paste("explore_",report_name,".html",sep="")))))
+
+  if(export_static_report==TRUE){
+    capture.output(suppressWarnings(suppressMessages(generate_report_explore_static(output_file=paste("explore_report_",report_name,".html",sep="")))))
+
+  }
 
   file.remove(paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
 
