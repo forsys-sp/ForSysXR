@@ -8,8 +8,6 @@
 #' @param land_cover Field from input_shapefile identifying the land cover in each stand
 #' @param land_ownership Field from input_shapefile identifying the land ownership in each stand
 #' @param objectives Vector containing the objective(s) field from input_shapefile
-#' @param constraints Vector containing the constraint(s) field, the constraint value (or minimum, maximum and step to be used), and the slack value to be used. The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
-#' @param constraints_logic Vector with two elements containing the constraint logic. The first element refers to if a single value should be used for the constraint ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple constraints must be combined, either selecting stands where all constraints are met ("and") or select stands where any of the constraints are met ("or"). Default is c("single_value","and")
 #' @param threshold Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
 #' @param threshold_logic Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")
 #' @param report_name Name to be used in the html report file
@@ -38,8 +36,8 @@ explore <- function(input_shapefile,
                             #constraints_name,
                             #constraints_value,
                             #constraints_slack ="",
-                            constraints,
-                            constraints_logic = c("single_value","and"),
+                            #constraints,
+                            #constraints_logic = c("single_value","and"),
                             #effect_fields,
                             objectives,
                             threshold,
@@ -48,10 +46,6 @@ explore <- function(input_shapefile,
                             #subunit_field,
                             #master_subunit
 ) {
-
-
-
-
 
 
   if(class(input_shapefile)[1]=="character"){
@@ -145,17 +139,31 @@ explore <- function(input_shapefile,
 
       threshold_diss$bin <- 0
 
+      if(suppressWarnings(is.na(as.numeric(threshold_df_final$my_value_threshold[i])))){
+        theshold_command_use <- suppressWarnings(noquote(paste("threshold_field", noquote(threshold_df_final$my_operator[i]),  as.character(threshold_df_final$my_value_threshold[i]),sep=" ")))
+        theshold_command_use_legend <- noquote(paste(noquote(threshold_df_final$my_threshold[i]), noquote(threshold_df_final$my_operator[i]), as.character(threshold_df_final$my_value_threshold[i]),sep=" "))
 
-      theshold_command_use <- noquote(paste("threshold_field", noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
+        #put quoatation marks in last element
+        theshold_command_use <- suppressWarnings(c(noquote(paste("threshold_field", noquote(threshold_df_final$my_operator[i]),sep=" ")),as.character(paste("'",threshold_df_final$my_value_threshold[i],"'",sep=""))))
+        threshold_diss <- within(threshold_diss, bin[eval(parse(text=theshold_command_use))] <- 1)
 
-      theshold_command_use_legend <- noquote(paste(noquote(threshold_df_final$my_threshold[i]), noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
+        theshold_command_legend_lable <- noquote(paste(noquote(threshold_df_final$my_operator[i]), as.character(threshold_df_final$my_value_threshold[i]),sep=" "))
+
+      }else{
+        theshold_command_use <- suppressWarnings(noquote(paste("threshold_field", noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" ")))
+        theshold_command_use_legend <- noquote(paste(noquote(threshold_df_final$my_threshold[i]), noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
+        threshold_diss <- within(threshold_diss, bin[eval(parse(text=theshold_command_use))] <- 1)
+        theshold_command_legend_lable <- noquote(paste(noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
+      }
+
+
 
       theshold_command_all <- c(theshold_command_all,theshold_command_use)
 
       theshold_command_all_legend <- c(theshold_command_all_legend,theshold_command_use_legend)
 
 
-      threshold_diss <- within(threshold_diss, bin[eval(parse(text=theshold_command_use))] <- 1)
+
 
 
 
@@ -170,7 +178,7 @@ explore <- function(input_shapefile,
 
 
 
-      theshold_command_legend_lable <- noquote(paste(noquote(threshold_df_final$my_operator[i]), as.numeric(threshold_df_final$my_value_threshold[i]),sep=" "))
+
 
       threshold_plot <- threshold_diss  %>%
         #mutate_at(c('diss'), ~na_if(., 0)) %>%
@@ -603,7 +611,16 @@ explore <- function(input_shapefile,
     for(e in 1:nrow(threshold_df_final)){
       threshold_df_loop_table <- threshold_df_final[e,]
 
-      theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
+
+      if(suppressWarnings(is.na(as.numeric(threshold_df_final$my_value_threshold[i])))){
+        theshold_command_use_loop <- suppressWarnings(c(noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]),sep=" ")), as.character(paste("'",threshold_df_final$my_value_threshold[e],"'",sep=""))))
+
+
+      }else{
+        theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
+        }
+
+
 
       threshold_loop_sf <- subset(my_shp, eval(parse(text=theshold_command_use_loop)))
 
@@ -764,7 +781,16 @@ explore <- function(input_shapefile,
 
           threshold_df_loop_table <- threshold_df_final[r,]
 
-          theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[r], noquote(threshold_df_final$my_operator[r]), as.numeric(threshold_df_final$my_value_threshold[r]),sep=" "))
+
+
+          if(suppressWarnings(is.na(as.numeric(threshold_df_final$my_value_threshold[i])))){
+            theshold_command_use_loop <- suppressWarnings(c(noquote(paste(threshold_df_final$my_threshold[r], noquote(threshold_df_final$my_operator[r]),sep=" ")), as.character(paste("'",threshold_df_final$my_value_threshold[r],"'",sep=""))))
+
+
+          }else{
+            theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[r], noquote(threshold_df_final$my_operator[r]), as.numeric(threshold_df_final$my_value_threshold[r]),sep=" "))
+          }
+
 
           threshold_loop_sf <- subset(my_shp, eval(parse(text=theshold_command_use_loop)))
 
@@ -933,7 +959,15 @@ explore <- function(input_shapefile,
       for(e in 1:nrow(threshold_df_final)){
         threshold_df_loop_table <- threshold_df_final[e,]
 
-        theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
+
+        if(suppressWarnings(is.na(as.numeric(threshold_df_final$my_value_threshold[i])))){
+          theshold_command_use_loop <- suppressWarnings(c(noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]),sep=" ")), as.character(paste("'",threshold_df_final$my_value_threshold[e],"'",sep=""))))
+
+
+        }else{
+          theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
+        }
+
 
         combination_area_sf <- subset(combination_area_sf, eval(parse(text=theshold_command_use_loop)))
 
@@ -1101,6 +1135,58 @@ explore <- function(input_shapefile,
 
 
     combination_area <- sum(combination_area_sf[,paste(area)][[1]])
+
+
+    #export final figure with only considered stands
+
+    combination_area_sf$dissp <- 1
+
+    combination_area_sf_plot <- combination_area_sf %>%
+      group_by(dissp) %>%
+      summarise(m = mean(dissp)) %>%
+      st_cast()
+
+
+    combination_area_sf_plot$considered <- "Yes"
+
+
+    combination_area_sf_plot <- st_transform(combination_area_sf_plot, crs = 4326)
+
+
+    # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
+    # #palFunc <- (c("white","grey"))
+
+    palFunc_considered_final <- leaflet::colorFactor(
+      palette = c('green'),
+      domain = combination_area_sf_plot$considered
+    )
+
+    combination_area_sf_plot_leaflet <- leaflet::leaflet() %>%
+      leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+      leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                           color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+      leaflet::addPolygons(data = combination_area_sf_plot, fillColor = ~palFunc_considered_final(considered), fillOpacity = 0.75,
+                           color = 'black', opacity = 1, weight=0.5, label = ~considered ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'considered')%>%
+      leaflet::addLegend(data=combination_area_sf_plot, "topright",
+                         #colors = c('darkolivegreen3'),
+                         pal = palFunc_considered_final,
+                         values = ~considered ,
+                         title = "Considered for ForSys run",
+                         labels = c("Yes"),
+                         group = "considered",
+                         opacity = 1)
+
+
+    suppressWarnings(assign("combination_area_sf_plot_leaflet",combination_area_sf_plot_leaflet,pos = 1))
+
+
 
 
     #create a table with the area

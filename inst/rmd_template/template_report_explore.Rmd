@@ -66,7 +66,7 @@ htmltools::img(src = knitr::image_uri(paste(system.file("help/figures", package 
 
 The following report was generated automatically by the explore function of ForSysXR package.
 
-The table below refers to the settings used in the ForSysX run. Note that these values are not captured by the inputs given by the user in the R script, but rather captures the values reported in the Summary text file that is exported by ForSysX. Nevertheless, these values must match the ones inputed by the user. Review them carefully.
+The figure below represents the stands that will be considered for the ForSys run assuming the parameters set by the user. The map is interactive and the user can choose the layer they want to visualize. Multiple layers can be plotted at the same time to allow intrepretation about the considered area after more than one constraint set. Note that the maps are not cumulative. This means the layer only represents the considered stands given a specific parameter, rather than a set of parameters, even when overlaying layers.
   
 
 
@@ -108,7 +108,7 @@ area_considered_table%>%
 
 The figure below shows the stands considered for treatment in the ForSys run defined by the user. It reflects the availability, exclusion, and threshold fields defined. The figure relates with the area reported in the last row (Combination of criteria) in Table 1.
 
-```{r echo=FALSE, fig.cap=paste("Figure 1.", sep=" ")}
+```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 #suppressWarnings(print(available_plot_leaflet))
 tagList(combination_area_sf_plot_leaflet)
 ```
