@@ -1043,7 +1043,8 @@ set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_norma
                  #plot_results=TRUE,
                  build_report = TRUE,
                  exe_path = my_exe_path,
-                 save_outputs = c("stand_csv","shapefile","image"),overwrite_data = TRUE)
+                 save_outputs = c("stand_csv","shapefile","image"),
+                 overwrite_data = TRUE)
 ```
 
 
