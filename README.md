@@ -1020,7 +1020,7 @@ explore (input_shapefile = stands_data,
 ```
 ### After running ForSys 
 The ForSysXR package allows the user to automatically generate a post-ForSys run report with the most typical analysis. This includes plotting the projects, quantifying the attainment of different objectives, and illustrating trade-offs.
-To generate this report, the user has to add the parameter ``` rbuild_report = TRUE```
+To generate this report, the user has to add the parameter ```build_report = TRUE```
 
 ``` r
 set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_normalized.shp",sep="/"),
