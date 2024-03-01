@@ -97,7 +97,7 @@ explore <- function(input_shapefile,
   #first plot individual thresholds
 
   #get the number of thresholds
-
+  threshold_df_final<-data.frame()
   if(!missing(threshold)){
     #if(length(threshold) !=3){
     #  stop("Wrong number of elements used in threshold (expected 3 elements). If using multiple thresholds, please specify the threshold_logic.")
@@ -632,10 +632,10 @@ explore <- function(input_shapefile,
 
     }
 
-
-  }else{
-    threshold_df_final$area_considered <- total_area
-  }
+}
+  # }else{
+  #   threshold_df_final$area_considered <- total_area
+  # }
 
 
 
@@ -973,6 +973,8 @@ explore <- function(input_shapefile,
         combination_area_sf <- subset(combination_area_sf, eval(parse(text=theshold_command_use_loop)))
 
       }
+    }else{
+      threshold_df_final<-data.frame()
     }
 
 
@@ -1047,9 +1049,18 @@ explore <- function(input_shapefile,
 
 
 
-  area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
-  colnames(area_considered_table) <- "Area_considered"
-  row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
+  if(nrow(threshold_df_final)>0){
+    area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
+    colnames(area_considered_table) <- "Area_considered"
+    row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
+
+  }else{
+    area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,combination_area))
+    colnames(area_considered_table) <- "Area_considered"
+    row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded","Combination of criteria")
+  }
+
+
 
 
   name_obj_temp_final<-c("Area_considered")
