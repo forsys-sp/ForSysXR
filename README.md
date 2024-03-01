@@ -317,8 +317,8 @@ result_table <- read.csv(paste(my_output_folder,"run_tutorial_1_Results.csv",sep
 ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   geom_line()+
   scale_x_continuous(breaks = 1:10)+
-  xlab("Objective attainment")+
-  ylab("Project number")+
+  xlab("Project number")+
+  ylab("Objective attainment")+
   theme_classic()
 ```
 
@@ -414,6 +414,9 @@ set_forsysx_run (input_shapefile = stands_data,
                  max_project_diameter = 1000,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
+
+<img src="man/figures/max_diameter_figure.jpg" width="600" align="center"/>
+
 
 
 ## Using more than one treatment threshold 
