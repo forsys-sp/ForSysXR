@@ -48,6 +48,7 @@ explore <- function(input_shapefile,
 ) {
 
 
+
   if(class(input_shapefile)[1]=="character"){
     input_shapefile_format <- substrRight(input_shapefile,4)
     if(input_shapefile_format!= ".shp")
@@ -82,7 +83,7 @@ explore <- function(input_shapefile,
   my_shp_diss <- my_shp %>%
     group_by(dissp) %>%
     summarise(m = mean(dissp)) %>%
-    st_cast()
+    sf::st_cast()
 
   #plotting
 
@@ -311,7 +312,7 @@ explore <- function(input_shapefile,
 
   all_groups_leaflet <- character()
 
-  my_shp_diss <- st_transform(my_shp_diss, crs = 4326)
+  my_shp_diss <- sf::st_transform(my_shp_diss, crs = 4326)
 
   available_plot_leaflet <- leaflet::leaflet() %>%
     leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
@@ -329,7 +330,7 @@ explore <- function(input_shapefile,
   available_diss <- available_diss %>%
     group_by(available_diss[,1][[1]]) %>%
     summarise(m = mean(available_diss[,1][[1]])) %>%
-    st_cast()
+    sf::st_cast()
 
   colnames(available_diss)<-c("available","m","geometry")
 
@@ -340,8 +341,8 @@ explore <- function(input_shapefile,
   available_diss$available_cha <- "Yes"
   available_diss <- within(available_diss, available_cha[available == 0] <- 'No')
 
-  available_diss <- st_transform(available_diss, crs = 4326)
-  my_shp_diss<- st_transform(my_shp_diss, crs = 4326)
+  available_diss <- sf::st_transform(available_diss, crs = 4326)
+  my_shp_diss<- sf::st_transform(my_shp_diss, crs = 4326)
 
   available_diss<-subset(available_diss,available_cha=="Yes")
 
@@ -410,7 +411,7 @@ explore <- function(input_shapefile,
     exclude_diss <- exclude_diss %>%
       group_by(exclude_diss[,1][[1]]) %>%
       summarise(m = mean(exclude_diss[,1][[1]])) %>%
-      st_cast()
+      sf::st_cast()
 
     colnames(exclude_diss)<-c("exclude","m","geometry")
 
@@ -428,7 +429,7 @@ explore <- function(input_shapefile,
 
 
 
-    exclude_diss<- st_transform(exclude_diss, crs = 4326)
+    exclude_diss<- sf::st_transform(exclude_diss, crs = 4326)
 
 
     available_plot_leaflet<- available_plot_leaflet %>%
@@ -1130,6 +1131,10 @@ explore <- function(input_shapefile,
         combination_area_sf <- subset(combination_area_sf, eval(parse(text=theshold_command_use_loop)))
 
       }
+
+
+      }else{
+      threshold_df_final<-data.frame()
     }
 
 
@@ -1192,12 +1197,17 @@ explore <- function(input_shapefile,
     #create a table with the area
     final_area_table_report <- data.frame()
 
+    if(nrow(threshold_df_final)>0){
+      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
+      colnames(area_considered_table) <- "Area_considered"
+      row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
 
+    }else{
+      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,combination_area))
+      colnames(area_considered_table) <- "Area_considered"
+      row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded","Combination of criteria")
+    }
 
-
-    area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
-    colnames(area_considered_table) <- "Area_considered"
-    row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
 
 
     for(m in 1:ncol(area_considered_table)){
