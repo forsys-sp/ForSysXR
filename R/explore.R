@@ -680,6 +680,33 @@ explore <- function(input_shapefile,
     all_groups_leaflet<-c(all_groups_leaflet,"land_cover_diss")
 
 
+
+
+
+    #get data for pie chart
+
+
+    if(!missing(objectives)){
+
+    objectives_per_landuse_df_final <- data.frame(c(unique(my_shp[,paste(land_cover)][[1]])))
+    colnames(objectives_per_landuse_df_final)<-c(land_cover)
+
+    for(c in 1:length(objectives)){
+    objectives_per_landuse_df <- data.frame(my_shp %>%
+      group_by(eval(parse(text=land_cover)))%>%
+      #summarise(total_obj_landuse = sum(noquote(paste(objectives[[c]]))))
+      summarise(total_obj_landuse = sum(eval(parse(text=objectives[[c]])))))
+
+    objectives_per_landuse_df <- objectives_per_landuse_df[,c(1:2)]
+    colnames(objectives_per_landuse_df)<-c(land_cover,objectives[[c]])
+
+
+    objectives_per_landuse_df_final <- dplyr::left_join(objectives_per_landuse_df_final,objectives_per_landuse_df,by=land_cover)
+    }
+
+    }
+
+
   }
 
 
@@ -723,6 +750,29 @@ explore <- function(input_shapefile,
                          opacity = 1)
 
     all_groups_leaflet<-c(all_groups_leaflet,"land_ownership_diss")
+
+
+
+    if(!missing(objectives)){
+
+      objectives_per_landownership_df_final <- data.frame(c(unique(my_shp[,paste(land_ownership)][[1]])))
+      colnames(objectives_per_landownership_df_final)<-c(land_ownership)
+
+      for(c in 1:length(objectives)){
+        objectives_per_landownership_df <- data.frame(my_shp %>%
+                                                  group_by(eval(parse(text=land_ownership)))%>%
+                                                  #summarise(total_obj_landownership = sum(noquote(paste(objectives[[c]]))))
+                                                  summarise(total_obj_landownership = sum(eval(parse(text=objectives[[c]])))))
+
+        objectives_per_landownership_df <- objectives_per_landownership_df[,c(1:2)]
+        colnames(objectives_per_landownership_df)<-c(land_ownership,objectives[[c]])
+
+
+        objectives_per_landownership_df_final <- dplyr::left_join(objectives_per_landownership_df_final,objectives_per_landownership_df,by=land_ownership)
+      }
+
+    }
+
 
   }
 
@@ -992,6 +1042,12 @@ explore <- function(input_shapefile,
 
 
 
+
+
+
+
+
+
   #export final figure with only considered stands
 
   combination_area_sf$dissp <- 1
@@ -1077,7 +1133,7 @@ explore <- function(input_shapefile,
 
 
   for(h in 1:length(objectives)){
-    get_objectives_df_avai_excl
+    #get_objectives_df_avai_excl
     area_considered_table["Stands total",(h+1)] <- obj_total_landscape_final$objective_value[[h]]
 
     if(!missing(available)){
@@ -1105,6 +1161,7 @@ explore <- function(input_shapefile,
 
   }
 
+  area_considered_table_raw <- area_considered_table
 
   #get the percentage
   for(m in 1:ncol(area_considered_table)){
@@ -1117,7 +1174,207 @@ explore <- function(input_shapefile,
 
   suppressWarnings(assign("area_considered_table",area_considered_table,pos = 1))
 
+
+
+
+  #pie chart for landuse and landownership
+
+  if(!missing(land_ownership)){
+
+
+    objectives_per_landownership_selectable_df_final <- data.frame(c(unique(combination_area_sf[,paste(land_ownership)][[1]])))
+    colnames(objectives_per_landownership_selectable_df_final)<-c(land_ownership)
+
+    for(c in 1:length(objectives)){
+      objectives_per_landownership_selectable_df <- data.frame(combination_area_sf %>%
+                                                                 group_by(eval(parse(text=land_ownership)))%>%
+                                                                 #summarise(total_obj_landownership = sum(noquote(paste(objectives[[c]]))))
+                                                                 summarise(total_obj_landownership = sum(eval(parse(text=objectives[[c]])))))
+
+      objectives_per_landownership_selectable_df <- objectives_per_landownership_selectable_df[,c(1:2)]
+      colnames(objectives_per_landownership_selectable_df)<-c(land_ownership,paste("considered_",objectives[[c]],sep=""))
+
+
+      objectives_per_landownership_selectable_df_final <- dplyr::left_join(objectives_per_landownership_selectable_df_final,objectives_per_landownership_selectable_df,by=land_ownership)
+    }
+
+    objectives_per_landownership_df_final<-dplyr::left_join(objectives_per_landownership_df_final,objectives_per_landownership_selectable_df_final,by=land_ownership)
+
+
+    #get as percentage
+    for(c in 1:length(objectives)){
+    objectives_per_landownership_df_final[is.na(objectives_per_landownership_df_final)] <- 0
+
+    objectives_per_landownership_df_final[[paste0("perc_",objectives)[c]]] <- objectives_per_landownership_df_final[,paste(objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
+
+    objectives_per_landownership_df_final[[paste0("perc_considered_",objectives)[c]]] <- objectives_per_landownership_df_final[,paste0("considered_",objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
+}
+
+
+
+    #plots
+
+
+
+
+
+    g <- lapply(1:length(objectives), function(i) {
+
+      ggplot(objectives_per_landownership_df_final,
+             aes_string(x=1, paste("perc_",objectives[i],sep=""),fill=land_ownership)) +
+        geom_bar(width = 1, stat = "identity") + #,color="black"
+        coord_polar("y") +
+        theme_void() +
+        scale_fill_brewer(name="Land ownership", palette="Paired") +
+        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+      #suppressWarnings(assign(paste("landownership_landscape_plot_",i,sep=""),g[i],pos = 1))
+    })
+
+
+
+
+    landownership_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                          ncol = 1,nrow=length(objectives),common.legend = FALSE)
+
+    suppressWarnings(assign("landownership_landscape_ggarrange_plot",landownership_landscape_ggarrange_plot,pos = 1))
+
+
+
+
+
+    #only considered
+
+    #plots
+
+
+    g <- lapply(1:length(objectives), function(i) {
+
+      ggplot(objectives_per_landownership_df_final,
+             aes_string(x=1, paste("perc_considered_",objectives[i],sep=""),fill=land_ownership)) +
+        geom_bar(width = 1, stat = "identity") + #,color="black"
+        coord_polar("y") +
+        theme_void() +
+        scale_fill_brewer(name="Land ownership", palette="Paired") +
+        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+      #suppressWarnings(assign(paste("landownership_considered_plot_",i,sep=""),g[i],pos = 1))
+    })
+
+
+
+
+
+    landownership_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                                ncol = 1,nrow=length(objectives),common.legend = FALSE)
+
+    suppressWarnings(assign("landownership_considered_ggarrange_plot",landownership_considered_ggarrange_plot,pos = 1))
+
+
+
+
   }
+
+
+
+
+  if(!missing(land_cover)){
+
+    objectives_per_landuse_selectable_df_final <- data.frame(c(unique(combination_area_sf[,paste(land_cover)][[1]])))
+    colnames(objectives_per_landuse_selectable_df_final)<-c(land_cover)
+
+    for(c in 1:length(objectives)){
+      objectives_per_landuse_selectable_df <- data.frame(combination_area_sf %>%
+                                                           group_by(eval(parse(text=land_cover)))%>%
+                                                           #summarise(total_obj_landuse = sum(noquote(paste(objectives[[c]]))))
+                                                           summarise(total_obj_landuse = sum(eval(parse(text=objectives[[c]])))))
+
+      objectives_per_landuse_selectable_df <- objectives_per_landuse_selectable_df[,c(1:2)]
+      colnames(objectives_per_landuse_selectable_df)<-c(land_cover,paste("considered_",objectives[[c]],sep=""))
+
+
+      objectives_per_landuse_selectable_df_final <- dplyr::left_join(objectives_per_landuse_selectable_df_final,objectives_per_landuse_selectable_df,by=land_cover)
+    }
+
+    objectives_per_landuse_df_final<-dplyr::left_join(objectives_per_landuse_df_final,objectives_per_landuse_selectable_df_final,by=land_cover)
+
+
+    #get as percentage
+    for(c in 1:length(objectives)){
+    objectives_per_landuse_df_final[is.na(objectives_per_landuse_df_final)] <- 0
+
+    objectives_per_landuse_df_final[[paste0("perc_",objectives)[c]]] <- objectives_per_landuse_df_final[,paste(objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
+
+    objectives_per_landuse_df_final[[paste0("perc_considered_",objectives)[c]]] <- objectives_per_landuse_df_final[,paste0("considered_",objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
+}
+
+
+
+    #do the pie chart - land use
+    g <- lapply(1:length(objectives), function(i) {
+
+      ggplot(objectives_per_landuse_df_final,
+             aes_string(x=1, paste("perc_",objectives[i],sep=""),fill=land_cover)) +
+        geom_bar(width = 1, stat = "identity") + #,color="black"
+        coord_polar("y") +
+        theme_void() +
+        scale_fill_brewer(name="Land use", palette="Paired") +
+        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+      #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
+    })
+
+
+
+
+
+    landuse_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                           ncol = 1,nrow=length(objectives),common.legend = FALSE)
+
+    suppressWarnings(assign("landuse_landscape_ggarrange_plot",landuse_landscape_ggarrange_plot,pos = 1))
+
+
+
+
+    #only considered
+
+
+    g <- lapply(1:length(objectives), function(i) {
+
+      ggplot(objectives_per_landuse_df_final,
+             aes_string(x=1, paste("perc_considered_",objectives[i],sep=""),fill=land_cover)) +
+        geom_bar(width = 1, stat = "identity") + #,color="black"
+        coord_polar("y") +
+        theme_void() +
+        scale_fill_brewer(name="Land use", palette="Paired") +
+        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+      #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
+    })
+
+
+
+
+
+    landuse_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                                 ncol = 1,nrow=length(objectives),common.legend = FALSE)
+
+    suppressWarnings(assign("landuse_considered_ggarrange_plot",landuse_considered_ggarrange_plot,pos = 1))
+
+
+
+  }
+
+
+
+
+
+
+
+
+  }
+
+
 
 
 
@@ -1233,6 +1490,10 @@ explore <- function(input_shapefile,
 
     suppressWarnings(assign("area_considered_table",area_considered_table,pos = 1))
   }
+
+
+
+
 
 
 
