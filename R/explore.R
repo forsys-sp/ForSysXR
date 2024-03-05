@@ -1226,7 +1226,7 @@ explore <- function(input_shapefile,
         coord_polar("y") +
         theme_void() +
         scale_fill_brewer(name="Land ownership", palette="Paired") +
-        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        ggtitle(paste(objectives[i],sep=" "))+
         theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
       #suppressWarnings(assign(paste("landownership_landscape_plot_",i,sep=""),g[i],pos = 1))
     })
@@ -1235,7 +1235,7 @@ explore <- function(input_shapefile,
 
 
     landownership_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                          ncol = 1,nrow=length(objectives),common.legend = FALSE)
+                                                          ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
 
     suppressWarnings(assign("landownership_landscape_ggarrange_plot",landownership_landscape_ggarrange_plot,pos = 1))
 
@@ -1256,7 +1256,7 @@ explore <- function(input_shapefile,
         coord_polar("y") +
         theme_void() +
         scale_fill_brewer(name="Land ownership", palette="Paired") +
-        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        ggtitle(paste(objectives[i],sep=" "))+
         theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
       #suppressWarnings(assign(paste("landownership_considered_plot_",i,sep=""),g[i],pos = 1))
     })
@@ -1266,7 +1266,7 @@ explore <- function(input_shapefile,
 
 
     landownership_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                                ncol = 1,nrow=length(objectives),common.legend = FALSE)
+                                                                ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
 
     suppressWarnings(assign("landownership_considered_ggarrange_plot",landownership_considered_ggarrange_plot,pos = 1))
 
@@ -1319,7 +1319,7 @@ explore <- function(input_shapefile,
         coord_polar("y") +
         theme_void() +
         scale_fill_brewer(name="Land use", palette="Paired") +
-        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        ggtitle(paste(objectives[i],sep=" "))+
         theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
       #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
     })
@@ -1329,7 +1329,7 @@ explore <- function(input_shapefile,
 
 
     landuse_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                           ncol = 1,nrow=length(objectives),common.legend = FALSE)
+                                                           ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
 
     suppressWarnings(assign("landuse_landscape_ggarrange_plot",landuse_landscape_ggarrange_plot,pos = 1))
 
@@ -1347,7 +1347,7 @@ explore <- function(input_shapefile,
         coord_polar("y") +
         theme_void() +
         scale_fill_brewer(name="Land use", palette="Paired") +
-        ggtitle(paste("Distribution of",objectives[c],"per land use type",sep=" "))+
+        ggtitle(paste(objectives[i],sep=" "))+
         theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
       #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
     })
@@ -1357,7 +1357,7 @@ explore <- function(input_shapefile,
 
 
     landuse_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                                 ncol = 1,nrow=length(objectives),common.legend = FALSE)
+                                                                 ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
 
     suppressWarnings(assign("landuse_considered_ggarrange_plot",landuse_considered_ggarrange_plot,pos = 1))
 

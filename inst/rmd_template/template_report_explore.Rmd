@@ -118,7 +118,8 @@ tagList(combination_area_sf_plot_leaflet)
 
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landuse_landscape_ggarrange_plot")){
-suppressWarnings(print(landuse_landscape_ggarrange_plot))  
+#suppressWarnings(print(landuse_landscape_ggarrange_plot))  
+  ggpubr::annotate_figure(print(landuse_landscape_ggarrange_plot), top = ggpubr::text_grob("Distribution of objective(s) per land use type",face = "bold", size = 14))
 }
 
 ```
@@ -126,7 +127,8 @@ suppressWarnings(print(landuse_landscape_ggarrange_plot))
 
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landuse_considered_ggarrange_plot")){
-suppressWarnings(print(landuse_considered_ggarrange_plot))  
+#suppressWarnings(print(landuse_considered_ggarrange_plot))  
+  ggpubr::annotate_figure(print(landuse_considered_ggarrange_plot), top = ggpubr::text_grob("Distribution of objective(s) per land use type considered",face = "bold", size = 14))
 }
 
 ```
@@ -134,7 +136,8 @@ suppressWarnings(print(landuse_considered_ggarrange_plot))
 
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landownership_landscape_ggarrange_plot")){
-suppressWarnings(print(landownership_landscape_ggarrange_plot))  
+#suppressWarnings(print(landownership_landscape_ggarrange_plot))
+  ggpubr::annotate_figure(print(landownership_landscape_ggarrange_plot), top = ggpubr::text_grob("Distribution of objective(s) per land ownership",face = "bold", size = 14))
 }
 
 ```
@@ -143,7 +146,8 @@ suppressWarnings(print(landownership_landscape_ggarrange_plot))
 
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landownership_considered_ggarrange_plot")){
-suppressWarnings(print(landownership_considered_ggarrange_plot))  
+#suppressWarnings(print(landownership_considered_ggarrange_plot))  
+   ggpubr::annotate_figure(print(landownership_considered_ggarrange_plot), top = ggpubr::text_grob("Distribution of objective(s) per land ownership considered",face = "bold", size = 14))
 }
 
 ```
