@@ -10,6 +10,8 @@
 #' @param objectives Vector containing the objective(s) field from input_shapefile
 #' @param threshold Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
 #' @param threshold_logic Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")
+#' @param burn_probability Field from input_shapefile containing the average burn probability
+#' @param flame_length Vector containing the field from input_shapefile with the expected flame length and the units (meters or feet)
 #' @param report_name Name to be used in the html report file
 #' @param export_static_report Logical. If TRUE, then an additional HTML report will be saved with static figures. Default is FALSE
 #' @return
@@ -42,6 +44,8 @@ explore <- function(input_shapefile,
                             objectives,
                             threshold,
                             threshold_logic = c("single_value","and"),
+                            burn_probability,
+                            flame_length,
                             export_static_report = FALSE
                             #subunit_field,
                             #master_subunit
@@ -310,6 +314,32 @@ explore <- function(input_shapefile,
 
   total_area <- sum(my_shp[,paste(area)][[1]])
 
+
+
+  if(!missing(flame_length)){
+    if(flame_length[2]=="feet"){
+      flame_length_unit <- ">= 8"
+    }
+    if(flame_length[2]=="meters"){
+      flame_length_unit <- ">= 2.5"
+    }
+
+    flame_length_logical <- paste(flame_length[1],flame_length_unit,sep=" ")
+    my_shp_above_FL_threshold <- subset(my_shp,eval(parse(text=flame_length_logical)))
+    total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area)][[1]])
+    total_area_above_FL_threshold_perc <- total_area_above_FL_threshold/total_area*100
+
+  }
+
+
+
+  if(!missing(burn_probability)){
+    total_expected_ba_year <- sum(my_shp[,paste(area)][[1]]*my_shp[,paste(burn_probability)][[1]])
+  }
+
+
+
+
   all_groups_leaflet <- character()
 
   my_shp_diss <- sf::st_transform(my_shp_diss, crs = 4326)
@@ -374,6 +404,9 @@ explore <- function(input_shapefile,
 
   available_area_sf <- subset(my_shp, get(available)==1)
   available_area<-sum(available_area_sf[,paste(area)][[1]])
+
+
+
 
 
   if(export_static_report==TRUE){
@@ -998,15 +1031,158 @@ explore <- function(input_shapefile,
   if(!missing(objectives)){
   if(!missing(available)){
     combination_area_sf <- subset(combination_area_sf, get(available)==1)
-  }
+
+    available_area <- sum(combination_area_sf[,paste(area)][[1]])
+
+    if(!missing(flame_length)){
+      #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
+      my_shp_above_FL_threshold_available <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
+      total_above_FL_threshold_available <- sum(my_shp_above_FL_threshold_available[,paste(area)][[1]])
+      total_above_FL_threshold_available_perc <- total_above_FL_threshold_available/total_area*100
+    }else{
+      total_above_FL_threshold_available_perc<-NA
+    }
+
+
+    if(!missing(burn_probability)){
+      total_expected_ba_year_available <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
+    }else{
+      total_expected_ba_year_available<-NA
+    }
+
+
+    get_objectives_df_avai <- data.frame()
+    for(a in 1:length(objectives)){
+
+      if(!missing(available)){
+        obj1_after_available <- combination_area_sf[,c(area,paste(objectives)[a])]
+        obj1_after_available <- sum(obj1_after_available[,paste(objectives)[[a]]][[1]])
+      }else{
+        obj1_after_available <- obj1_total_landscape
+      }
+
+
+      get_objectives_df_avai <- rbind(get_objectives_df_avai,c(obj1_after_available,a))
+      colnames(get_objectives_df_avai)<-c("after_only_available","objective_order")
+
+    }
+
+}
 
   if(!missing(exclude_field)){
     combination_area_sf <- subset(combination_area_sf, get(exclude_field)==0)
+
+    not_exclude_area <- sum(combination_area_sf[,paste(area)][[1]])
+
+
+    if(!missing(flame_length)){
+      #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
+      my_shp_above_FL_threshold_available_exclude <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
+      total_above_FL_threshold_available_exclude <- sum(my_shp_above_FL_threshold_available_exclude[,paste(area)][[1]])
+      total_above_FL_threshold_available_exclude_perc <- total_above_FL_threshold_available_exclude/total_area*100
+    }else{
+      total_above_FL_threshold_available_exclude_perc<-NA
+    }
+
+    if(!missing(burn_probability)){
+      total_expected_ba_year_available_exclude <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
+    }else{
+      total_expected_ba_year_available_exclude<-NA
+    }
+
+    get_objectives_df_avai_excl <- data.frame()
+    for(a in 1:length(objectives)){
+      if(!missing(exclude_field)){
+        obj1_after_exclude <- combination_area_sf[,c(area,paste(objectives)[a])]
+        obj1_after_exclude <- sum(obj1_after_exclude[,paste(objectives)[[a]]][[1]])
+      }else{
+        obj1_after_exclude <- obj1_total_landscape
+      }
+
+      get_objectives_df_avai_excl <- rbind(get_objectives_df_avai_excl,c(obj1_after_exclude,a))
+      colnames(get_objectives_df_avai_excl)<-c("after_only_exclude","objective_order")
+    }
+
+
   }
 
 
     #threshold part
     if(!missing(threshold)){
+
+      total_above_FL_threshold_available_exclude_threshold_perc_df <- numeric()
+      total_expected_ba_year_available_exclude_threshold_df<-numeric()
+      get_objectives_df_avai_excl_threshold <- data.frame()
+      for(e in 1:nrow(threshold_df_final)){
+        threshold_df_loop_table <- threshold_df_final[e,]
+
+
+        if(suppressWarnings(is.na(as.numeric(threshold_df_final$my_value_threshold[i])))){
+          theshold_command_use_loop <- suppressWarnings(c(noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]),sep=" ")), as.character(paste("'",threshold_df_final$my_value_threshold[e],"'",sep=""))))
+
+
+        }else{
+          theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
+        }
+
+
+
+        combination_area_sf <- subset(combination_area_sf, eval(parse(text=theshold_command_use_loop)))
+
+        threshold_loop_area<-sum(combination_area_sf[,paste(area)][[1]])
+
+        threshold_df_final$area_considered[e] <- threshold_loop_area
+
+
+
+        #flame lenght
+
+        if(!missing(flame_length)){
+          #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
+          my_shp_above_FL_threshold_available_exclude_threshold <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
+          total_above_FL_threshold_available_exclude_threshold <- sum(my_shp_above_FL_threshold_available_exclude_threshold[,paste(area)][[1]])
+          total_above_FL_threshold_available_exclude_threshold_perc <- total_above_FL_threshold_available_exclude_threshold/total_area*100
+
+
+          total_above_FL_threshold_available_exclude_threshold_perc_df<-c(total_above_FL_threshold_available_exclude_threshold_perc_df,total_above_FL_threshold_available_exclude_threshold_perc)
+        }else{
+          total_above_FL_threshold_available_exclude_threshold_perc_df<-NA
+        }
+
+
+        if(!missing(burn_probability)){
+          total_expected_ba_year_available_exclude_threshold <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
+          total_expected_ba_year_available_exclude_threshold_df<-c(total_expected_ba_year_available_exclude_threshold_df,total_expected_ba_year_available_exclude_threshold)
+        }else{
+          total_expected_ba_year_available_exclude_threshold_df<-NA
+        }
+
+
+
+
+        for(a in 1:length(objectives)){
+          if(!missing(exclude_field)){
+            obj1_after_threshold <- combination_area_sf[,c(area,paste(objectives)[a])]
+            obj1_after_threshold <- sum(obj1_after_threshold[,paste(objectives)[[a]]][[1]])
+          }else{
+            obj1_after_threshold <- obj1_total_landscape
+          }
+
+          get_objectives_df_avai_excl_threshold <- rbind(get_objectives_df_avai_excl_threshold,c(obj1_after_threshold,a,e))
+          colnames(get_objectives_df_avai_excl_threshold)<-c("objective_value","objective_order","threshold_order")
+        }
+
+
+
+      }
+      #cbind(threshold_df_final[,c(1:3)],total_above_FL_threshold_available_exclude_threshold_perc_df)
+
+
+
+
+
+      ###quizas tenho de tirar esta parte porque esta a calcular a area para os thresholds individuais - a ideia e ter em conjunto####
+      #tirar daqui e meter no loop de cima
       for(e in 1:nrow(threshold_df_final)){
         threshold_df_loop_table <- threshold_df_final[e,]
 
@@ -1098,6 +1274,15 @@ explore <- function(input_shapefile,
   suppressWarnings(assign("combination_area_sf_plot_leaflet",combination_area_sf_plot_leaflet,pos = 1))
 
 
+#
+#   ###flame lenght in table####
+#   if(!missing(flame_length)){
+#     #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
+#     my_shp_above_FL_threshold <- subset(my_shp,eval(parse(text=flame_length_logical)))
+#     total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area)][[1]])
+#     total_area_above_FL_threshold_perc <- total_area_above_FL_threshold/total_area*100
+#
+#   }
 
   #create a table with the area
   final_area_table_report <- data.frame()
@@ -1107,19 +1292,19 @@ explore <- function(input_shapefile,
 
   if(nrow(threshold_df_final)>0){
     area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
-    colnames(area_considered_table) <- "Area_considered"
+    colnames(area_considered_table) <- "Area considered"
     row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
 
   }else{
     area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,combination_area))
-    colnames(area_considered_table) <- "Area_considered"
+    colnames(area_considered_table) <- "Area considered"
     row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded","Combination of criteria")
   }
 
+  area_considered_table$`Area reduction` <- area_considered_table$`Area considered`- total_area
+  area_considered_table$`Residual area (% of total)` <- (total_area + area_considered_table$`Area reduction`)*100/total_area
 
-
-
-  name_obj_temp_final<-c("Area_considered")
+  name_obj_temp_final<-c("Area considered","Area reduction","Residual area (% of total)")
 
   for(v in 1:length(combination_objective_final)){
     area_considered_table$objtemp<-0
@@ -1134,24 +1319,24 @@ explore <- function(input_shapefile,
 
   for(h in 1:length(objectives)){
     #get_objectives_df_avai_excl
-    area_considered_table["Stands total",(h+1)] <- obj_total_landscape_final$objective_value[[h]]
+    area_considered_table["Stands total",(h+3)] <- obj_total_landscape_final$objective_value[[h]]
 
     if(!missing(available)){
-      area_considered_table["Only available",(h+1)] <- get_objectives_df_avai_excl$after_only_available[[h]]
+      area_considered_table["Only available",(h+3)] <- get_objectives_df_avai$after_only_available[[h]]
     }
 
     if(!missing(exclude_field)){
-      area_considered_table["Only not excluded",(h+1)] <- get_objectives_df_avai_excl$after_only_not_excluded[[h]]
+      area_considered_table["Only not excluded",(h+3)] <- get_objectives_df_avai_excl$after_only_exclude[[h]]
     }
 
     if(!missing(threshold)){
+      #
+      get_objectives_df_final_loop_h <- subset(get_objectives_df_avai_excl_threshold,objective_order ==h)
 
-      get_objectives_df_final_loop_h <- subset(get_objectives_df_final,objective_order ==h)
-
-      for(w in 1:max(get_objectives_df_final$threshold_order)){
+      for(w in 1:max(get_objectives_df_avai_excl_threshold$threshold_order)){
         get_objectives_df_final_loop <- subset(get_objectives_df_final_loop_h,threshold_order == w)
 
-        area_considered_table[paste("Only", theshold_command_all_legend)[[w]],(h+1)] <- get_objectives_df_final_loop$objective_value
+        area_considered_table[paste("Only", theshold_command_all_legend)[[w]],(h+3)] <- get_objectives_df_final_loop$objective_value
 
       }
 
@@ -1161,16 +1346,48 @@ explore <- function(input_shapefile,
 
   }
 
+
+  #flame length
+  if(!missing(flame_length)){
+    flame_length_col <- c(total_area_above_FL_threshold_perc,total_above_FL_threshold_available_perc,
+      total_above_FL_threshold_available_exclude_perc,total_above_FL_threshold_available_exclude_threshold_perc_df)
+
+    #exclude NAs
+    flame_length_col <- flame_length_col[!is.na(flame_length_col)]
+
+    ###tirar NA daqui quando arranjar a tabela!#####
+    area_considered_table<-cbind(area_considered_table,c(flame_length_col,NA))
+    names(area_considered_table)[length(names(area_considered_table))]<-"Flame_lenght"
+  }
+
+
+  if(!missing(burn_probability)){
+    burn_probability_col <- c(total_expected_ba_year,total_expected_ba_year_available,
+                              total_expected_ba_year_available_exclude,
+                          total_expected_ba_year_available_exclude_threshold_df)
+
+    #exclude NAs
+    burn_probability_col <- burn_probability_col[!is.na(burn_probability_col)]
+
+    ###tirar NA daqui quando arranjar a tabela!#####
+    area_considered_table<-cbind(area_considered_table,c(burn_probability_col,NA))
+    names(area_considered_table)[length(names(area_considered_table))]<-"Expected fire impacts"
+  }
+
+
   area_considered_table_raw <- area_considered_table
 
+  #get col area considered reduction
+
+
   #get the percentage
-  for(m in 1:ncol(area_considered_table)){
-    perc_loop <- round(area_considered_table[,m]/area_considered_table[1,m]*100,0)
-    val_and_perc_loop <- paste(area_considered_table[,m]," (",perc_loop,")",sep="")
-
-    area_considered_table[,m] <-val_and_perc_loop
-
-  }
+  # for(m in 1:ncol(area_considered_table)){
+  #   perc_loop <- round(area_considered_table[,m]/area_considered_table[1,m]*100,0)
+  #   val_and_perc_loop <- paste(area_considered_table[,m]," (",perc_loop,")",sep="")
+  #
+  #   area_considered_table[,m] <-val_and_perc_loop
+  #
+  # }
 
   suppressWarnings(assign("area_considered_table",area_considered_table,pos = 1))
 
@@ -1367,13 +1584,7 @@ explore <- function(input_shapefile,
 
 
 
-
-
-
-
-
   }
-
 
 
 
@@ -1467,12 +1678,12 @@ explore <- function(input_shapefile,
 
     if(nrow(threshold_df_final)>0){
       area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
-      colnames(area_considered_table) <- "Area_considered"
+      colnames(area_considered_table) <- "Area considered"
       row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
 
     }else{
       area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,combination_area))
-      colnames(area_considered_table) <- "Area_considered"
+      colnames(area_considered_table) <- "Area considered"
       row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded","Combination of criteria")
     }
 

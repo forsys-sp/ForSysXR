@@ -16,6 +16,8 @@ explore(
   objectives,
   threshold,
   threshold_logic = c("single_value", "and"),
+  burn_probability,
+  flame_length,
   export_static_report = FALSE
 )
 }
@@ -41,6 +43,10 @@ explore(
 \item{threshold}{Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
 \item{threshold_logic}{Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")}
+
+\item{burn_probability}{Field from input_shapefile containing the average burn probability}
+
+\item{flame_length}{Vector containing the field from input_shapefile with the expected flame length and the units (meters or feet)}
 
 \item{export_static_report}{Logical. If TRUE, then an additional HTML report will be saved with static figures. Default is FALSE}
 }
