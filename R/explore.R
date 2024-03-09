@@ -19,37 +19,40 @@
 #' @examples
 explore <- function(input_shapefile,
                     report_name,
-                            stand_id,
-                            area,
-                            #available_for_management, #default is to not have stands with availability info
-                            available,
-                            #exclude_stands, #the default is not to have info on exclude in stands
-                            exclude_field,
-                            land_cover,
-                            land_ownership,
-                            #load_objective_steps,
-                            #step_file,
-                            #objective_direction,
-                            #patch_buster,
-                            #weight,
-                            #patch_identifier,
-                            #patchbuster_identifier,
-                            #patchbuster_weight,
-                            #constraints_name,
-                            #constraints_value,
-                            #constraints_slack ="",
-                            #constraints,
-                            #constraints_logic = c("single_value","and"),
-                            #effect_fields,
-                            objectives,
-                            threshold,
-                            threshold_logic = c("single_value","and"),
-                            burn_probability,
-                            flame_length,
-                            export_static_report = FALSE
-                            #subunit_field,
-                            #master_subunit
+                    stand_id,
+                    area,
+                    #available_for_management, #default is to not have stands with availability info
+                    available,
+                    #exclude_stands, #the default is not to have info on exclude in stands
+                    exclude_field,
+                    land_cover,
+                    land_ownership,
+                    #load_objective_steps,
+                    #step_file,
+                    #objective_direction,
+                    #patch_buster,
+                    #weight,
+                    #patch_identifier,
+                    #patchbuster_identifier,
+                    #patchbuster_weight,
+                    #constraints_name,
+                    #constraints_value,
+                    #constraints_slack ="",
+                    #constraints,
+                    #constraints_logic = c("single_value","and"),
+                    #effect_fields,
+                    objectives,
+                    threshold,
+                    threshold_logic = c("single_value","and"),
+                    burn_probability,
+                    flame_length,
+                    export_static_report = FALSE
+                    #subunit_field,
+                    #master_subunit
 ) {
+
+
+
 
 
 
@@ -73,13 +76,13 @@ explore <- function(input_shapefile,
 
   if(class(input_shapefile)[1]=="character"){
 
-      my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
+    my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
 
-      #if(max(nchar(names(my_shp)))>10){
-      #  stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
-      #}
+    #if(max(nchar(names(my_shp)))>10){
+    #  stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
+    #}
 
-    }
+  }
 
 
   #study area contour
@@ -223,7 +226,7 @@ explore <- function(input_shapefile,
 
 
     threshold_final_figure <- ggpubr::ggarrange(plotlist=my_list_final,
-                      ncol = 1,nrow=length(list_threshold_plots),common.legend = FALSE)
+                                                ncol = 1,nrow=length(list_threshold_plots),common.legend = FALSE)
 
     suppressWarnings(assign("threshold_final_figure",threshold_final_figure,pos = 1))
     suppressWarnings(assign("n_threshold_plots",length(list_threshold_plots),pos = 1))
@@ -232,8 +235,8 @@ explore <- function(input_shapefile,
 
 
 
-  list_threshold_diss_used <- (ls(envir = .GlobalEnv)[grep("threshold_diss_", ls(envir = .GlobalEnv))])
-}
+    list_threshold_diss_used <- (ls(envir = .GlobalEnv)[grep("threshold_diss_", ls(envir = .GlobalEnv))])
+  }
 
 
 
@@ -305,7 +308,7 @@ explore <- function(input_shapefile,
 
 
 
-#
+  #
 
 
 
@@ -355,86 +358,86 @@ explore <- function(input_shapefile,
 
 
   if(!missing(available)){
-  available_diss <- my_shp[,paste(available)][1]
+    available_diss <- my_shp[,paste(available)][1]
 
-  available_diss <- available_diss %>%
-    group_by(available_diss[,1][[1]]) %>%
-    summarise(m = mean(available_diss[,1][[1]])) %>%
-    sf::st_cast()
+    available_diss <- available_diss %>%
+      group_by(available_diss[,1][[1]]) %>%
+      summarise(m = mean(available_diss[,1][[1]])) %>%
+      sf::st_cast()
 
-  colnames(available_diss)<-c("available","m","geometry")
-
-
-  #convert shapefile to WGS84
-  #st_crs(available_diss)
-
-  available_diss$available_cha <- "Yes"
-  available_diss <- within(available_diss, available_cha[available == 0] <- 'No')
-
-  available_diss <- sf::st_transform(available_diss, crs = 4326)
-  my_shp_diss<- sf::st_transform(my_shp_diss, crs = 4326)
-
-  available_diss<-subset(available_diss,available_cha=="Yes")
-
-  # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
-  # #palFunc <- (c("white","grey"))
-
-  palFunc <- leaflet::colorFactor(
-    palette = c("green"),
-    domain = available_diss$available_cha
-  )
+    colnames(available_diss)<-c("available","m","geometry")
 
 
-  available_plot_leaflet<- available_plot_leaflet %>%
-    leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.5,
-                         color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
-                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                         group = 'available')%>%
-    leaflet::addLegend(data=available_diss, "topright",
-                       #colors = c('white', 'grey'),
-                       pal = palFunc,
-                       values = ~available_cha ,
-                       title = "Available",
-                       labels = c("Yes"),
-                       group = "available",
-                       opacity = 0.5)
+    #convert shapefile to WGS84
+    #st_crs(available_diss)
 
-  all_groups_leaflet<-c(all_groups_leaflet,"available")
+    available_diss$available_cha <- "Yes"
+    available_diss <- within(available_diss, available_cha[available == 0] <- 'No')
 
+    available_diss <- sf::st_transform(available_diss, crs = 4326)
+    my_shp_diss<- sf::st_transform(my_shp_diss, crs = 4326)
 
-  available_area_sf <- subset(my_shp, get(available)==1)
-  available_area<-sum(available_area_sf[,paste(area)][[1]])
+    available_diss<-subset(available_diss,available_cha=="Yes")
 
+    # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
+    # #palFunc <- (c("white","grey"))
+
+    palFunc <- leaflet::colorFactor(
+      palette = c("green"),
+      domain = available_diss$available_cha
+    )
 
 
+    available_plot_leaflet<- available_plot_leaflet %>%
+      leaflet::addPolygons(data = available_diss, fillColor = ~palFunc(available_cha), fillOpacity = 0.5,
+                           color = 'black', opacity = 1, weight=0.5, label = ~available_cha ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'available')%>%
+      leaflet::addLegend(data=available_diss, "topright",
+                         #colors = c('white', 'grey'),
+                         pal = palFunc,
+                         values = ~available_cha ,
+                         title = "Available",
+                         labels = c("Yes"),
+                         group = "available",
+                         opacity = 0.5)
+
+    all_groups_leaflet<-c(all_groups_leaflet,"available")
 
 
-  if(export_static_report==TRUE){
-
-    available_plot <- available_diss  %>%
-      #mutate_at(c('diss'), ~na_if(., 0)) %>%
-      #st_combine() %>%
-      ggplot() +
-      geom_sf(aes(fill=factor(available)),color="black") +
-      geom_sf(data=my_shp_diss,fill=NA,color="black") +
-      #ggspatial::annotation_map_tile(zoom = 7) +
-      #ggtitle("Projects ranking") +
-      theme_void()+
-      theme(plot.title=element_text(hjust=0.5))+
-      #guides(fill="none")+
-      labs(fill='Availability')+
-      scale_fill_manual(values=c("lightgreen"),
-                        labels=c('1'= 'Available'))
+    available_area_sf <- subset(my_shp, get(available)==1)
+    available_area<-sum(available_area_sf[,paste(area)][[1]])
 
 
-    suppressWarnings(assign("available_plot",available_plot,pos = 1))
   }
 
-  }else{
-    available_area<-total_area
-  }
 
-    #
+  # if(export_static_report==TRUE){
+  #
+  #   available_plot <- available_diss  %>%
+  #     #mutate_at(c('diss'), ~na_if(., 0)) %>%
+  #     #st_combine() %>%
+  #     ggplot() +
+  #     geom_sf(aes(fill=factor(available)),color="black") +
+  #     geom_sf(data=my_shp_diss,fill=NA,color="black") +
+  #     #ggspatial::annotation_map_tile(zoom = 7) +
+  #     #ggtitle("Projects ranking") +
+  #     theme_void()+
+  #     theme(plot.title=element_text(hjust=0.5))+
+  #     #guides(fill="none")+
+  #     labs(fill='Availability')+
+  #     scale_fill_manual(values=c("lightgreen"),
+  #                       labels=c('1'= 'Available'))
+  #
+  #
+  #   suppressWarnings(assign("available_plot",available_plot,pos = 1))
+  # }
+  #
+  # }else{
+  #   available_area<-total_area
+  # }
+
+  #
 
 
 
@@ -467,9 +470,9 @@ explore <- function(input_shapefile,
 
     available_plot_leaflet<- available_plot_leaflet %>%
       leaflet::addPolygons(data = exclude_diss, fillColor = ~palFunc_exclude(exclude_cha), fillOpacity = 0.5,
-                         color = 'black', opacity = 1, weight=0.5, label = ~exclude_cha ,stroke = TRUE,
-                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                         group = 'exclude')%>%
+                           color = 'black', opacity = 1, weight=0.5, label = ~exclude_cha ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'exclude')%>%
       leaflet::addLegend(data=exclude_diss, "topright",
                          #colors = c('white', 'grey'),
                          pal = palFunc_exclude,
@@ -485,55 +488,55 @@ explore <- function(input_shapefile,
 
     not_exclude_area_sf <- subset(my_shp, get(exclude_field)==0)
     not_exclude_area<-sum(not_exclude_area_sf[,paste(area)][[1]])
-
-
-    if(export_static_report==TRUE){
-
-      available_plot <- available_diss  %>%
-        #mutate_at(c('diss'), ~na_if(., 0)) %>%
-        #st_combine() %>%
-        ggplot() +
-        geom_sf(aes(fill=factor(available)),color="black") +
-        geom_sf(data=my_shp_diss,fill=NA,color="black") +
-        #ggspatial::annotation_map_tile(zoom = 7) +
-        #ggtitle("Projects ranking") +
-        theme_void()+
-        theme(plot.title=element_text(hjust=0.5))+
-        #guides(fill="none")+
-        labs(fill='Availability')+
-        scale_fill_manual(values=c("lightgreen"),
-                          labels=c('1'= 'Available'))
-
-
-      suppressWarnings(assign("available_plot",available_plot,pos = 1))
-
-
-
-
-      exclude_plot <- exclude_diss  %>%
-        #mutate_at(c('diss'), ~na_if(., 0)) %>%
-        #st_combine() %>%
-        ggplot() +
-        geom_sf(aes(fill=factor(exclude)),color="black") +
-        geom_sf(data=my_shp_diss,fill=NA,color="black") +
-        #ggtitle("Projects ranking") +
-        theme_void()+
-        theme(plot.title=element_text(hjust=0.5))+
-        #guides(fill="none")+
-        labs(fill='Exclusion')+
-        scale_fill_manual(values=c("lightgreen"),
-                          labels=c('0'='Not exclude'))
-
-
-      suppressWarnings(assign("exclude_plot",exclude_plot,pos = 1))
-
-
-    }
-
-
-  }else{
-    not_exclude_area<-total_area
   }
+
+  #   if(export_static_report==TRUE){
+  #
+  #     available_plot <- available_diss  %>%
+  #       #mutate_at(c('diss'), ~na_if(., 0)) %>%
+  #       #st_combine() %>%
+  #       ggplot() +
+  #       geom_sf(aes(fill=factor(available)),color="black") +
+  #       geom_sf(data=my_shp_diss,fill=NA,color="black") +
+  #       #ggspatial::annotation_map_tile(zoom = 7) +
+  #       #ggtitle("Projects ranking") +
+  #       theme_void()+
+  #       theme(plot.title=element_text(hjust=0.5))+
+  #       #guides(fill="none")+
+  #       labs(fill='Availability')+
+  #       scale_fill_manual(values=c("lightgreen"),
+  #                         labels=c('1'= 'Available'))
+  #
+  #
+  #     suppressWarnings(assign("available_plot",available_plot,pos = 1))
+  #
+  #
+  #
+  #
+  #     exclude_plot <- exclude_diss  %>%
+  #       #mutate_at(c('diss'), ~na_if(., 0)) %>%
+  #       #st_combine() %>%
+  #       ggplot() +
+  #       geom_sf(aes(fill=factor(exclude)),color="black") +
+  #       geom_sf(data=my_shp_diss,fill=NA,color="black") +
+  #       #ggtitle("Projects ranking") +
+  #       theme_void()+
+  #       theme(plot.title=element_text(hjust=0.5))+
+  #       #guides(fill="none")+
+  #       labs(fill='Exclusion')+
+  #       scale_fill_manual(values=c("lightgreen"),
+  #                         labels=c('0'='Not exclude'))
+  #
+  #
+  #     suppressWarnings(assign("exclude_plot",exclude_plot,pos = 1))
+  #
+  #
+  #   }
+  #
+  #
+  # }else{
+  #   not_exclude_area<-total_area
+  # }
 
 
 
@@ -559,9 +562,9 @@ explore <- function(input_shapefile,
 
       available_plot_leaflet<-available_plot_leaflet %>%
         leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold_original), fillOpacity = 0.5,
-                           color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
-                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                           group = 'threshold_diss_1')%>%
+                             color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'threshold_diss_1')%>%
         leaflet::addLegend(data=threshold_diss_1, "topright",
                            #colors = c('white', 'grey'),
                            pal = palFunc_threshold,
@@ -574,7 +577,7 @@ explore <- function(input_shapefile,
       all_groups_leaflet<-c(all_groups_leaflet,"threshold_diss_1")
 
 
-      }
+    }
 
 
     if(nrow(threshold_df_final)==2){
@@ -606,9 +609,9 @@ explore <- function(input_shapefile,
 
       available_plot_leaflet<-available_plot_leaflet %>%
         leaflet::addPolygons(data = threshold_diss_1, fillColor = ~palFunc_threshold(threshold_original), fillOpacity = 0.5,
-                                                   color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
-                                                   highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                                                   group = 'threshold_diss_1')%>%
+                             color = 'black', opacity = 1, weight=0.5, label = ~threshold_original ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'threshold_diss_1')%>%
         leaflet::addLegend(data=threshold_diss_1, "topright",
                            #colors = c('white', 'grey'),
                            pal = palFunc_threshold,
@@ -636,7 +639,7 @@ explore <- function(input_shapefile,
       all_groups_leaflet<-c(all_groups_leaflet,"threshold_diss_1","threshold_diss_2")
 
 
-      }
+    }
 
 
 
@@ -652,7 +655,7 @@ explore <- function(input_shapefile,
 
       }else{
         theshold_command_use_loop <- noquote(paste(threshold_df_final$my_threshold[e], noquote(threshold_df_final$my_operator[e]), as.numeric(threshold_df_final$my_value_threshold[e]),sep=" "))
-        }
+      }
 
 
 
@@ -665,7 +668,7 @@ explore <- function(input_shapefile,
 
     }
 
-}
+  }
   # }else{
   #   threshold_df_final$area_considered <- total_area
   # }
@@ -721,21 +724,21 @@ explore <- function(input_shapefile,
 
     if(!missing(objectives)){
 
-    objectives_per_landuse_df_final <- data.frame(c(unique(my_shp[,paste(land_cover)][[1]])))
-    colnames(objectives_per_landuse_df_final)<-c(land_cover)
+      objectives_per_landuse_df_final <- data.frame(c(unique(my_shp[,paste(land_cover)][[1]])))
+      colnames(objectives_per_landuse_df_final)<-c(land_cover)
 
-    for(c in 1:length(objectives)){
-    objectives_per_landuse_df <- data.frame(my_shp %>%
-      group_by(eval(parse(text=land_cover)))%>%
-      #summarise(total_obj_landuse = sum(noquote(paste(objectives[[c]]))))
-      summarise(total_obj_landuse = sum(eval(parse(text=objectives[[c]])))))
+      for(c in 1:length(objectives)){
+        objectives_per_landuse_df <- data.frame(my_shp %>%
+                                                  group_by(eval(parse(text=land_cover)))%>%
+                                                  #summarise(total_obj_landuse = sum(noquote(paste(objectives[[c]]))))
+                                                  summarise(total_obj_landuse = sum(eval(parse(text=objectives[[c]])))))
 
-    objectives_per_landuse_df <- objectives_per_landuse_df[,c(1:2)]
-    colnames(objectives_per_landuse_df)<-c(land_cover,objectives[[c]])
+        objectives_per_landuse_df <- objectives_per_landuse_df[,c(1:2)]
+        colnames(objectives_per_landuse_df)<-c(land_cover,objectives[[c]])
 
 
-    objectives_per_landuse_df_final <- dplyr::left_join(objectives_per_landuse_df_final,objectives_per_landuse_df,by=land_cover)
-    }
+        objectives_per_landuse_df_final <- dplyr::left_join(objectives_per_landuse_df_final,objectives_per_landuse_df,by=land_cover)
+      }
 
     }
 
@@ -793,9 +796,9 @@ explore <- function(input_shapefile,
 
       for(c in 1:length(objectives)){
         objectives_per_landownership_df <- data.frame(my_shp %>%
-                                                  group_by(eval(parse(text=land_ownership)))%>%
-                                                  #summarise(total_obj_landownership = sum(noquote(paste(objectives[[c]]))))
-                                                  summarise(total_obj_landownership = sum(eval(parse(text=objectives[[c]])))))
+                                                        group_by(eval(parse(text=land_ownership)))%>%
+                                                        #summarise(total_obj_landownership = sum(noquote(paste(objectives[[c]]))))
+                                                        summarise(total_obj_landownership = sum(eval(parse(text=objectives[[c]])))))
 
         objectives_per_landownership_df <- objectives_per_landownership_df[,c(1:2)]
         colnames(objectives_per_landownership_df)<-c(land_ownership,objectives[[c]])
@@ -829,13 +832,13 @@ explore <- function(input_shapefile,
 
     #threshold will require more conditionals or a loop. Maybe a loop
 
-      get_objectives_df_avai_excl <- data.frame()
-      #objectives_diss_1$threshold_original <- "Non-threshold-compliant"
+    get_objectives_df_avai_excl <- data.frame()
+    #objectives_diss_1$threshold_original <- "Non-threshold-compliant"
 
-      obj1_after_threshold_final <-numeric()
-      get_objectives_df_final <- data.frame()
+    obj1_after_threshold_final <-numeric()
+    get_objectives_df_final <- data.frame()
 
-      for(a in 1:length(objectives)){
+    for(a in 1:length(objectives)){
 
       if(!missing(available)){
         obj1_after_available <- available_area_sf[,c(area,paste(objectives)[a])]
@@ -853,8 +856,8 @@ explore <- function(input_shapefile,
 
 
 
-        get_objectives_df_avai_excl <- rbind(get_objectives_df_avai_excl,c(obj1_after_available,obj1_after_exclude,a))
-        colnames(get_objectives_df_avai_excl)<-c("after_only_available","after_only_not_excluded","objective_order")
+      get_objectives_df_avai_excl <- rbind(get_objectives_df_avai_excl,c(obj1_after_available,obj1_after_exclude,a))
+      colnames(get_objectives_df_avai_excl)<-c("after_only_available","after_only_not_excluded","objective_order")
 
 
       if(!missing(threshold)){
@@ -890,9 +893,9 @@ explore <- function(input_shapefile,
 
         }
       }else{
-      get_objectives_df_final <- obj_total_landscape_final
+        get_objectives_df_final <- obj_total_landscape_final
+      }
     }
-}
     colnames(get_objectives_df_final)<-c("objective_value","objective_order","threshold_order")
 
 
@@ -934,11 +937,11 @@ explore <- function(input_shapefile,
 
 
       palFunc_objective_1 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_1)),
-                                                  objectives_diss_1$objectives_field)
+                                                   objectives_diss_1$objectives_field)
 
 
       palFunc_objective_2 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_2)),
-                                                  objectives_diss_2$objectives_field)
+                                                   objectives_diss_2$objectives_field)
 
 
 
@@ -1005,10 +1008,10 @@ explore <- function(input_shapefile,
 
 
   available_plot_leaflet<-available_plot_leaflet %>%
-        leaflet::addLayersControl(overlayGroups = all_groups_leaflet,
-                                  options = leaflet::layersControlOptions(collapsed = F)) %>%
+    leaflet::addLayersControl(overlayGroups = all_groups_leaflet,
+                              options = leaflet::layersControlOptions(collapsed = F)) %>%
 
-        leaflet::hideGroup(all_groups_leaflet)%>%
+    leaflet::hideGroup(all_groups_leaflet)%>%
     leaflet.extras::addFullscreenControl(position = "topleft", pseudoFullscreen = FALSE)
 
 
@@ -1029,82 +1032,178 @@ explore <- function(input_shapefile,
   combination_area_sf <- my_shp
 
   if(!missing(objectives)){
-  if(!missing(available)){
-    combination_area_sf <- subset(combination_area_sf, get(available)==1)
+    if(!missing(available)){
+      combination_area_sf <- subset(combination_area_sf, get(available)==1)
+      after_available <- combination_area_sf
+      available_area <- sum(combination_area_sf[,paste(area)][[1]])
 
-    available_area <- sum(combination_area_sf[,paste(area)][[1]])
-
-    if(!missing(flame_length)){
-      #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
-      my_shp_above_FL_threshold_available <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
-      total_above_FL_threshold_available <- sum(my_shp_above_FL_threshold_available[,paste(area)][[1]])
-      total_above_FL_threshold_available_perc <- total_above_FL_threshold_available/total_area*100
-    }else{
-      total_above_FL_threshold_available_perc<-NA
-    }
-
-
-    if(!missing(burn_probability)){
-      total_expected_ba_year_available <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
-    }else{
-      total_expected_ba_year_available<-NA
-    }
-
-
-    get_objectives_df_avai <- data.frame()
-    for(a in 1:length(objectives)){
-
-      if(!missing(available)){
-        obj1_after_available <- combination_area_sf[,c(area,paste(objectives)[a])]
-        obj1_after_available <- sum(obj1_after_available[,paste(objectives)[[a]]][[1]])
+      if(!missing(flame_length)){
+        #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
+        my_shp_above_FL_threshold_available <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
+        total_above_FL_threshold_available <- sum(my_shp_above_FL_threshold_available[,paste(area)][[1]])
+        total_above_FL_threshold_available_perc <- total_above_FL_threshold_available/total_area*100
       }else{
-        obj1_after_available <- obj1_total_landscape
+        total_above_FL_threshold_available_perc<-NA
       }
 
 
-      get_objectives_df_avai <- rbind(get_objectives_df_avai,c(obj1_after_available,a))
-      colnames(get_objectives_df_avai)<-c("after_only_available","objective_order")
-
-    }
-
-}
-
-  if(!missing(exclude_field)){
-    combination_area_sf <- subset(combination_area_sf, get(exclude_field)==0)
-
-    not_exclude_area <- sum(combination_area_sf[,paste(area)][[1]])
-
-
-    if(!missing(flame_length)){
-      #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
-      my_shp_above_FL_threshold_available_exclude <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
-      total_above_FL_threshold_available_exclude <- sum(my_shp_above_FL_threshold_available_exclude[,paste(area)][[1]])
-      total_above_FL_threshold_available_exclude_perc <- total_above_FL_threshold_available_exclude/total_area*100
-    }else{
-      total_above_FL_threshold_available_exclude_perc<-NA
-    }
-
-    if(!missing(burn_probability)){
-      total_expected_ba_year_available_exclude <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
-    }else{
-      total_expected_ba_year_available_exclude<-NA
-    }
-
-    get_objectives_df_avai_excl <- data.frame()
-    for(a in 1:length(objectives)){
-      if(!missing(exclude_field)){
-        obj1_after_exclude <- combination_area_sf[,c(area,paste(objectives)[a])]
-        obj1_after_exclude <- sum(obj1_after_exclude[,paste(objectives)[[a]]][[1]])
+      if(!missing(burn_probability)){
+        total_expected_ba_year_available <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
       }else{
-        obj1_after_exclude <- obj1_total_landscape
+        total_expected_ba_year_available<-NA
       }
 
-      get_objectives_df_avai_excl <- rbind(get_objectives_df_avai_excl,c(obj1_after_exclude,a))
-      colnames(get_objectives_df_avai_excl)<-c("after_only_exclude","objective_order")
+
+      get_objectives_df_avai <- data.frame()
+      for(a in 1:length(objectives)){
+
+        if(!missing(available)){
+          obj1_after_available <- combination_area_sf[,c(area,paste(objectives)[a])]
+          obj1_after_available <- sum(obj1_after_available[,paste(objectives)[[a]]][[1]])
+        }else{
+          obj1_after_available <- obj1_total_landscape
+        }
+
+
+        get_objectives_df_avai <- rbind(get_objectives_df_avai,c(obj1_after_available,a))
+        colnames(get_objectives_df_avai)<-c("after_only_available","objective_order")
+
+      }
+
+
+      #plot after available
+      #after_available_and_exclude_and_thresholds
+      after_available$dissp <- 1
+
+      after_available_sf_plot <- after_available %>%
+        group_by(dissp) %>%
+        summarise(m = mean(dissp)) %>%
+        st_cast()
+
+
+      after_available_sf_plot$considered <- "Yes"
+
+      after_available_sf_plot <- st_transform(after_available_sf_plot, crs = 4326)
+
+      palFunc_considered_final <- leaflet::colorFactor(
+        palette = c('green'),
+        domain = after_available_sf_plot$considered
+      )
+
+      after_available_sf_plot_leaflet <- leaflet::leaflet() %>%
+        leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+        leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                             color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+        leaflet::addPolygons(data = after_available_sf_plot, fillColor = ~palFunc_considered_final(considered), fillOpacity = 0.75,
+                             color = 'black', opacity = 1, weight=0.5, label = ~considered ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'considered')%>%
+        leaflet::addLegend(data=after_available_sf_plot, "topright",
+                           #colors = c('darkolivegreen3'),
+                           pal = palFunc_considered_final,
+                           values = ~considered ,
+                           title = "Withdrawals from treatments",
+                           labels = c("Yes"),
+                           group = "considered",
+                           opacity = 1)%>%
+        leaflet::addLayersControl(baseGroups = c("Esri.NatGeoWorldMap", "ESRI World Imagery"),
+                                  position = "topleft")
+
+
+      suppressWarnings(assign("after_available_sf_plot_leaflet",after_available_sf_plot_leaflet,pos = 1))
+
+
     }
 
+    if(!missing(exclude_field)){
+      combination_area_sf <- subset(combination_area_sf, get(exclude_field)==0)
+      after_available_and_exclude <- combination_area_sf
+      not_exclude_area <- sum(combination_area_sf[,paste(area)][[1]])
 
-  }
+
+      if(!missing(flame_length)){
+        #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
+        my_shp_above_FL_threshold_available_exclude <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
+        total_above_FL_threshold_available_exclude <- sum(my_shp_above_FL_threshold_available_exclude[,paste(area)][[1]])
+        total_above_FL_threshold_available_exclude_perc <- total_above_FL_threshold_available_exclude/total_area*100
+      }else{
+        total_above_FL_threshold_available_exclude_perc<-NA
+      }
+
+      if(!missing(burn_probability)){
+        total_expected_ba_year_available_exclude <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
+      }else{
+        total_expected_ba_year_available_exclude<-NA
+      }
+
+      get_objectives_df_avai_excl <- data.frame()
+      for(a in 1:length(objectives)){
+        if(!missing(exclude_field)){
+          obj1_after_exclude <- combination_area_sf[,c(area,paste(objectives)[a])]
+          obj1_after_exclude <- sum(obj1_after_exclude[,paste(objectives)[[a]]][[1]])
+        }else{
+          obj1_after_exclude <- obj1_total_landscape
+        }
+
+        get_objectives_df_avai_excl <- rbind(get_objectives_df_avai_excl,c(obj1_after_exclude,a))
+        colnames(get_objectives_df_avai_excl)<-c("after_only_exclude","objective_order")
+      }
+
+
+      #plot after available
+      #after_available_and_exclude
+      after_available_and_exclude$dissp <- 1
+
+      after_available_and_exclude_sf_plot <- after_available_and_exclude %>%
+        group_by(dissp) %>%
+        summarise(m = mean(dissp)) %>%
+        st_cast()
+
+
+      after_available_and_exclude_sf_plot$considered <- "Yes"
+
+      after_available_and_exclude_sf_plot <- st_transform(after_available_and_exclude_sf_plot, crs = 4326)
+
+      palFunc_considered_final <- leaflet::colorFactor(
+        palette = c('green'),
+        domain = after_available_and_exclude_sf_plot$considered
+      )
+
+      after_available_and_exclude_sf_plot_leaflet <- leaflet::leaflet() %>%
+        leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+        leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                             color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+        leaflet::addPolygons(data = after_available_and_exclude_sf_plot, fillColor = ~palFunc_considered_final(considered), fillOpacity = 0.75,
+                             color = 'black', opacity = 1, weight=0.5, label = ~considered ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'considered')%>%
+        leaflet::addLegend(data=after_available_and_exclude_sf_plot, "topright",
+                           #colors = c('darkolivegreen3'),
+                           pal = palFunc_considered_final,
+                           values = ~considered ,
+                           title = "Residual stands after removal from exclude field",
+                           labels = c("Yes"),
+                           group = "considered",
+                           opacity = 1)%>%
+        leaflet::addLayersControl(baseGroups = c("Esri.NatGeoWorldMap", "ESRI World Imagery"),
+                                  position = "topleft")
+
+
+      suppressWarnings(assign("after_available_and_exclude_sf_plot_leaflet",after_available_and_exclude_sf_plot_leaflet,pos = 1))
+
+
+
+    }
 
 
     #threshold part
@@ -1197,390 +1296,489 @@ explore <- function(input_shapefile,
 
 
         combination_area_sf <- subset(combination_area_sf, eval(parse(text=theshold_command_use_loop)))
-
+        after_available_and_exclude_and_thresholds <- combination_area_sf
       }
+
+
+
+      #plot after available
+      #after_available_and_exclude_and_thresholds
+      after_available_and_exclude_and_thresholds$dissp <- 1
+
+      after_available_and_exclude_and_thresholds_sf_plot <- after_available_and_exclude_and_thresholds %>%
+        group_by(dissp) %>%
+        summarise(m = mean(dissp)) %>%
+        st_cast()
+
+
+      after_available_and_exclude_and_thresholds_sf_plot$considered <- "Yes"
+
+      after_available_and_exclude_and_thresholds_sf_plot <- st_transform(after_available_and_exclude_and_thresholds_sf_plot, crs = 4326)
+
+      palFunc_considered_final <- leaflet::colorFactor(
+        palette = c('green'),
+        domain = after_available_and_exclude_and_thresholds_sf_plot$considered
+      )
+
+      after_available_and_exclude_and_thresholds_sf_plot_leaflet <- leaflet::leaflet() %>%
+        leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+        leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                             color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+        leaflet::addPolygons(data = after_available_and_exclude_and_thresholds_sf_plot, fillColor = ~palFunc_considered_final(considered), fillOpacity = 0.75,
+                             color = 'black', opacity = 1, weight=0.5, label = ~considered ,stroke = TRUE,
+                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                             group = 'considered')%>%
+        leaflet::addLegend(data=after_available_and_exclude_and_thresholds_sf_plot, "topright",
+                           #colors = c('darkolivegreen3'),
+                           pal = palFunc_considered_final,
+                           values = ~considered ,
+                           title = "Residual stands after removal from treatment thresholds",
+                           labels = c("Yes"),
+                           group = "considered",
+                           opacity = 1)%>%
+        leaflet::addLayersControl(baseGroups = c("Esri.NatGeoWorldMap", "ESRI World Imagery"),
+                                  position = "topleft")
+
+
+      suppressWarnings(assign("after_available_and_exclude_and_thresholds_sf_plot_leaflet",after_available_and_exclude_and_thresholds_sf_plot_leaflet,pos = 1))
+
+
     }else{
       threshold_df_final<-data.frame()
     }
 
 
 
-  combination_area <- sum(combination_area_sf[,paste(area)][[1]])
+    combination_area <- sum(combination_area_sf[,paste(area)][[1]])
 
-  combination_objective_final <- numeric()
-  for(z in 1:nrow(objectives_df_final)){
-
-
-    combination_objective <- sum(combination_area_sf[,paste(objectives_df_final$objectives_list[z])][[1]])
-
-    combination_objective_final <- c(combination_objective_final,combination_objective)
-  }
+    combination_objective_final <- numeric()
+    for(z in 1:nrow(objectives_df_final)){
 
 
+      combination_objective <- sum(combination_area_sf[,paste(objectives_df_final$objectives_list[z])][[1]])
 
-
-
-
-
-
-
-  #export final figure with only considered stands
-
-  combination_area_sf$dissp <- 1
-
-  combination_area_sf_plot <- combination_area_sf %>%
-    group_by(dissp) %>%
-    summarise(m = mean(dissp)) %>%
-    st_cast()
-
-
-  combination_area_sf_plot$considered <- "Yes"
-
-
-  combination_area_sf_plot <- st_transform(combination_area_sf_plot, crs = 4326)
-
-
-  # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
-  # #palFunc <- (c("white","grey"))
-
-  palFunc_considered_final <- leaflet::colorFactor(
-    palette = c('green'),
-    domain = combination_area_sf_plot$considered
-  )
-
-  combination_area_sf_plot_leaflet <- leaflet::leaflet() %>%
-    leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
-    #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
-    #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
-    #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
-
-    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
-                         color = 'black', opacity=1,  weight=1, label=NA) %>%
-
-    leaflet::addPolygons(data = combination_area_sf_plot, fillColor = ~palFunc_considered_final(considered), fillOpacity = 0.75,
-                         color = 'black', opacity = 1, weight=0.5, label = ~considered ,stroke = TRUE,
-                         highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                         group = 'considered')%>%
-    leaflet::addLegend(data=combination_area_sf_plot, "topright",
-                       #colors = c('darkolivegreen3'),
-                       pal = palFunc_considered_final,
-                       values = ~considered ,
-                       title = "Considered for ForSys run",
-                       labels = c("Yes"),
-                       group = "considered",
-                       opacity = 1)
-
-
-  suppressWarnings(assign("combination_area_sf_plot_leaflet",combination_area_sf_plot_leaflet,pos = 1))
-
-
-#
-#   ###flame lenght in table####
-#   if(!missing(flame_length)){
-#     #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
-#     my_shp_above_FL_threshold <- subset(my_shp,eval(parse(text=flame_length_logical)))
-#     total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area)][[1]])
-#     total_area_above_FL_threshold_perc <- total_area_above_FL_threshold/total_area*100
-#
-#   }
-
-  #create a table with the area
-  final_area_table_report <- data.frame()
-
-
-
-
-  if(nrow(threshold_df_final)>0){
-    area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
-    colnames(area_considered_table) <- "Area considered"
-    row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
-
-  }else{
-    area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,combination_area))
-    colnames(area_considered_table) <- "Area considered"
-    row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded","Combination of criteria")
-  }
-
-  area_considered_table$`Area reduction` <- area_considered_table$`Area considered`- total_area
-  area_considered_table$`Residual area (% of total)` <- (total_area + area_considered_table$`Area reduction`)*100/total_area
-
-  name_obj_temp_final<-c("Area considered","Area reduction","Residual area (% of total)")
-
-  for(v in 1:length(combination_objective_final)){
-    area_considered_table$objtemp<-0
-
-    area_considered_table$objtemp[nrow(area_considered_table)] <- combination_objective_final[v]
-    name_obj_temp <- paste(objectives_df_final$objectives_list[v])
-    name_obj_temp_final <- c(name_obj_temp_final,name_obj_temp)
-
-    colnames(area_considered_table)<-name_obj_temp_final
-  }
-
-
-  for(h in 1:length(objectives)){
-    #get_objectives_df_avai_excl
-    area_considered_table["Stands total",(h+3)] <- obj_total_landscape_final$objective_value[[h]]
-
-    if(!missing(available)){
-      area_considered_table["Only available",(h+3)] <- get_objectives_df_avai$after_only_available[[h]]
+      combination_objective_final <- c(combination_objective_final,combination_objective)
     }
 
-    if(!missing(exclude_field)){
-      area_considered_table["Only not excluded",(h+3)] <- get_objectives_df_avai_excl$after_only_exclude[[h]]
+
+
+
+
+
+
+
+
+    #export final figure with only considered stands
+
+    combination_area_sf$dissp <- 1
+
+    combination_area_sf_plot <- combination_area_sf %>%
+      group_by(dissp) %>%
+      summarise(m = mean(dissp)) %>%
+      st_cast()
+
+
+    combination_area_sf_plot$considered <- "Yes"
+
+
+    combination_area_sf_plot <- st_transform(combination_area_sf_plot, crs = 4326)
+
+
+    # palFunc <- leaflet::colorNumeric(c("white","grey"), 2, domain = NULL)
+    # #palFunc <- (c("white","grey"))
+
+    palFunc_considered_final <- leaflet::colorFactor(
+      palette = c('green'),
+      domain = combination_area_sf_plot$considered
+    )
+
+    combination_area_sf_plot_leaflet <- leaflet::leaflet() %>%
+      leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+      leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+                           color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+      leaflet::addPolygons(data = combination_area_sf_plot, fillColor = ~palFunc_considered_final(considered), fillOpacity = 0.75,
+                           color = 'black', opacity = 1, weight=0.5, label = ~considered ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'considered')%>%
+      leaflet::addLegend(data=combination_area_sf_plot, "topright",
+                         #colors = c('darkolivegreen3'),
+                         pal = palFunc_considered_final,
+                         values = ~considered ,
+                         title = "Considered for ForSys run",
+                         labels = c("Yes"),
+                         group = "considered",
+                         opacity = 1)%>%
+      leaflet::addLayersControl(baseGroups = c("Esri.NatGeoWorldMap", "ESRI World Imagery"),
+                                position = "topleft")
+
+
+    suppressWarnings(assign("combination_area_sf_plot_leaflet",combination_area_sf_plot_leaflet,pos = 1))
+
+
+
+
+
+
+
+
+
+
+    #
+    #   ###flame lenght in table####
+    #   if(!missing(flame_length)){
+    #     #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
+    #     my_shp_above_FL_threshold <- subset(my_shp,eval(parse(text=flame_length_logical)))
+    #     total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area)][[1]])
+    #     total_area_above_FL_threshold_perc <- total_area_above_FL_threshold/total_area*100
+    #
+    #   }
+
+    #create a table with the area
+    final_area_table_report <- data.frame()
+
+
+
+
+    if(nrow(threshold_df_final)>0){
+      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered))
+      colnames(area_considered_table) <- "Area considered"
+      row.names(area_considered_table) <- c("Planning area","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""))
+
+    }else{
+      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area))
+      colnames(area_considered_table) <- "Area considered"
+      row.names(area_considered_table) <- c("Planning area","Only available","Only not excluded")
     }
 
-    if(!missing(threshold)){
-      #
-      get_objectives_df_final_loop_h <- subset(get_objectives_df_avai_excl_threshold,objective_order ==h)
+    area_considered_table$`Area reduction` <- area_considered_table$`Area considered`- total_area
+    area_considered_table$`Residual area (% of total)` <- (total_area + area_considered_table$`Area reduction`)*100/total_area
 
-      for(w in 1:max(get_objectives_df_avai_excl_threshold$threshold_order)){
-        get_objectives_df_final_loop <- subset(get_objectives_df_final_loop_h,threshold_order == w)
+    name_obj_temp_final<-c("Area considered","Area reduction","Residual area (% of total)")
 
-        area_considered_table[paste("Only", theshold_command_all_legend)[[w]],(h+3)] <- get_objectives_df_final_loop$objective_value
+    for(v in 1:length(combination_objective_final)){
+      area_considered_table$objtemp<-0
+
+      area_considered_table$objtemp[nrow(area_considered_table)] <- combination_objective_final[v]
+      name_obj_temp <- paste(objectives_df_final$objectives_list[v])
+      name_obj_temp_final <- c(name_obj_temp_final,name_obj_temp)
+
+      colnames(area_considered_table)<-name_obj_temp_final
+    }
+
+
+    for(h in 1:length(objectives)){
+      #get_objectives_df_avai_excl
+      area_considered_table["Planning area",(h+3)] <- obj_total_landscape_final$objective_value[[h]]/obj_total_landscape_final$objective_value[[h]]*100
+
+
+      if(!missing(available)){
+        area_considered_table["Only available",(h+3)] <- get_objectives_df_avai$after_only_available[[h]]*100/obj_total_landscape_final$objective_value[[h]]
+      }
+
+      if(!missing(exclude_field)){
+        area_considered_table["Only not excluded",(h+3)] <- get_objectives_df_avai_excl$after_only_exclude[[h]]*100/obj_total_landscape_final$objective_value[[h]]
+      }
+
+      if(!missing(threshold)){
+        #
+        get_objectives_df_final_loop_h <- subset(get_objectives_df_avai_excl_threshold,objective_order ==h)
+
+        for(w in 1:max(get_objectives_df_avai_excl_threshold$threshold_order)){
+          get_objectives_df_final_loop <- subset(get_objectives_df_final_loop_h,threshold_order == w)
+
+          area_considered_table[paste("Only", theshold_command_all_legend)[[w]],(h+3)] <- get_objectives_df_final_loop$objective_value*100/obj_total_landscape_final$objective_value[[h]]
+
+        }
 
       }
 
+
+      area_considered_table[,(h+5)] <- area_considered_table[,paste(objectives[h])]/area_considered_table[,1]*100
+      names(area_considered_table)[(h+5)]<-paste(objectives[h],"Potential treatment leverage (PCP per area)",sep=" ")
+    }
+
+
+    #flame length
+    if(!missing(flame_length)){
+      flame_length_col <- c(total_area_above_FL_threshold_perc,total_above_FL_threshold_available_perc,
+                            total_above_FL_threshold_available_exclude_perc,total_above_FL_threshold_available_exclude_threshold_perc_df)
+
+      #exclude NAs
+      flame_length_col <- flame_length_col[!is.na(flame_length_col)]
+
+
+      names(area_considered_table)[length(names(area_considered_table))]<-"Residual % of total area burning at high intensity"
+    }
+
+
+    if(!missing(burn_probability)){
+      burn_probability_col <- c(total_expected_ba_year,total_expected_ba_year_available,
+                                total_expected_ba_year_available_exclude,
+                                total_expected_ba_year_available_exclude_threshold_df)
+
+      #exclude NAs
+      burn_probability_col <- burn_probability_col[!is.na(burn_probability_col)]
+
+
+      names(area_considered_table)[length(names(area_considered_table))]<-"Expected fire impacts"
+
+
+      for(t in  1:length(objectives)){
+        area_considered_table$fire_impact_on_priority <- area_considered_table$`Expected fire impacts`*area_considered_table[,paste(objectives[t])]
+        area_considered_table$fire_impact_on_priority <- area_considered_table$fire_impact_on_priority*100/area_considered_table$fire_impact_on_priority[1]
+        names(area_considered_table)[length(names(area_considered_table))]<-paste("Expected fire impacts on",objectives[t],"(% burned per year)",sep=" ")
+      }
+    }
+
+
+    area_considered_table_raw <- area_considered_table
+
+    #get col area considered reduction
+
+
+    #get the percentage
+    # for(m in 1:ncol(area_considered_table)){
+    #   perc_loop <- round(area_considered_table[,m]/area_considered_table[1,m]*100,0)
+    #   val_and_perc_loop <- paste(area_considered_table[,m]," (",perc_loop,")",sep="")
+    #
+    #   area_considered_table[,m] <-val_and_perc_loop
+    #
+    # }
+
+    suppressWarnings(assign("area_considered_table",area_considered_table,pos = 1))
+
+
+
+
+    #pie chart for landuse and landownership
+
+    if(!missing(land_ownership)){
+
+
+      objectives_per_landownership_selectable_df_final <- data.frame(c(unique(combination_area_sf[,paste(land_ownership)][[1]])))
+      colnames(objectives_per_landownership_selectable_df_final)<-c(land_ownership)
+
+      for(c in 1:length(objectives)){
+        objectives_per_landownership_selectable_df <- data.frame(combination_area_sf %>%
+                                                                   group_by(eval(parse(text=land_ownership)))%>%
+                                                                   #summarise(total_obj_landownership = sum(noquote(paste(objectives[[c]]))))
+                                                                   summarise(total_obj_landownership = sum(eval(parse(text=objectives[[c]])))))
+
+        objectives_per_landownership_selectable_df <- objectives_per_landownership_selectable_df[,c(1:2)]
+        colnames(objectives_per_landownership_selectable_df)<-c(land_ownership,paste("considered_",objectives[[c]],sep=""))
+
+
+        objectives_per_landownership_selectable_df_final <- dplyr::left_join(objectives_per_landownership_selectable_df_final,objectives_per_landownership_selectable_df,by=land_ownership)
+      }
+
+      objectives_per_landownership_df_final<-dplyr::left_join(objectives_per_landownership_df_final,objectives_per_landownership_selectable_df_final,by=land_ownership)
+
+
+      #get as percentage
+      my_vector_landownership_considered_final<-character()
+      my_vector_landownership_final<-character()
+      for(c in 1:length(objectives)){
+        objectives_per_landownership_df_final[is.na(objectives_per_landownership_df_final)] <- 0
+
+        objectives_per_landownership_df_final[[paste0("perc_",objectives)[c]]] <- objectives_per_landownership_df_final[,paste(objectives)[c]]/sum(objectives_per_landownership_df_final[,paste(objectives)[c]])*100#area_considered_table_raw[,paste(objectives)[c]][1]*100
+
+        objectives_per_landownership_df_final[[paste0("perc_considered_",objectives)[c]]] <- objectives_per_landownership_df_final[,paste0("considered_",objectives)[c]]/sum(objectives_per_landownership_df_final[,paste0("considered_",objectives)[c]])*100#area_considered_table_raw[,paste(objectives)[c]][1]*100
+
+        my_vector_landownership <- paste(objectives_per_landownership_df_final$landownership,": ",round(objectives_per_landownership_df_final[,paste0("perc_",objectives)[c]],1),"%",sep="",collapse = ", ")
+        my_vector_landownership <- paste("For ",objectives[c]," the proportions is as follows: ",my_vector_landownership,sep="")
+        my_vector_landownership_final <- c(my_vector_landownership_final,my_vector_landownership)
+
+        my_vector_landownership_considered <- paste(objectives_per_landownership_df_final$landownership,": ",round(objectives_per_landownership_df_final[,paste0("perc_considered_",objectives)[c]],1),"%",sep="",collapse = ", ")
+        my_vector_landownership_considered <- paste("For ",objectives[c]," the proportions is as follows: ",my_vector_landownership_considered,sep="")
+        my_vector_landownership_considered_final <- c(my_vector_landownership_considered_final,my_vector_landownership_considered)
+
+      }
+
+      my_vector_landownership_final_use<-paste(my_vector_landownership_final,collapse = ". ")
+      my_vector_landownership_considered_final_use<-paste(my_vector_landownership_considered_final,collapse = ". ")
+
+
+
+
+
+      #plots
+
+
+
+
+
+      g <- lapply(1:length(objectives), function(i) {
+
+        ggplot(objectives_per_landownership_df_final,
+               aes_string(x=1, paste("perc_",objectives[i],sep=""),fill=land_ownership)) +
+          geom_bar(width = 1, stat = "identity") + #,color="black"
+          coord_polar("y") +
+          theme_void() +
+          scale_fill_brewer(name="Land ownership", palette="Paired") +
+          ggtitle(paste(objectives[i],sep=" "))+
+          theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+        #suppressWarnings(assign(paste("landownership_landscape_plot_",i,sep=""),g[i],pos = 1))
+      })
+
+
+
+
+      landownership_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                                  ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
+
+      suppressWarnings(assign("landownership_landscape_ggarrange_plot",landownership_landscape_ggarrange_plot,pos = 1))
+
+      suppressWarnings(assign("my_vector_landownership_final_use",my_vector_landownership_final_use,pos = 1))
+      suppressWarnings(assign("my_vector_landownership_considered_final_use",my_vector_landownership_considered_final_use,pos = 1))
+
+
+
+      #only considered
+
+      #plots
+
+
+      g <- lapply(1:length(objectives), function(i) {
+
+        ggplot(objectives_per_landownership_df_final,
+               aes_string(x=1, paste("perc_considered_",objectives[i],sep=""),fill=land_ownership)) +
+          geom_bar(width = 1, stat = "identity") + #,color="black"
+          coord_polar("y") +
+          theme_void() +
+          scale_fill_brewer(name="Land ownership", palette="Paired") +
+          ggtitle(paste(objectives[i],sep=" "))+
+          theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+        #suppressWarnings(assign(paste("landownership_considered_plot_",i,sep=""),g[i],pos = 1))
+      })
+
+
+
+
+
+      landownership_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                                   ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
+
+      suppressWarnings(assign("landownership_considered_ggarrange_plot",landownership_considered_ggarrange_plot,pos = 1))
+
+
+
+
     }
 
 
 
-  }
+
+    if(!missing(land_cover)){
+
+      objectives_per_landuse_selectable_df_final <- data.frame(c(unique(combination_area_sf[,paste(land_cover)][[1]])))
+      colnames(objectives_per_landuse_selectable_df_final)<-c(land_cover)
+
+      for(c in 1:length(objectives)){
+        objectives_per_landuse_selectable_df <- data.frame(combination_area_sf %>%
+                                                             group_by(eval(parse(text=land_cover)))%>%
+                                                             #summarise(total_obj_landuse = sum(noquote(paste(objectives[[c]]))))
+                                                             summarise(total_obj_landuse = sum(eval(parse(text=objectives[[c]])))))
+
+        objectives_per_landuse_selectable_df <- objectives_per_landuse_selectable_df[,c(1:2)]
+        colnames(objectives_per_landuse_selectable_df)<-c(land_cover,paste("considered_",objectives[[c]],sep=""))
 
 
-  #flame length
-  if(!missing(flame_length)){
-    flame_length_col <- c(total_area_above_FL_threshold_perc,total_above_FL_threshold_available_perc,
-      total_above_FL_threshold_available_exclude_perc,total_above_FL_threshold_available_exclude_threshold_perc_df)
+        objectives_per_landuse_selectable_df_final <- dplyr::left_join(objectives_per_landuse_selectable_df_final,objectives_per_landuse_selectable_df,by=land_cover)
+      }
 
-    #exclude NAs
-    flame_length_col <- flame_length_col[!is.na(flame_length_col)]
-
-    ###tirar NA daqui quando arranjar a tabela!#####
-    area_considered_table<-cbind(area_considered_table,c(flame_length_col,NA))
-    names(area_considered_table)[length(names(area_considered_table))]<-"Flame_lenght"
-  }
+      objectives_per_landuse_df_final<-dplyr::left_join(objectives_per_landuse_df_final,objectives_per_landuse_selectable_df_final,by=land_cover)
 
 
-  if(!missing(burn_probability)){
-    burn_probability_col <- c(total_expected_ba_year,total_expected_ba_year_available,
-                              total_expected_ba_year_available_exclude,
-                          total_expected_ba_year_available_exclude_threshold_df)
+      #get as percentage
+      my_vector_landuse_final <- character()
+      my_vector_landuse_considered_final <- character()
+      for(c in 1:length(objectives)){
+        objectives_per_landuse_df_final[is.na(objectives_per_landuse_df_final)] <- 0
 
-    #exclude NAs
-    burn_probability_col <- burn_probability_col[!is.na(burn_probability_col)]
+        objectives_per_landuse_df_final[[paste0("perc_",objectives)[c]]] <- objectives_per_landuse_df_final[,paste(objectives)[c]]/sum(objectives_per_landuse_df_final[,paste(objectives)[c]])*100#area_considered_table_raw[,paste(objectives)[c]][1]*100
 
-    ###tirar NA daqui quando arranjar a tabela!#####
-    area_considered_table<-cbind(area_considered_table,c(burn_probability_col,NA))
-    names(area_considered_table)[length(names(area_considered_table))]<-"Expected fire impacts"
-  }
+        objectives_per_landuse_df_final[[paste0("perc_considered_",objectives)[c]]] <- objectives_per_landuse_df_final[,paste0("considered_",objectives)[c]]/sum(objectives_per_landuse_df_final[,paste0("considered_",objectives)[c]])*100#area_considered_table_raw[,paste(objectives)[c]][1]*100
 
+        my_vector_landuse <- paste(objectives_per_landuse_df_final$landuse,": ",round(objectives_per_landuse_df_final[,paste0("perc_",objectives)[c]],1),"%",sep="",collapse = ", ")
+        my_vector_landuse <- paste("For ",objectives[c]," the proportions is as follows: ",my_vector_landuse,sep="")
+        my_vector_landuse_final <- c(my_vector_landuse_final,my_vector_landuse)
 
-  area_considered_table_raw <- area_considered_table
+        my_vector_landuse_considered <- paste(objectives_per_landuse_df_final$landuse,": ",round(objectives_per_landuse_df_final[,paste0("perc_considered_",objectives)[c]],1),"%",sep="",collapse = ", ")
+        my_vector_landuse_considered <- paste("For ",objectives[c]," the proportions is as follows: ",my_vector_landuse_considered,sep="")
+        my_vector_landuse_considered_final <- c(my_vector_landuse_considered_final,my_vector_landuse_considered)
 
-  #get col area considered reduction
+      }
 
+      my_vector_landuse_final_use<-paste(my_vector_landuse_final,collapse = ". ")
+      my_vector_landuse_considered_final_use<-paste(my_vector_landuse_considered_final,collapse = ". ")
 
-  #get the percentage
-  # for(m in 1:ncol(area_considered_table)){
-  #   perc_loop <- round(area_considered_table[,m]/area_considered_table[1,m]*100,0)
-  #   val_and_perc_loop <- paste(area_considered_table[,m]," (",perc_loop,")",sep="")
-  #
-  #   area_considered_table[,m] <-val_and_perc_loop
-  #
-  # }
+      #do the pie chart - land use
+      g <- lapply(1:length(objectives), function(i) {
 
-  suppressWarnings(assign("area_considered_table",area_considered_table,pos = 1))
-
+        ggplot(objectives_per_landuse_df_final,
+               aes_string(x=1, paste("perc_",objectives[i],sep=""),fill=land_cover)) +
+          geom_bar(width = 1, stat = "identity") + #,color="black"
+          coord_polar("y") +
+          theme_void() +
+          scale_fill_brewer(name="Land use", palette="Paired") +
+          ggtitle(paste(objectives[i],sep=" "))+
+          theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+        #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
+      })
 
 
 
-  #pie chart for landuse and landownership
-
-  if(!missing(land_ownership)){
 
 
-    objectives_per_landownership_selectable_df_final <- data.frame(c(unique(combination_area_sf[,paste(land_ownership)][[1]])))
-    colnames(objectives_per_landownership_selectable_df_final)<-c(land_ownership)
+      landuse_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                            ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
 
-    for(c in 1:length(objectives)){
-      objectives_per_landownership_selectable_df <- data.frame(combination_area_sf %>%
-                                                                 group_by(eval(parse(text=land_ownership)))%>%
-                                                                 #summarise(total_obj_landownership = sum(noquote(paste(objectives[[c]]))))
-                                                                 summarise(total_obj_landownership = sum(eval(parse(text=objectives[[c]])))))
-
-      objectives_per_landownership_selectable_df <- objectives_per_landownership_selectable_df[,c(1:2)]
-      colnames(objectives_per_landownership_selectable_df)<-c(land_ownership,paste("considered_",objectives[[c]],sep=""))
+      suppressWarnings(assign("landuse_landscape_ggarrange_plot",landuse_landscape_ggarrange_plot,pos = 1))
+      suppressWarnings(assign("my_vector_landuse_final_use",my_vector_landuse_final_use,pos = 1))
+      suppressWarnings(assign("my_vector_landuse_considered_final_use",my_vector_landuse_considered_final_use,pos = 1))
 
 
-      objectives_per_landownership_selectable_df_final <- dplyr::left_join(objectives_per_landownership_selectable_df_final,objectives_per_landownership_selectable_df,by=land_ownership)
+
+
+
+      #only considered
+
+
+      g <- lapply(1:length(objectives), function(i) {
+
+        ggplot(objectives_per_landuse_df_final,
+               aes_string(x=1, paste("perc_considered_",objectives[i],sep=""),fill=land_cover)) +
+          geom_bar(width = 1, stat = "identity") + #,color="black"
+          coord_polar("y") +
+          theme_void() +
+          scale_fill_brewer(name="Land use", palette="Paired") +
+          ggtitle(paste(objectives[i],sep=" "))+
+          theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
+        #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
+      })
+
+
+
+
+
+      landuse_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
+                                                             ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
+
+      suppressWarnings(assign("landuse_considered_ggarrange_plot",landuse_considered_ggarrange_plot,pos = 1))
+
+
+
     }
-
-    objectives_per_landownership_df_final<-dplyr::left_join(objectives_per_landownership_df_final,objectives_per_landownership_selectable_df_final,by=land_ownership)
-
-
-    #get as percentage
-    for(c in 1:length(objectives)){
-    objectives_per_landownership_df_final[is.na(objectives_per_landownership_df_final)] <- 0
-
-    objectives_per_landownership_df_final[[paste0("perc_",objectives)[c]]] <- objectives_per_landownership_df_final[,paste(objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
-
-    objectives_per_landownership_df_final[[paste0("perc_considered_",objectives)[c]]] <- objectives_per_landownership_df_final[,paste0("considered_",objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
-}
-
-
-
-    #plots
-
-
-
-
-
-    g <- lapply(1:length(objectives), function(i) {
-
-      ggplot(objectives_per_landownership_df_final,
-             aes_string(x=1, paste("perc_",objectives[i],sep=""),fill=land_ownership)) +
-        geom_bar(width = 1, stat = "identity") + #,color="black"
-        coord_polar("y") +
-        theme_void() +
-        scale_fill_brewer(name="Land ownership", palette="Paired") +
-        ggtitle(paste(objectives[i],sep=" "))+
-        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
-      #suppressWarnings(assign(paste("landownership_landscape_plot_",i,sep=""),g[i],pos = 1))
-    })
-
-
-
-
-    landownership_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                          ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
-
-    suppressWarnings(assign("landownership_landscape_ggarrange_plot",landownership_landscape_ggarrange_plot,pos = 1))
-
-
-
-
-
-    #only considered
-
-    #plots
-
-
-    g <- lapply(1:length(objectives), function(i) {
-
-      ggplot(objectives_per_landownership_df_final,
-             aes_string(x=1, paste("perc_considered_",objectives[i],sep=""),fill=land_ownership)) +
-        geom_bar(width = 1, stat = "identity") + #,color="black"
-        coord_polar("y") +
-        theme_void() +
-        scale_fill_brewer(name="Land ownership", palette="Paired") +
-        ggtitle(paste(objectives[i],sep=" "))+
-        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
-      #suppressWarnings(assign(paste("landownership_considered_plot_",i,sep=""),g[i],pos = 1))
-    })
-
-
-
-
-
-    landownership_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                                ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
-
-    suppressWarnings(assign("landownership_considered_ggarrange_plot",landownership_considered_ggarrange_plot,pos = 1))
-
-
-
-
-  }
-
-
-
-
-  if(!missing(land_cover)){
-
-    objectives_per_landuse_selectable_df_final <- data.frame(c(unique(combination_area_sf[,paste(land_cover)][[1]])))
-    colnames(objectives_per_landuse_selectable_df_final)<-c(land_cover)
-
-    for(c in 1:length(objectives)){
-      objectives_per_landuse_selectable_df <- data.frame(combination_area_sf %>%
-                                                           group_by(eval(parse(text=land_cover)))%>%
-                                                           #summarise(total_obj_landuse = sum(noquote(paste(objectives[[c]]))))
-                                                           summarise(total_obj_landuse = sum(eval(parse(text=objectives[[c]])))))
-
-      objectives_per_landuse_selectable_df <- objectives_per_landuse_selectable_df[,c(1:2)]
-      colnames(objectives_per_landuse_selectable_df)<-c(land_cover,paste("considered_",objectives[[c]],sep=""))
-
-
-      objectives_per_landuse_selectable_df_final <- dplyr::left_join(objectives_per_landuse_selectable_df_final,objectives_per_landuse_selectable_df,by=land_cover)
-    }
-
-    objectives_per_landuse_df_final<-dplyr::left_join(objectives_per_landuse_df_final,objectives_per_landuse_selectable_df_final,by=land_cover)
-
-
-    #get as percentage
-    for(c in 1:length(objectives)){
-    objectives_per_landuse_df_final[is.na(objectives_per_landuse_df_final)] <- 0
-
-    objectives_per_landuse_df_final[[paste0("perc_",objectives)[c]]] <- objectives_per_landuse_df_final[,paste(objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
-
-    objectives_per_landuse_df_final[[paste0("perc_considered_",objectives)[c]]] <- objectives_per_landuse_df_final[,paste0("considered_",objectives)[c]]/area_considered_table_raw[,paste(objectives)[c]][1]*100
-}
-
-
-
-    #do the pie chart - land use
-    g <- lapply(1:length(objectives), function(i) {
-
-      ggplot(objectives_per_landuse_df_final,
-             aes_string(x=1, paste("perc_",objectives[i],sep=""),fill=land_cover)) +
-        geom_bar(width = 1, stat = "identity") + #,color="black"
-        coord_polar("y") +
-        theme_void() +
-        scale_fill_brewer(name="Land use", palette="Paired") +
-        ggtitle(paste(objectives[i],sep=" "))+
-        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
-      #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
-    })
-
-
-
-
-
-    landuse_landscape_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                           ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
-
-    suppressWarnings(assign("landuse_landscape_ggarrange_plot",landuse_landscape_ggarrange_plot,pos = 1))
-
-
-
-
-    #only considered
-
-
-    g <- lapply(1:length(objectives), function(i) {
-
-      ggplot(objectives_per_landuse_df_final,
-             aes_string(x=1, paste("perc_considered_",objectives[i],sep=""),fill=land_cover)) +
-        geom_bar(width = 1, stat = "identity") + #,color="black"
-        coord_polar("y") +
-        theme_void() +
-        scale_fill_brewer(name="Land use", palette="Paired") +
-        ggtitle(paste(objectives[i],sep=" "))+
-        theme(axis.text.x=element_blank(),plot.title = element_text(hjust = 0.5))
-      #suppressWarnings(assign(paste("land_use_considered_plot_",i,sep=""),g[i],pos = 1))
-    })
-
-
-
-
-
-    landuse_considered_ggarrange_plot <- ggpubr::ggarrange(plotlist=g,
-                                                                 ncol = 1,nrow=length(objectives),common.legend = TRUE,legend="bottom")
-
-    suppressWarnings(assign("landuse_considered_ggarrange_plot",landuse_considered_ggarrange_plot,pos = 1))
-
-
-
-  }
 
 
 
@@ -1612,7 +1810,7 @@ explore <- function(input_shapefile,
       }
 
 
-      }else{
+    }else{
       threshold_df_final<-data.frame()
     }
 
@@ -1647,6 +1845,7 @@ explore <- function(input_shapefile,
 
     combination_area_sf_plot_leaflet <- leaflet::leaflet() %>%
       leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+      leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>%
       #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
       #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
       #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
@@ -1665,7 +1864,9 @@ explore <- function(input_shapefile,
                          title = "Considered for ForSys run",
                          labels = c("Yes"),
                          group = "considered",
-                         opacity = 1)
+                         opacity = 1)%>%
+      leaflet::addLayersControl(baseGroups = c("Esri.NatGeoWorldMap", "ESRI World Imagery"),
+                                position = "topleft")
 
 
     suppressWarnings(assign("combination_area_sf_plot_leaflet",combination_area_sf_plot_leaflet,pos = 1))
@@ -1677,14 +1878,14 @@ explore <- function(input_shapefile,
     final_area_table_report <- data.frame()
 
     if(nrow(threshold_df_final)>0){
-      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered,combination_area))
+      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,threshold_df_final$area_considered))
       colnames(area_considered_table) <- "Area considered"
-      row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""),"Combination of criteria")
+      row.names(area_considered_table) <- c("Planning area","Only available","Only not excluded",paste("Only ",theshold_command_all_legend,sep=""))
 
     }else{
-      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area,combination_area))
+      area_considered_table <- data.frame(c(total_area,available_area,not_exclude_area))
       colnames(area_considered_table) <- "Area considered"
-      row.names(area_considered_table) <- c("Stands total","Only available","Only not excluded","Combination of criteria")
+      row.names(area_considered_table) <- c("Planning area","Only available","Only not excluded")
     }
 
 

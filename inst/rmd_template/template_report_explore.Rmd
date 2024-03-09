@@ -97,11 +97,19 @@ tagList(available_plot_leaflet)
   
 area_considered_table%>%
     #collapse_rows_df(Parameter)%>%
-    knitr::kable(caption="Table 1. Area and objective values considered in ForSys run when each constraint is accounted individually and all together (last row). The row Stands total (first row) represents the total area or objective in the stand shapefile, ignoring all constaints given. Value between parenthesis represent the percentage of the total")
+    knitr::kable(caption="Table 1. Area, objective and fire metrics in landscape file.")
   
   
   
 ```
+
+The row Planning area represents the total area or objective (PCP) in the stand shapefile, ignoring all constaints given. The row Withdrawals from treatments refers to the metrics located in stands identified with 1s in the availability field (typically excluding stands in protected areas, etc.). The row Removal from treatment thresholds further excluded stands that do not meet a given treatment threshold. Note that the rows are cumulative, i.e., the row Removal from treatment threshold excludes stands identified by the availability and exclude field (as explained above) and by the threshold identified. Whenever using more than one threshold, the second threshold is applied after the first one, further filtering the data (and so on).
+
+
+
+The column Residual area refers to the area (same units as in input shapefile) that remain for treatment after each filter is implemented. The column Area reduction represents the reduction of area caused by that filter in previous column. The column Residual area (% of total) represents the residual area that remain for treatment as a percentage of the total. The column(s) Priority available for treatment % of total represent the the amount of priority in the associated land base in column Residual area expressed as PCP. The column(s) Potential treatment leverage (priority per acre) represents the average priority per acre in the associated land base specified in column Residual area. The column Expected fire impacts on priority (% burned per year) represents the estimated fire impacts on the selected priority which equals the total expected area burned in column Expected fire impacts x the total priority PCP. The column Expected fire impacts represents the expected area burned on the land base in column Residual area, this equals the sum of the cross product of burn probability x area for each stand. The column Residual % of total area burning at high intensity represents the percentage of the area in column Residual area that burns at high intensity (either flame length >= 8 feet or flame length >= 2.5 meters).
+ 
+
 
 
 ## Map of considered stands in ForSys
@@ -116,14 +124,31 @@ tagList(combination_area_sf_plot_leaflet)
 
 
 
+
+
+
+```{r echo=FALSE,eval = TRUE}
+if(exists("landuse_landscape_ggarrange_plot")){
+  asis_output("## Objective distribution per land use\\n")}
+```  
+
+```{r echo=FALSE,eval = TRUE}
+if(exists("landuse_landscape_ggarrange_plot")){
+asis_output(paste("The figure below represents the proportion of each objective per land use class. ", my_vector_landuse_final_use,sep="" ))}
+```
+
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landuse_landscape_ggarrange_plot")){
+  
 #suppressWarnings(print(landuse_landscape_ggarrange_plot))  
   ggpubr::annotate_figure(print(landuse_landscape_ggarrange_plot), top = ggpubr::text_grob("Distribution of objective(s) per land use type",face = "bold", size = 14))
 }
 
 ```
-
+```{r echo=FALSE,eval = TRUE}
+if(exists("landuse_landscape_ggarrange_plot")){
+asis_output(paste("The figure below represents the proportion of each objective per land use class when considering only the stands that can be selected for treatment (i.e., after applying the several filters showed in Table 1). ", my_vector_landuse_considered_final_use,sep="" ))}
+```
 
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landuse_considered_ggarrange_plot")){
@@ -134,6 +159,18 @@ if(exists("landuse_considered_ggarrange_plot")){
 ```
 
 
+
+```{r echo=FALSE,eval = TRUE}
+if(exists("landownership_landscape_ggarrange_plot")){
+  asis_output("## Objective distribution per land ownership\\n")}
+```  
+
+
+```{r echo=FALSE,eval = TRUE}
+if(exists("landownership_landscape_ggarrange_plot")){
+asis_output(paste("The figure below represents the proportion of each objective per land ownership class. ", my_vector_landownership_final_use,sep="" ))}
+```
+
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landownership_landscape_ggarrange_plot")){
 #suppressWarnings(print(landownership_landscape_ggarrange_plot))
@@ -142,7 +179,10 @@ if(exists("landownership_landscape_ggarrange_plot")){
 
 ```
 
-
+```{r echo=FALSE,eval = TRUE}
+if(exists("landownership_considered_ggarrange_plot")){
+asis_output(paste("The figure below represents the proportion of each objective per land ownership class when considering only the stands that can be selected for treatment (i.e., after applying the several filters showed in Table 1). ", my_vector_landownership_considered_final_use,sep="" ))}
+```
 
 ```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
 if(exists("landownership_considered_ggarrange_plot")){
@@ -151,6 +191,51 @@ if(exists("landownership_considered_ggarrange_plot")){
 }
 
 ```
+
+
+
+```{r echo=FALSE,eval = TRUE}
+if(exists("after_available_sf_plot_leaflet") | exists("after_available_and_exclude_sf_plot_leaflet") | exists("after_available_and_exclude_and_thresholds_sf_plot_leaflet")){
+  asis_output("## Individual maps\\n")}
+```  
+
+```{r echo=FALSE, eval = TRUE}
+if(exists("after_available_sf_plot_leaflet")){
+  asis_output(paste("The figure below represents the stands that can be selected for treatment in ForSys after filtering with the availability field (area corresponds to row Withdrawals from treatments in Table 1)"))}
+```
+
+```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
+#suppressWarnings(print(available_plot_leaflet))
+if(exists("after_available_sf_plot_leaflet")){
+tagList(after_available_sf_plot_leaflet)}
+```
+
+
+```{r echo=FALSE, eval = TRUE}
+if(exists("after_available_and_exclude_sf_plot_leaflet")){
+  asis_output(paste("The figure below represents the stands that can be selected for treatment in ForSys after filtering with the availability field (area corresponds to row Withdrawals from treatments in Table 1) and the exclude field"))}
+```
+
+```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
+#suppressWarnings(print(available_plot_leaflet))
+if(exists("after_available_and_exclude_sf_plot_leaflet")){
+tagList(after_available_and_exclude_sf_plot_leaflet)}
+```
+
+
+
+```{r echo=FALSE, eval = TRUE}
+if(exists("after_available_and_exclude_and_thresholds_sf_plot_leaflet")){
+  asis_output(paste("The figure below represents the stands that can be selected for treatment in ForSys after filtering with the availability field (area corresponds to row Withdrawals from treatments in Table 1), the exclude field and the threshold(s)"))}
+```
+
+```{r echo=FALSE, fig.cap=paste("Figure 2.", sep=" ")}
+#suppressWarnings(print(available_plot_leaflet))
+if(exists("after_available_and_exclude_and_thresholds_sf_plot_leaflet")){
+tagList(after_available_and_exclude_and_thresholds_sf_plot_leaflet)}
+```
+
+
 
 
 
