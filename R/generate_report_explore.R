@@ -13,7 +13,7 @@ generate_report_explore <- function(#data,
   #   if (!(y %in% names(data))) stop("`", y, "` not found in data!")
   # }
   ## Get directory of report markdown template
-  report_dir <- system.file("rmd_template/template_report_explore.rmd", package = "ForSysXR")
+  report_dir <- system.file("rmd_template/template_report_explore.qmd", package = "ForSysXR")
   ## Render report into html
   suppressWarnings(rmarkdown::render(
     input = report_dir,
