@@ -49,5 +49,6 @@ Imports:
     leaflet (>= 2.2.0),
     viridis (>= 0.6.4),
     colorspace (>= 2.1-0),
-    leaflet.extras (>= 1.0.0)
+    leaflet.extras (>= 1.0.0),
+    pals (>= 1.8)
     

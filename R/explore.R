@@ -54,9 +54,6 @@ explore <- function(input_shapefile,
 
 
 
-
-
-
   if(class(input_shapefile)[1]=="character"){
     input_shapefile_format <- substrRight(input_shapefile,4)
     if(input_shapefile_format!= ".shp")
@@ -67,7 +64,7 @@ explore <- function(input_shapefile,
   if(class(input_shapefile)[1]=="sf"){
     my_shp <- (input_shapefile)
 
-
+    cat("Loading shapefile",'\n')
     my_shp <- rmapshaper::ms_simplify(my_shp, keep = 0.05,
                                     keep_shapes = TRUE)
 
@@ -81,7 +78,7 @@ explore <- function(input_shapefile,
 
 
   if(class(input_shapefile)[1]=="character"){
-
+    cat("Loading shapefile",'\n')
     my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
 
     #if(max(nchar(names(my_shp)))>10){
@@ -95,15 +92,20 @@ explore <- function(input_shapefile,
   }
 
 
+  cat("Analysing data and preparing maps",'\n')
+
   my_shp <- st_transform(my_shp, crs = 4326)
   my_shp_df <- st_drop_geometry(my_shp)
 
+  sf_use_s2(FALSE)
   #study area contour
   my_shp$dissp <- 1
-  my_shp_diss <- my_shp %>%
+  my_shp_diss <- suppressMessages(suppressWarnings(my_shp %>%
     group_by(dissp) %>%
     summarise(m = mean(dissp)) %>%
-    sf::st_cast()
+    sf::st_cast()))
+
+  my_shp_use_gl<-sf::st_cast(my_shp,"POLYGON")
 
   #plotting
 
@@ -748,9 +750,9 @@ explore <- function(input_shapefile,
     ###alternativa#####
 
 
-    my_shp_use_gl<-sf::st_cast(my_shp,"POLYGON")
 
-    cols=colourvalues::colour_values_rgb(land_cover_diss$land_cover_use,  palette = "terrain",include_alpha = FALSE)/ 255
+
+    cols=colourvalues::colour_values_rgb(my_shp_use_gl[,paste(land_cover)][[1]],  palette = "terrain",include_alpha = FALSE)/ 255
 
 
     available_plot_leaflet<-available_plot_leaflet %>%
@@ -769,17 +771,18 @@ explore <- function(input_shapefile,
                             #weight=1,
                             #label=NA,
                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                            group = 'land_cover') %>%
+                            group = 'Land cover') %>%
       leaflet::addLegend(data=my_shp_use_gl, "topright",
-                         #colors = c('white', 'grey'),
+                         #colors = rgb(cols),
                          pal = palFunc_landcover,
                          values = ~land_cover_diss$land_cover_use ,
                          title = "Land cover",
-                         labels = c("No", "Yes"),
-                         group = "land_cover",
+                         #labels = c("No", "Yes"),
+                         group = "Land cover",
                          opacity = 1)
 
-    all_groups_leaflet<-c(all_groups_leaflet,"land_cover_diss")
+    all_groups_leaflet<-c(all_groups_leaflet,"Land cover")
+
 
 
     #get data for pie chart
@@ -980,25 +983,94 @@ explore <- function(input_shapefile,
     if(nrow(objectives_df_final)==1){
 
 
-      palFunc_objective_1 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_1)),
+      palFunc_objective_1 <- leaflet::colorNumeric(viridis::viridis(nrow(objectives_diss_1)),
                                                    objectives_diss_1$objectives_field)
 
 
+      # available_plot_leaflet<-available_plot_leaflet %>%
+      #   leaflet::addPolygons(data = objectives_diss_1, fillColor = ~palFunc_objective_1(objectives_field), fillOpacity = 0.75,
+      #                        color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
+      #                        highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+      #                        group = 'objectives_diss_1')%>%
+      #   leaflet::addLegend(data=objectives_diss_1, "topright",
+      #                      #colors = c('white', 'grey'),
+      #                      pal = palFunc_objective_1,
+      #                      values = ~objectives_diss_1$objectives_field ,
+      #                      title = objectives_df_final$objectives_list[1],
+      #                      labels = c("No", "Yes"),
+      #                      group = "objectives_diss_1",
+      #                      opacity = 1)
+      #
+      # all_groups_leaflet<-c(all_groups_leaflet,"objectives_diss_1")
+      #
+
+
+
+
+      #alternativa
+
+      cols=colourvalues::colour_values_rgb(my_shp_use_gl[,paste(objectives[1])][[1]],  palette = "viridis",include_alpha = FALSE)/ 255
+
+
       available_plot_leaflet<-available_plot_leaflet %>%
-        leaflet::addPolygons(data = objectives_diss_1, fillColor = ~palFunc_objective_1(objectives_field), fillOpacity = 0.75,
-                             color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
-                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                             group = 'objectives_diss_1')%>%
-        leaflet::addLegend(data=objectives_diss_1, "topright",
-                           #colors = c('white', 'grey'),
+        leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        leafgl::addGlPolygons(data = my_shp_use_gl,
+                              #cols_fill= cols,
+                              #cols_fill = NA,
+                              fillOpacity = 0.75,
+                              color = cols,
+                              opacity = 1,
+                              weight=0.5,
+                              popup = objectives[1],
+                              #label = ~landuse,
+                              weight = 0.1,
+                              #opacity=1,
+                              #weight=1,
+                              #label=NA,
+                              highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                              group = objectives[1]) %>%
+        leaflet::addLegend(data=my_shp_use_gl, "topright",
+                           #colors = rgb(cols),
                            pal = palFunc_objective_1,
                            values = ~objectives_diss_1$objectives_field ,
-                           title = objectives_df_final$objectives_list[1],
-                           labels = c("No", "Yes"),
-                           group = "objectives_diss_1",
+                           title = objectives[1],
+                           #labels = c("No", "Yes"),
+                           group = objectives[1],
                            opacity = 1)
 
-      all_groups_leaflet<-c(all_groups_leaflet,"objectives_diss_1")
+      all_groups_leaflet<-c(all_groups_leaflet,objectives[1])
+
+
+#
+#
+#       leaflet::leaflet() %>%
+#         leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+#         leafgl::addGlPolygons(data = my_shp_use_gl,
+#                               #cols_fill= cols,
+#                               #cols_fill = NA,
+#                               fillOpacity = 0.75,
+#                               color = cols,
+#                               opacity = 1,
+#                               weight=0.5,
+#                               popup = objectives[1],
+#                               #label = ~landuse,
+#                               weight = 0.1,
+#                               #opacity=1,
+#                               #weight=1,
+#                               #label=NA,
+#                               highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+#                               group = objectives[1]) %>%
+#         leaflet::addLegend(data=my_shp_use_gl, "topright",
+#                            #colors = rgb(cols),
+#                            pal = palFunc_objective_1,
+#                            values = ~objectives_diss_1$objectives_field ,
+#                            title = objectives[1],
+#                            #labels = c("No", "Yes"),
+#                            group = objectives[1],
+#                            opacity = 1)
+#
+#
+
 
 
     }
@@ -1010,46 +1082,169 @@ explore <- function(input_shapefile,
 
       #objectives_diss_1$threshold_original <- "Non-threshold-compliant"
 
+      palFunc_objective_1 <- leaflet::colorNumeric(viridis::cividis(nrow(my_shp_use_gl)),
+                                                   my_shp_use_gl[,paste(objectives[1])][[1]])
 
-      palFunc_objective_1 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_1)),
-                                                   objectives_diss_1$objectives_field)
+      #palFunc_objective_1 <- leaflet::colorFactor(viridis::viridis(nrow(my_shp_use_gl)), my_shp_use_gl$obj_1)
+
+      # palFunc_objective_1 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_1)),
+      #                                              objectives_diss_1$objectives_field)
 
 
-      palFunc_objective_2 <- leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_2)),
-                                                   objectives_diss_2$objectives_field)
+      palFunc_objective_2 <- leaflet::colorNumeric(viridis::cividis(nrow(my_shp_use_gl)),
+                                                   my_shp_use_gl[,paste(objectives[2])][[1]])
 
 
+#
+#       available_plot_leaflet<-available_plot_leaflet %>%
+#         leaflet::addPolygons(data = objectives_diss_1, fillColor = ~palFunc_objective_1(objectives_field), fillOpacity = 0.75,
+#                              color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
+#                              highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+#                              group = 'objectives_diss_1')%>%
+#         leaflet::addLegend(data=objectives_diss_1, "topright",
+#                            #colors = c('white', 'grey'),
+#                            pal = palFunc_objective_1,
+#                            values = ~objectives_diss_1$objectives_field ,
+#                            title = objectives_df_final$objectives_list[1],
+#                            labels = c("No", "Yes"),
+#                            group = "objectives_diss_1",
+#                            opacity = 1)%>%
+#
 
-      available_plot_leaflet<-available_plot_leaflet %>%
-        leaflet::addPolygons(data = objectives_diss_1, fillColor = ~palFunc_objective_1(objectives_field), fillOpacity = 0.75,
-                             color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
-                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                             group = 'objectives_diss_1')%>%
-        leaflet::addLegend(data=objectives_diss_1, "topright",
-                           #colors = c('white', 'grey'),
+
+        #alternativa
+#########
+        cols_obj1=colourvalues::colour_values_rgb(my_shp_use_gl[,paste(objectives[1])][[1]],  palette = "cividis",include_alpha = FALSE)
+        cols_obj2=colourvalues::colour_values_rgb(my_shp_use_gl[,paste(objectives[2])][[1]],  palette = "cividis",include_alpha = FALSE)
+
+        # leaflet::colorNumeric(viridis::cividis(nrow(my_shp_use_gl)),
+        #              my_shp_use_gl$obj_1)
+        #
+
+        #colourvalues::colour_palettes(colours = "viridis")
+
+        #cols=colourvalues::colour_values_rgb(leaflet::colorNumeric(viridis::turbo(nrow(objectives_diss_1)),
+        #                      objectives_diss_1$objectives_field))
+
+        my_shp_use_gl_obj1 <- my_shp_use_gl
+        my_shp_use_gl_obj2 <- my_shp_use_gl
+
+        available_plot_leaflet<-available_plot_leaflet %>%
+        leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        leafgl::addGlPolygons(data = my_shp_use_gl_obj1,
+                              #cols_fill= cols,
+                              #cols_fill = NA,
+                              fillOpacity = 0.75,
+                              color = cols_obj1,
+                              opacity = 1,
+                              weight=0.5,
+                              popup = objectives[1],
+                              #label = ~landuse,
+                              weight = 0.1,
+                              #opacity=1,
+                              #weight=1,
+                              #label=NA,
+                              highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                              group = objectives[1]) %>%
+        leaflet::addLegend(data=my_shp_use_gl_obj1, "topleft",
+                           #colors = rgb(cols),
                            pal = palFunc_objective_1,
                            values = ~objectives_diss_1$objectives_field ,
-                           title = objectives_df_final$objectives_list[1],
-                           labels = c("No", "Yes"),
-                           group = "objectives_diss_1",
+                           title = objectives[1],
+                           #labels = c("No", "Yes"),
+                           group = objectives[1],
                            opacity = 1)%>%
 
 
-        leaflet::addPolygons(data = objectives_diss_2, fillColor = ~palFunc_objective_2(objectives_field), fillOpacity = 0.75,
-                             color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
-                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
-                             group = 'objectives_diss_2')%>%
-        leaflet::addLegend(data=objectives_diss_2, "topright",
-                           #colors = c('white', 'grey'),
+
+        #leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+        leafgl::addGlPolygons(data = my_shp_use_gl_obj2,
+                              #cols_fill= cols,
+                              #cols_fill = NA,
+                              fillOpacity = 0.75,
+                              color = cols_obj2,
+                              opacity = 1,
+                              weight=0.5,
+                              popup = objectives[2],
+                              #label = ~landuse,
+                              weight = 0.1,
+                              #opacity=1,
+                              #weight=1,
+                              #label=NA,
+                              highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                              group = objectives[2]) %>%
+        leaflet::addLegend(data=my_shp_use_gl_obj2, "topleft",
+                           #colors = rgb(cols),
                            pal = palFunc_objective_2,
                            values = ~objectives_diss_2$objectives_field ,
-                           title = objectives_df_final$objectives_list[2],
-                           labels = c("No", "Yes"),
-                           group = "objectives_diss_2",
+                           title = objectives[2],
+                           #labels = c("No", "Yes"),
+                           group = objectives[2],
                            opacity = 1)
 
 
-      all_groups_leaflet<-c(all_groups_leaflet,"objectives_diss_1","objectives_diss_2")
+        # leaflet::addPolygons(data = objectives_diss_2, fillColor = ~palFunc_objective_2(objectives_field), fillOpacity = 0.75,
+        #                      color = 'black', opacity = 1, weight=0.5, label = ~objectives_field ,stroke = TRUE,
+        #                      highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+        #                      group = 'objectives_diss_2')%>%
+        # leaflet::addLegend(data=objectives_diss_2, "topright",
+        #                    #colors = c('white', 'grey'),
+        #                    pal = palFunc_objective_2,
+        #                    values = ~objectives_diss_2$objectives_field ,
+        #                    title = objectives_df_final$objectives_list[2],
+        #                    labels = c("No", "Yes"),
+        #                    group = "objectives_diss_2",
+        #                    opacity = 1)
+
+
+      all_groups_leaflet<-c(all_groups_leaflet,objectives[1],objectives[2])
+
+      #all_groups_leaflet<-c(all_groups_leaflet,objectives[1])
+
+
+# #
+#         available_plot_leaflet %>%
+#           leaflet::addLayersControl(overlayGroups = all_groups_leaflet,
+#                                     options = leaflet::layersControlOptions(collapsed = F)) %>%
+#
+#           leaflet::hideGroup(all_groups_leaflet)%>%
+#           leaflet.extras::addFullscreenControl(position = "topleft", pseudoFullscreen = FALSE)
+#        #
+#
+
+#
+#
+#         leaflet::leaflet()%>%
+#           leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+#           leafgl::addGlPolygons(data = my_shp_use_gl,
+#                                 #cols_fill= cols,
+#                                 #cols_fill = NA,
+#                                 fillOpacity = 0.75,
+#                                 color = cols,
+#                                 opacity = 1,
+#                                 weight=0.5,
+#                                 popup = objectives[1],
+#                                 #label = ~landuse,
+#                                 weight = 0.1,
+#                                 #opacity=1,
+#                                 #weight=1,
+#                                 #label=NA,
+#                                 highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+#                                 group = objectives[1]) %>%
+#           leaflet::addLegend(data=my_shp_use_gl, "topleft",
+#                              #colors = rgb(cols),
+#                              pal = palFunc_objective_1,
+#                              values = ~objectives_diss_1$objectives_field ,
+#                              title = objectives[1],
+#                              #labels = c("No", "Yes"),
+#                              group = objectives[1],
+#                              opacity = 1) %>%
+#           leaflet::addLayersControl(overlayGroups = all_groups_leaflet,
+#                                     options = leaflet::layersControlOptions(collapsed = F)) %>%
+#
+#           leaflet::hideGroup(all_groups_leaflet)
+
+
 
 
 
@@ -2015,6 +2210,7 @@ explore <- function(input_shapefile,
   #check export html document
   save.image (file = paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
 
+  cat("Creating report")
   capture.output(suppressWarnings(suppressMessages(generate_report_explore(output_file=paste("explore_",report_name,".html",sep="")))))
 
   if(export_static_report==TRUE){

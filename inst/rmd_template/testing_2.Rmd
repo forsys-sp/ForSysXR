@@ -126,6 +126,15 @@ suppressWarnings(print(plot_treated_constraint_in_proj_ggarrange))
 ```
 
 
+```{r, echo=FALSE, fig.cap=paste("Figure 5.", caption_fig_constraint1, sep=" "),fig.height = fig.height_variables_bars,  fig.align = "center"}
+if(exists("my_plot_variables_bars_report")){
+suppressWarnings(print(my_plot_variables_bars_report))}
+
+```
+
+
+
+
 
 
 ### R Code used in set_forsysx_run
@@ -156,7 +165,7 @@ interpretation of any of the ForSys family products.
 
 If you found any error or issue, please open a new issue [here](https://github.com/forsys-sp/ForSysXR/issues) and provide a replicable example of your data and run settings.
 
-For further support please contact Michelle Day: michelle.day@usda.gov
+For further support please contact Michelle Day (michelle.day@usda.gov) or Alan Ager (alan.ager@oregonstate.edu)    
 
 ```{r, include = FALSE, echo=FALSE,message = FALSE,warning = FALSE}
 (rm(list = ls()[grep("attainment_fig_constraint1", ls())], envir = globalenv()))

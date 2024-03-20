@@ -27,6 +27,7 @@ set_forsysx_run(
   constraints,
   constraints_logic = c("single_value", "and"),
   effect_fields,
+  objective_direction = "maximize",
   objectives,
   threshold,
   threshold_logic = c("single_value", "and"),
@@ -40,6 +41,7 @@ set_forsysx_run(
   plot_results = FALSE,
   load_results = FALSE,
   build_report = FALSE,
+  report_variables,
   exe_path
 )
 }
@@ -84,6 +86,8 @@ set_forsysx_run(
 
 \item{effect_fields}{Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments}
 
+\item{objective_direction}{Direction ("minimize" or "maximize") for the objectives. If maximize, stands with highest values will be selected first. If minimize, stands with lowest values will be selected first. Default is "maximize"}
+
 \item{objectives}{Field(s) from input_shapefile identifying the treatment priorities}
 
 \item{threshold}{Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
@@ -109,6 +113,8 @@ set_forsysx_run(
 \item{load_results}{Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE}
 
 \item{build_report}{Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
+
+\item{report_variables}{Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
 

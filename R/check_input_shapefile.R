@@ -176,20 +176,63 @@ check_input_shapefile <- function(input_shapefile,
 
 
 
+    #not allow long name values
 
-    if(make_valid == TRUE & length(fields_changed)>=1){
-      cat("Writing stand shapefile \n")
-      sf::st_write(my_shp,input_shapefile,append = FALSE,quiet = TRUE)
+    #check the length of characters attributes. Longer than 10 cause a problem
+    charecters_in_table  <-  my_shp[, sapply(my_shp, class) == 'character']
+    charecters_in_table <- charecters_in_table[,1:ncol(charecters_in_table)-1]
 
-      all_fields_changed<-c()
-      for(e in 1:length(fields_changed)){
-        all_fields_changed<-c(all_fields_changed,(paste("•",noquote(fields_changed)[e], "\n", sep=" ")))
+    if(make_valid == TRUE & ncol(charecters_in_table)>0){
+
+
+      fields_characts<-noquote(colnames(charecters_in_table))
+
+      my_shp_no_geo <- st_drop_geometry(my_shp)
+
+      for(q in 1:(ncol(charecters_in_table)-1)){
+
+        unique_vals_char <- unique(my_shp_no_geo[,which( colnames(my_shp_no_geo)==fields_characts[q])])
+
+        if(max(nchar(unique_vals_char))>10){
+
+          new_names <- abbreviate(unique_vals_char,10, dot = "FALSE", strict = "TRUE")
+          test <- abbreviate(my_shp_no_geo[,which( colnames(my_shp_no_geo)==fields_characts[q])],10, dot = "FALSE", strict = "TRUE",named=FALSE)
+
+          my_shp[,which( colnames(my_shp)==fields_characts[q])] <- test
+
+          fields_changed_name<-paste("Field ",fields_characts[q]," had values with more than 10 characters. These values were abbreviated.",sep="")
+          fields_changed<-c(fields_changed,fields_changed_name)
+
+
+        }
+
       }
-      #sf::st_write(my_shp,input_shapefile,append = FALSE)
-      cat("The input shapefile in the local machine was overwritten. The following fields were updated to match ForSysX required formats: \n",
-          noquote(all_fields_changed))
 
-      #cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
+    }
+
+
+
+
+
+    if(make_valid == FALSE & ncol(charecters_in_table)>0){
+
+
+      fields_characts<-noquote(colnames(charecters_in_table))
+
+      my_shp_no_geo <- st_drop_geometry(my_shp)
+
+      for(q in 1:(ncol(charecters_in_table)-1)){
+
+        unique_vals_char <- unique(my_shp_no_geo[,which( colnames(my_shp_no_geo)==fields_characts[q])])
+
+        if(max(nchar(unique_vals_char))>10){
+
+          issues_found <- c(issues_found,paste("Field ",fields_characts[q], " has values with more than 10 characters.", sep=""))
+
+        }
+
+      }
+
     }
 
 
@@ -221,6 +264,25 @@ check_input_shapefile <- function(input_shapefile,
           noquote(all_issues_found))
 
     }
+
+
+
+
+    if(make_valid == TRUE & length(fields_changed)>=1){
+      cat("Writing stand shapefile \n")
+      sf::st_write(my_shp,input_shapefile,append = FALSE,quiet = TRUE)
+
+      all_fields_changed<-c()
+      for(e in 1:length(fields_changed)){
+        all_fields_changed<-c(all_fields_changed,(paste("•",noquote(fields_changed)[e], "\n", sep=" ")))
+      }
+      #sf::st_write(my_shp,input_shapefile,append = FALSE)
+      cat("The input shapefile in the local machine was overwritten. The following fields were updated to match ForSysX required formats: \n",
+          noquote(all_fields_changed))
+
+      #cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
+    }
+
 
 
 
@@ -439,6 +501,65 @@ check_input_shapefile <- function(input_shapefile,
 
 
 
+    #check the length of characters attributes. Longer than 10 cause a problem
+    charecters_in_table  <-  my_shp[, sapply(my_shp, class) == 'character']
+    charecters_in_table <- charecters_in_table[,1:ncol(charecters_in_table)-1]
+
+    if(make_valid == TRUE & ncol(charecters_in_table)>0){
+
+
+        fields_characts<-noquote(colnames(charecters_in_table))
+
+        my_shp_no_geo <- st_drop_geometry(my_shp)
+
+        for(q in 1:(ncol(charecters_in_table)-1)){
+
+          unique_vals_char <- unique(my_shp_no_geo[,which( colnames(my_shp_no_geo)==fields_characts[q])])
+
+          if(max(nchar(unique_vals_char))>10){
+
+            new_names <- abbreviate(unique_vals_char,10, dot = "FALSE", strict = "TRUE")
+            test <- abbreviate(my_shp_no_geo[,which( colnames(my_shp_no_geo)==fields_characts[q])],10, dot = "FALSE", strict = "TRUE",named=FALSE)
+
+            my_shp[,which( colnames(my_shp)==fields_characts[q])] <- test
+
+            fields_changed_name<-paste("Field ",fields_characts[q]," had values with more than 10 characters. These values were abbreviated.",sep="")
+            fields_changed<-c(fields_changed,fields_changed_name)
+
+
+        }
+
+      }
+
+    }
+
+
+
+
+
+    if(make_valid == FALSE & ncol(charecters_in_table)>0){
+
+
+      fields_characts<-noquote(colnames(charecters_in_table))
+
+      my_shp_no_geo <- st_drop_geometry(my_shp)
+
+      for(q in 1:(ncol(charecters_in_table)-1)){
+
+        unique_vals_char <- unique(my_shp_no_geo[,which( colnames(my_shp_no_geo)==fields_characts[q])])
+
+        if(max(nchar(unique_vals_char))>10){
+
+          issues_found <- c(issues_found,paste("Field ",fields_characts[q], " has values with more than 10 characters.", sep=""))
+
+        }
+
+      }
+
+    }
+
+
+
 
 
 
@@ -459,6 +580,12 @@ check_input_shapefile <- function(input_shapefile,
 
       #cat("The input shapefile was updated. The following fields were updated to match ForSysX required formats: \n",noquote(fields_changed))
     }
+
+
+
+
+
+
 
 
     if(make_valid == TRUE & length(fields_changed)==0){
@@ -484,6 +611,10 @@ check_input_shapefile <- function(input_shapefile,
           noquote(all_issues_found))
 
     }
+
+
+
+
 
 
 

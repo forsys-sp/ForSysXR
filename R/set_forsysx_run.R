@@ -24,6 +24,7 @@
 #' @param patchbuster_weight Optional. Weight for the patchbuster function. Only use when setting a patchbuster run.
 #' @param effect_fields Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments
 #' @param objectives Field(s) from input_shapefile identifying the treatment priorities
+#' @param objective_direction Direction ("minimize" or "maximize") for the objectives. If maximize, stands with highest values will be selected first. If minimize, stands with lowest values will be selected first. Default is "maximize"
 #' @param subunit_field Field from input_shapefile identifying the pre-defined planning areas
 #' @param master_subunit If master subunits should be used
 #' @param save_outputs Vector with the outputs that must be saved. Options are "shapefile", "stand_csv" and/or "image". At least one output must be saved.
@@ -36,6 +37,7 @@
 #' @param MaximizeDistanceOpt Binary. If 1, then Maximize Distance will be used and the effect of inverse distance weighting is reversed. Useful when creating fuelbreak networks. Default is 0.
 #' @param plot_results Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE
 #' @param build_report Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE
+#' @param report_variables Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created
 #' @import dplyr sf ggplot2 shiny
 #' @return
 #' @export
@@ -73,6 +75,7 @@ set_forsysx_run <- function(input_shapefile,
                             constraints,
                             constraints_logic = c("single_value","and"),
                             effect_fields,
+                            objective_direction="maximize",
                             objectives,
                             threshold,
                             threshold_logic = c("single_value","and"),
@@ -86,8 +89,13 @@ set_forsysx_run <- function(input_shapefile,
                             plot_results=FALSE,
                             load_results=FALSE,
                             build_report=FALSE,
+                            report_variables,
                             exe_path #,xml_path
                             ) {
+
+
+
+
 
 
   if (file.exists(output_xml)) {
@@ -317,7 +325,9 @@ set_forsysx_run <- function(input_shapefile,
   #load_objective_steps - falta fazer
   #step_file - falta fazer
   #objective_direction - falta fazer
-  #spatial_optimization - falta fazer
+    if(objective_direction=="minimize"){
+  xml_data_use <- gsub("ObjectiveDirection=\"1\"","ObjectiveDirection=\"0\"",unlist(xml_data_use))
+    }
 
   xml_data_use <- gsub("Point_X",x_coordinate,unlist(xml_data_use))
   xml_data_use <- gsub("Point_Y",y_coordinate,unlist(xml_data_use))
@@ -1115,10 +1125,10 @@ set_forsysx_run <- function(input_shapefile,
   #run forsysX
 
   #wait a bit for the xml to be written and then run forsysX
-  date_time<-Sys.time()
-  while((as.numeric(Sys.time()) - as.numeric(date_time))<5){
-    #print("waiting")
-  }
+  # date_time<-Sys.time()
+  # while((as.numeric(Sys.time()) - as.numeric(date_time))<5){
+  #   #print("waiting")
+  # }
 
   write.table(xml_data_use,output_xml,row.names = F,col.names = F,quote = FALSE)
 
@@ -1221,7 +1231,7 @@ set_forsysx_run <- function(input_shapefile,
 
   number_scenarios_created <- number_scenarios_created[grepl(pattern = ".shp$", x = number_scenarios_created)]
 
-
+  number_scenarios_created <- number_scenarios_created[!grepl(pattern = "_stand_data.shp$", x = number_scenarios_created)]
 
 
 
@@ -1305,7 +1315,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+        plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
           geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -1318,7 +1328,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
           geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -1350,7 +1360,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+        plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
           geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -1364,7 +1374,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
           geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -1374,6 +1384,9 @@ set_forsysx_run <- function(input_shapefile,
           theme_classic())))
 
         suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
+
+
+
 
 
 
@@ -1774,26 +1787,94 @@ set_forsysx_run <- function(input_shapefile,
         my_shp_subunits <- my_shp %>%
           group_by(sub_id_package) %>%
           summarise(m = mean(sub_id_package)) %>%
-          st_cast()
+          sf::st_cast()
 
+
+        my_breaks<-max(output_shp_run$ProjectNum)/4
+
+        my_breaks<-round(c(my_breaks,my_breaks*2,my_breaks*3,my_breaks*4),0)
 
 
         my_plot_projects_report <- my_shp  %>%
           #mutate_at(c('diss'), ~na_if(., 0)) %>%
           #st_combine() %>%
-          ggplot() +
+          ggplot2::ggplot() +
           geom_sf(aes(fill=diss),fill="grey",color=NA) +
           #ggtitle("Projects ranking") +
           theme_void()+
           theme(plot.title=element_text(hjust=0.5))+
           #guides(fill="none")+
           geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
-          scale_fill_viridis_c(option = "turbo",direction=-1)+
+          scale_fill_viridis_c(option = "turbo",direction=-1,breaks=my_breaks)+
           geom_sf(data=my_shp_subunits,color="black",fill=NA)+
           labs(fill='Project number')
 
         suppressWarnings(assign("my_plot_projects_report",my_plot_projects_report,pos = 1))
         suppressWarnings(assign("caption_fig1","Location of the projects created by ForSysX. Warmer colors represent higher priority",pos = 1))
+
+
+        #plot report_variables
+        if(!missing(report_variables)){
+
+          output_shp_run_variable<-subset(output_shp_run,Treat==1)
+
+          my_shp$id_join_loop<-1:nrow(my_shp)
+
+          output_shp_run_diss<-output_shp_run_variable%>%
+            group_by(ProjectNum)%>%
+            summarise(m = mean(ProjectNum)) %>%
+            sf::st_cast()
+
+          stands_treated_list <- data.frame(sf::st_within(my_shp,output_shp_run_diss))
+
+          my_shp_df_variable <-sf::st_drop_geometry(my_shp)
+          my_shp_df_variable<-dplyr::left_join(my_shp_df_variable,stands_treated_list,by=c("id_join_loop"="row.id"))
+
+          my_shp_df_variable_use <- subset(my_shp_df_variable, (!is.na(my_shp_df_variable$col.id)))
+
+
+          Pattern1_list <- lapply(1:length(report_variables), function(w) {
+            treated_per_variable <- my_shp_df_variable_use %>%
+              group_by(col.id, .data[[report_variables[w]]]) %>%
+              summarise(total_area_treated = sum(.data[[area]]), .groups = 'drop')
+
+            colnames(treated_per_variable) <- c("ProjectNumber", report_variables[w], "Area_treated")
+
+            my_breaks <- max(treated_per_variable$ProjectNumber) / 4
+            my_breaks <- round(c(my_breaks, my_breaks*2, my_breaks*3, my_breaks*4), 0)
+
+            ggplot(treated_per_variable, aes_string(x = "ProjectNumber", y = "Area_treated", fill = report_variables[w])) +
+              geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+              xlab("Project rank") +
+              ylab("Area treated") +
+              cowplot::theme_cowplot() +
+              scale_fill_manual(values = as.vector(pals::kovesi.isoluminant_cgo_80_c38(length(unique(treated_per_variable[[2]])))),
+                                name = report_variables[w]) +
+              scale_x_continuous(breaks = my_breaks) +
+              theme(legend.position = "bottom",
+                    legend.box = "horizontal",
+                    legend.box.just = "center",
+                    legend.title = element_text(hjust = 0.5),
+                    legend.text = element_text(hjust = 0.5),
+                    legend.justification = "center")
+
+          })
+
+
+
+          my_plot_variables_bars_report<- ggpubr::ggarrange(plotlist=Pattern1_list,
+                                                            ncol = 1,nrow=length(Pattern1_list),common.legend = FALSE)
+
+          fig.height_variables_bars <- 5*length(Pattern1_list)
+          suppressWarnings(assign("fig.height_variables_bars",fig.height_variables_bars,pos = 1))
+          suppressWarnings(assign("my_plot_variables_bars_report",my_plot_variables_bars_report,pos = 1))
+
+
+
+
+        }
+
+
 
       }
 
@@ -1911,20 +1992,25 @@ set_forsysx_run <- function(input_shapefile,
         my_shp_subunits <- my_shp %>%
           group_by(sub_id_package) %>%
           summarise(m = mean(sub_id_package)) %>%
-          st_cast()
+          sf::st_cast()
+
+
+        my_breaks<-max(output_shp_run$ProjectNum)/4
+
+        my_breaks<-round(c(my_breaks,my_breaks*2,my_breaks*3,my_breaks*4),0)
 
 
         my_plot_projects_report1 <- my_shp  %>%
           #mutate_at(c('diss'), ~na_if(., 0)) %>%
           #st_combine() %>%
-          ggplot() +
+          ggplot2::ggplot() +
           geom_sf(aes(fill=diss),fill="grey",color=NA) +
           #ggtitle("Projects ranking") +
           theme_void()+
           theme(plot.title=element_text(hjust=0.5))+
           #guides(fill="none")+
           geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
-          scale_fill_viridis_c(option = "turbo",direction=-1)+
+          scale_fill_viridis_c(option = "turbo",direction=-1,breaks=my_breaks)+
           geom_sf(data=my_shp_subunits,color="black",fill=NA)+
           labs(fill='Project number',tag = "a)")
 
@@ -1933,19 +2019,22 @@ set_forsysx_run <- function(input_shapefile,
 
         my_shp$diss <- 1
 
+        my_breaks<-max(output_shp_run$ProjectNum)/4
+
+        my_breaks<-round(c(my_breaks,my_breaks*2,my_breaks*3,my_breaks*4),0)
 
 
         my_plot_projects_report2 <- my_shp  %>%
           #mutate_at(c('diss'), ~na_if(., 0)) %>%
           #st_combine() %>%
-          ggplot() +
+          ggplot2::ggplot() +
           geom_sf(aes(fill=diss),fill="grey",color=NA) +
           #ggtitle("Projects ranking") +
           theme_void()+
           theme(plot.title=element_text(hjust=0.5))+
           #guides(fill="none")+
           geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
-          scale_fill_viridis_c(option = "turbo",direction=-1)+
+          scale_fill_viridis_c(option = "turbo",direction=-1,breaks=my_breaks)+
           geom_sf(data=my_shp_subunits,color="black",fill=NA)+
           labs(fill='Project number',tag = "b)")
 
@@ -1954,17 +2043,23 @@ set_forsysx_run <- function(input_shapefile,
 
         my_shp$diss <- 1
 
+        my_breaks<-max(output_shp_run$ProjectNum)/4
+
+        my_breaks<-round(c(my_breaks,my_breaks*2,my_breaks*3,my_breaks*4),0)
+
+
+
         my_plot_projects_report3 <- my_shp  %>%
           #mutate_at(c('diss'), ~na_if(., 0)) %>%
           #st_combine() %>%
-          ggplot() +
+          ggplot2::ggplot() +
           geom_sf(aes(fill=diss),fill="grey",color=NA) +
           #ggtitle("Projects ranking") +
           theme_void()+
           theme(plot.title=element_text(hjust=0.5))+
           #guides(fill="none")+
           geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
-          scale_fill_viridis_c(option = "turbo",direction=-1)+
+          scale_fill_viridis_c(option = "turbo",direction=-1,breaks=my_breaks)+
           geom_sf(data=my_shp_subunits,color="black",fill=NA)+
           labs(fill='Project number',tag = "c)")
 
@@ -2039,7 +2134,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
   }
-        plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+        plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
           geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2052,7 +2147,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+        plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
           geom_point()+
           geom_line(linewidth=1)+
           scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2083,7 +2178,7 @@ set_forsysx_run <- function(input_shapefile,
       }
 
 
-    plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+    plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
       geom_point()+
       geom_line(linewidth=1)+
       scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2096,7 +2191,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-    plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+    plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
       geom_point()+
       geom_line(linewidth=1)+
       scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2211,7 +2306,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2230,7 +2325,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project_cum1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project_cum1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2288,7 +2383,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2307,7 +2402,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project_cum2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project_cum2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2367,7 +2462,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2386,7 +2481,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_attainment_per_project_cum3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+      plot_attainment_per_project_cum3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2477,7 +2572,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_treated_constraint1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+      plot_treated_constraint1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2490,7 +2585,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_perc_treated_constraint_in_proj1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+      plot_perc_treated_constraint_in_proj1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2547,7 +2642,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_treated_constraint2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+      plot_treated_constraint2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2560,7 +2655,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_perc_treated_constraint_in_proj2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+      plot_perc_treated_constraint_in_proj2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2616,7 +2711,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_treated_constraint3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+      plot_treated_constraint3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2629,7 +2724,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-      plot_perc_treated_constraint_in_proj3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+      plot_perc_treated_constraint_in_proj3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
         geom_point()+
         geom_line(linewidth=1)+
         scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2730,7 +2825,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+          plot_attainment_per_project1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2749,7 +2844,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project_cum1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+          plot_attainment_per_project_cum1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2797,7 +2892,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+          plot_attainment_per_project2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2816,7 +2911,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project_cum2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+          plot_attainment_per_project_cum2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2868,7 +2963,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
+          plot_attainment_per_project3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2887,7 +2982,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_attainment_per_project_cum3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+          plot_attainment_per_project_cum3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2963,7 +3058,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_treated_constraint1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+          plot_treated_constraint1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -2976,7 +3071,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_perc_treated_constraint_in_proj1 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+          plot_perc_treated_constraint_in_proj1 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -3019,7 +3114,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_treated_constraint2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+          plot_treated_constraint2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -3032,7 +3127,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_perc_treated_constraint_in_proj2 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+          plot_perc_treated_constraint_in_proj2 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -3074,7 +3169,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_treated_constraint3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
+          plot_treated_constraint3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -3087,7 +3182,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-          plot_perc_treated_constraint_in_proj3 <- (suppressWarnings(suppressMessages(ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
+          plot_perc_treated_constraint_in_proj3 <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
             geom_point()+
             geom_line(linewidth=1)+
             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
@@ -3128,8 +3223,6 @@ set_forsysx_run <- function(input_shapefile,
         }}
 
     }
-
-
 
 
 
@@ -3237,6 +3330,9 @@ set_forsysx_run <- function(input_shapefile,
         summarise(m = mean(sub_id_package)) %>%
         st_cast()
 
+      my_breaks<-max(output_shp_run$ProjectNum)/4
+
+      my_breaks<-round(c(my_breaks,my_breaks*2,my_breaks*3,my_breaks*4),0)
 
 
       ttt <- my_shp  %>%
@@ -3249,7 +3345,7 @@ set_forsysx_run <- function(input_shapefile,
         theme(plot.title=element_text(hjust=0.5))+
         #guides(fill="none")+
         geom_sf(data=output_shp_run,aes(fill=ProjectNum),color=NA)+
-        scale_fill_viridis_c(option = "turbo",direction=-1)+
+        scale_fill_viridis_c(option = "turbo",direction=-1,breaks=my_breaks)+
         geom_sf(data=my_shp_subunits,color="black",fill=NA)+
         labs(fill='Project number')
 
@@ -3285,10 +3381,17 @@ set_forsysx_run <- function(input_shapefile,
       plot_data <- list()
       all_name_output_shiny <- data.frame()
 
+
       for(e in 1:length(number_scenarios_created)){
         output_shp_run_plot <- sf::st_read(paste(path_with_results,output_shp_run[[e]],sep="/"),quiet=TRUE)
 
         name_output_shiny <- output_shp_run[[e]]
+
+
+        my_breaks<-max(output_shp_run$ProjectNum)/4
+
+        my_breaks<-round(c(my_breaks,my_breaks*2,my_breaks*3,my_breaks*4),0)
+
 
         plot_data[[paste("ttt_", e, sep = "")]] <- my_shp  %>%
           #mutate_at(c('diss'), ~na_if(., 0)) %>%
@@ -3300,7 +3403,7 @@ set_forsysx_run <- function(input_shapefile,
           theme(plot.title=element_text(hjust=0.5))+
           #guides(fill="none")+
           geom_sf(data=output_shp_run_plot,aes(fill=ProjectNum),color=NA)+
-          scale_fill_viridis_c(option = "turbo",direction=-1)+
+          scale_fill_viridis_c(option = "turbo",direction=-1,breaks=my_breaks)+
           geom_sf(data=my_shp_subunits,color="black",fill=NA)+
           labs(fill='Project number')
 

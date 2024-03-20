@@ -69,7 +69,7 @@ The map below was generated using the input parameters provided for the proposed
   
 
 
-```{r echo=FALSE, fig.cap=paste("Figure 1.", sep=" ")}
+```{r echo=FALSE}
 #suppressWarnings(print(available_plot_leaflet))
 htmltools::tagList(available_plot_leaflet)
 ```
@@ -343,4 +343,11 @@ interpretation of any of the ForSys family products.
 If you found any error or issue, please open a new issue [here](https://github.com/forsys-sp/ForSysXR/issues) and provide a replicable example of your data and run settings.
 
 For further support please contact Michelle Day (michelle.day@usda.gov) or Alan Ager (alan.ager@oregonstate.edu)
+
+
+
+<!-- # Image from the Web -->
+
+<!-- ![Image from the web](https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Sporting_Clube_de_Portugal.svg/200px-Sporting_Clube_de_Portugal.svg.png) -->
+
 
