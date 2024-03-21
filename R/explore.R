@@ -54,6 +54,8 @@ explore <- function(input_shapefile,
 
 
 
+
+
   if(class(input_shapefile)[1]=="character"){
     input_shapefile_format <- substrRight(input_shapefile,4)
     if(input_shapefile_format!= ".shp")
@@ -68,7 +70,7 @@ explore <- function(input_shapefile,
     my_shp <- rmapshaper::ms_simplify(my_shp, keep = 0.05,
                                     keep_shapes = TRUE)
 
-    my_shp <- st_make_valid(my_shp)
+    my_shp <- sf::st_make_valid(my_shp)
     #if(max(nchar(names(my_shp)))>10){
     #  stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
     #}
@@ -94,10 +96,10 @@ explore <- function(input_shapefile,
 
   cat("Analysing data and preparing maps",'\n')
 
-  my_shp <- st_transform(my_shp, crs = 4326)
-  my_shp_df <- st_drop_geometry(my_shp)
+  my_shp <- sf::st_transform(my_shp, crs = 4326)
+  my_shp_df <- sf::st_drop_geometry(my_shp)
 
-  sf_use_s2(FALSE)
+  sf::sf_use_s2(FALSE)
   #study area contour
   my_shp$dissp <- 1
   my_shp_diss <- suppressMessages(suppressWarnings(my_shp %>%
@@ -192,7 +194,7 @@ explore <- function(input_shapefile,
         group_by(threshold_diss[,3][[1]]) %>%
         summarise(m = mean(threshold_diss[,3][[1]])) %>%
         #mutate(centrum = T) %>%
-        st_cast()
+        sf::st_cast()
 
 
 
@@ -333,7 +335,7 @@ explore <- function(input_shapefile,
 
   ###new plot test######
 
-  total_area <- sum(my_shp_df[,paste(area)][[1]])
+  total_area <- sum(my_shp_df[,paste(area)])
 
 
 
@@ -712,7 +714,7 @@ explore <- function(input_shapefile,
     land_cover_diss <- land_cover_diss %>%
       group_by(land_cover_diss[,1][[1]]) %>%
       summarise(m = mode(land_cover_diss[,1][[1]])) %>%
-      st_cast()
+      sf::st_cast()
 
     colnames(land_cover_diss)<-c("land_cover_use","m","geometry")
     land_cover_diss$land_cover_use <- factor(land_cover_diss$land_cover_use)
@@ -821,7 +823,7 @@ explore <- function(input_shapefile,
     land_ownership_diss <- land_ownership_diss %>%
       group_by(land_ownership_diss[,1][[1]]) %>%
       summarise(m = mode(land_ownership_diss[,1][[1]])) %>%
-      st_cast()
+      sf::st_cast()
 
     colnames(land_ownership_diss)<-c("land_ownership_use","m","geometry")
     land_ownership_diss$land_ownership_use <- factor(land_ownership_diss$land_ownership_use)
@@ -1313,7 +1315,7 @@ explore <- function(input_shapefile,
         #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
         my_shp_above_FL_threshold_available <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
         total_above_FL_threshold_available <- sum(my_shp_above_FL_threshold_available[,paste(area)][[1]])
-        total_above_FL_threshold_available_perc <- total_above_FL_threshold_available/total_area*100
+        total_above_FL_threshold_available_perc <- round(total_above_FL_threshold_available/total_area*100,1)
       }else{
         total_above_FL_threshold_available_perc<-NA
       }
@@ -1517,7 +1519,7 @@ explore <- function(input_shapefile,
           #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
           my_shp_above_FL_threshold_available_exclude_threshold <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
           total_above_FL_threshold_available_exclude_threshold <- sum(my_shp_above_FL_threshold_available_exclude_threshold[,paste(area)][[1]])
-          total_above_FL_threshold_available_exclude_threshold_perc <- total_above_FL_threshold_available_exclude_threshold/total_area*100
+          total_above_FL_threshold_available_exclude_threshold_perc <- round(total_above_FL_threshold_available_exclude_threshold/total_area*100,1)
 
 
           total_above_FL_threshold_available_exclude_threshold_perc_df<-c(total_above_FL_threshold_available_exclude_threshold_perc_df,total_above_FL_threshold_available_exclude_threshold_perc)
@@ -1738,7 +1740,7 @@ explore <- function(input_shapefile,
     }
 
     area_considered_table$`Area reduction` <- area_considered_table$`Area considered`- total_area
-    area_considered_table$`Residual area (% of total)` <- (total_area + area_considered_table$`Area reduction`)*100/total_area
+    area_considered_table$`Residual area (% of total)` <- round((total_area + area_considered_table$`Area reduction`)*100/total_area,1)
 
     name_obj_temp_final<-c("Area considered","Area reduction","Residual area (% of total)")
 
@@ -1755,15 +1757,15 @@ explore <- function(input_shapefile,
 
     for(h in 1:length(objectives)){
       #get_objectives_df_avai_excl
-      area_considered_table["Planning area",(h+3)] <- obj_total_landscape_final$objective_value[[h]]/obj_total_landscape_final$objective_value[[h]]*100
+      area_considered_table["Planning area",(h+3)] <- round(obj_total_landscape_final$objective_value[[h]]/obj_total_landscape_final$objective_value[[h]]*100,1)
 
 
       if(!missing(available)){
-        area_considered_table["Available land",(h+3)] <- get_objectives_df_avai$after_only_available[[h]]*100/obj_total_landscape_final$objective_value[[h]]
+        area_considered_table["Available land",(h+3)] <- round(get_objectives_df_avai$after_only_available[[h]]*100/obj_total_landscape_final$objective_value[[h]],1)
       }
 
       if(!missing(exclude_field)){
-        area_considered_table["Only not excluded",(h+3)] <- get_objectives_df_avai_excl$after_only_exclude[[h]]*100/obj_total_landscape_final$objective_value[[h]]
+        area_considered_table["Only not excluded",(h+3)] <- round(get_objectives_df_avai_excl$after_only_exclude[[h]]*100/obj_total_landscape_final$objective_value[[h]],1)
       }
 
       if(!missing(threshold)){
@@ -1773,7 +1775,7 @@ explore <- function(input_shapefile,
         for(w in 1:max(get_objectives_df_avai_excl_threshold$threshold_order)){
           get_objectives_df_final_loop <- subset(get_objectives_df_final_loop_h,threshold_order == w)
 
-          area_considered_table[paste("Meets", theshold_command_all_legend)[[w]],(h+3)] <- get_objectives_df_final_loop$objective_value*100/obj_total_landscape_final$objective_value[[h]]
+          area_considered_table[paste("Meets", theshold_command_all_legend)[[w]],(h+3)] <- round(get_objectives_df_final_loop$objective_value*100/obj_total_landscape_final$objective_value[[h]],1)
 
         }
 
@@ -1795,6 +1797,8 @@ explore <- function(input_shapefile,
 
 
       names(area_considered_table)[length(names(area_considered_table))]<-"Residual % of total area burning at high intensity"
+      area_considered_table$`Residual % of total area burning at high intensity`<-flame_length_col
+
     }
 
 

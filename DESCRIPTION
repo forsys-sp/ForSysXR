@@ -50,5 +50,8 @@ Imports:
     viridis (>= 0.6.4),
     colorspace (>= 2.1-0),
     leaflet.extras (>= 1.0.0),
-    pals (>= 1.8)
+    pals (>= 1.8),
+    rmapshaper (>= 0.5.0)
+Remotes:
+    r-spatial/leafgl
     

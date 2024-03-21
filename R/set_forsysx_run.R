@@ -1813,6 +1813,28 @@ set_forsysx_run <- function(input_shapefile,
         suppressWarnings(assign("caption_fig1","Location of the projects created by ForSysX. Warmer colors represent higher priority",pos = 1))
 
 
+        output_shp_run_treat <- subset(output_shp_run,Treat==1)
+
+        my_plot_projects_treat_report <- my_shp  %>%
+          #mutate_at(c('diss'), ~na_if(., 0)) %>%
+          #st_combine() %>%
+          ggplot2::ggplot() +
+          geom_sf(aes(fill=diss),fill="grey",color=NA) +
+          #ggtitle("Projects ranking") +
+          theme_void()+
+          theme(plot.title=element_text(hjust=0.5))+
+          #guides(fill="none")+
+          geom_sf(data=output_shp_run_treat,aes(fill=ProjectNum),color=NA)+
+          scale_fill_viridis_c(option = "turbo",direction=-1,breaks=my_breaks)+
+          geom_sf(data=my_shp_subunits,color="black",fill=NA)+
+          labs(fill='Project number')
+
+        suppressWarnings(assign("my_plot_projects_treat_report",my_plot_projects_treat_report,pos = 1))
+        suppressWarnings(assign("caption_fig2","Location of the stands targeted for treatment per project created by ForSysX. Warmer colors represent higher priority",pos = 1))
+
+
+
+
         #plot report_variables
         if(!missing(report_variables)){
 

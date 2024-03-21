@@ -1,9 +1,14 @@
 ---
 title: "ForSysXR Explore Report"
 subtitle: 'Assessment of proposed scenario'
-output: html_document
 date: "`r Sys.Date()`"
 author: "ForSys Consortium"
+output: 
+  rmdformats::robobook:
+    highlight: kate
+    toc_collapsed: FALSE 
+    toc_depth: 3
+    
 ---
 
 <!-- --- -->
@@ -12,7 +17,41 @@ author: "ForSys Consortium"
 <!-- always_allow_html: true -->
 <!-- --- -->
 
+<!-- <style type="text/css"> -->
+<!-- .main-container { -->
+<!--   max-width: 80% !important -->
+<!--   margin-left: auto; -->
+<!--   margin-right: auto; -->
+<!-- } -->
+<!-- </style> -->
 
+<!-- <style type="text/css"> -->
+<!-- .main-container { -->
+<!--   max-width: 150% !important; -->
+<!--   margin: auto; -->
+<!-- } -->
+<!-- </style> -->
+  
+  
+```{css, echo=FALSE}
+    body .page-inner {
+      max-width: 65% !important;
+      margin-left: auto;
+      margin-right: auto
+      
+    }
+    body .body-inner {
+      max-width: 100% !important;
+      margin-left: auto;
+      margin-right: auto
+      
+    }
+    body {
+      max-width: 100% !important;
+      margin-left: auto;
+      margin-right: auto
+    }
+```  
 
   
 ```{r setup, include=FALSE}

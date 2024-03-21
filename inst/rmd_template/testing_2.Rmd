@@ -93,13 +93,21 @@ introduction_table%>%
 
 ## Map of projects created
 
-The figure below shows the location of the projects created, color-codded by their ranking or priority. The project number 1 has a higher contribution for the objective(s) than project number 2, etc.
+The figure below shows the location of the projects created, color-codded by their ranking or priority. The project number 1 has a higher contribution for the objective(s) than project number 2, etc. Note that projects may include stands that are not targeted for treatment.
 
 
 
 ```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig1, sep=" ")}
 suppressWarnings(print(my_plot_projects_report))
 ```
+
+The figure below shows only the stands targeted for treatment, per project, color-codded by their ranking or priority. The project number 1 has a higher contribution for the objective(s) than project number 2, etc.
+
+
+```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig2, sep=" ")}
+suppressWarnings(print(my_plot_projects_treat_report))
+```
+
 
 
 

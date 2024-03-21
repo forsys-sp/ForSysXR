@@ -17,7 +17,7 @@ generate_report_explore <- function(#data,
   ## Render report into html
   suppressWarnings(rmarkdown::render(
     input = report_dir,
-    output_format = output_format,
+    #output_format = output_format,
     output_file = output_file,
     output_dir = output_dir,
     intermediates_dir = output_dir,
