@@ -41,6 +41,7 @@ set_forsysx_run(
   plot_results = FALSE,
   load_results = FALSE,
   build_report = FALSE,
+  build_interac_report = FALSE,
   report_variables,
   exe_path
 )
@@ -113,6 +114,8 @@ set_forsysx_run(
 \item{load_results}{Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE}
 
 \item{build_report}{Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
+
+\item{build_interac_report}{Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
 
 \item{report_variables}{Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created}
 

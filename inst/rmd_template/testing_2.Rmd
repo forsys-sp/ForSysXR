@@ -98,7 +98,16 @@ The figure below shows the location of the projects created, color-codded by the
 
 
 ```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig1, sep=" ")}
-suppressWarnings(print(my_plot_projects_report))
+if(exists("my_plot_projects_report")){
+suppressWarnings(print(my_plot_projects_report))  
+}
+
+```
+
+```{r echo=FALSE}
+if(exists("projects_plot_leaflet")){
+htmltools::tagList(projects_plot_leaflet)
+}
 ```
 
 The figure below shows only the stands targeted for treatment, per project, color-codded by their ranking or priority. The project number 1 has a higher contribution for the objective(s) than project number 2, etc.
