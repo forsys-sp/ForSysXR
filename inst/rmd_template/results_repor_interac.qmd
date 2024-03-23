@@ -32,8 +32,6 @@ author: "ForSys Consortium"
     }
 ```  
 
-
-
   
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message=FALSE, warnings=FALSE)
@@ -118,19 +116,10 @@ The figure below shows the location of the projects created, color-codded by the
 
 
 
-```{r echo=FALSE, fig.cap=paste("Figure 1.", caption_fig1, sep=" "),  fig.align = "center"}
-suppressWarnings(print(my_plot_projects_report))  
 
+```{r echo=FALSE}
+htmltools::tagList(projects_plot_leaflet)
 ```
-
-The figure below shows only the stands targeted for treatment, per project, color-codded by their ranking or priority. The project number 1 has a higher contribution for the objective(s) than project number 2, etc.
-
-
-```{r echo=FALSE, fig.cap=paste("Figure 2.", caption_fig2, sep=" "),  fig.align = "center"}
-suppressWarnings(print(my_plot_projects_treat_report))
-```
-
-
 
 
 
@@ -140,7 +129,7 @@ suppressWarnings(print(my_plot_projects_treat_report))
 The figures below show the attainment per project (top) and the cumulative attainment (bottom) for the effects stored. This figure
 is of particular interest when the effect is showed as PCP.
   
-```{r, echo=FALSE, fig.cap=paste("Figure 3.", attainment_fig_constraint1, sep=" "),fig.height = 10,  fig.align = "center"}
+```{r, echo=FALSE, fig.cap=paste("Figure 1.", attainment_fig_constraint1, sep=" "),fig.height = 10,  fig.align = "center"}
 suppressWarnings(print(plot_attainment_per_project_ggarranged))
 
 ```
@@ -150,22 +139,24 @@ suppressWarnings(print(plot_attainment_per_project_ggarranged))
 
 ### Amount of constraint treated
 
-```{r, echo=FALSE, fig.cap=paste("Figure 4.", caption_fig_constraint1, sep=" "),fig.height = 10,  fig.align = "center"}
+```{r, echo=FALSE, fig.cap=paste("Figure 2.", caption_fig_constraint1, sep=" "),fig.height = 10,  fig.align = "center"}
 suppressWarnings(print(plot_treated_constraint_in_proj_ggarrange))
 
 ```
-
 
 ```{r, echo=FALSE}
 if(exists("my_plot_variables_bars_report")){
   asis_output("### Costum variables\\n")}
 ```
 
-```{r, echo=FALSE, fig.cap=paste("Figure 5.", caption_report_variables, sep=" "),fig.height = fig.height_variables_bars,  fig.align = "center"}
+
+```{r, echo=FALSE, fig.cap=paste("Figure 3.", caption_report_variables, sep=" "),fig.height = fig.height_variables_bars,  fig.align = "center"}
 if(exists("my_plot_variables_bars_report")){
-suppressWarnings(print(my_plot_variables_bars_report))}  
+suppressWarnings(print(my_plot_variables_bars_report))}
 
 ```
+
+
 
 
 
@@ -201,8 +192,7 @@ If you found any error or issue, please open a new issue [here](https://github.c
 For further support please contact Michelle Day (michelle.day@usda.gov) or Alan Ager (alan.ager@oregonstate.edu)    
 
 ```{r, include = FALSE, echo=FALSE,message = FALSE,warning = FALSE}
-if(build_interac_report==FALSE){
 (rm(list = ls()[grep("attainment_fig_constraint1", ls())], envir = globalenv()))
     (rm(list = ls()[grep("caption_fig_constraint1", ls())], envir = globalenv()))
-    (rm(list = ls()[grep("caption_fig1", ls())], envir = globalenv()))}
+    (rm(list = ls()[grep("caption_fig1", ls())], envir = globalenv()))
 ```
