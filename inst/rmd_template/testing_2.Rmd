@@ -78,7 +78,7 @@ load("my_work_space_vs2.RData")
 ```{r, echo=FALSE}
 
 
-htmltools::img(src = knitr::image_uri(paste(system.file("help/figures", package = "ForSysXR"),"forsys_consortium_logo.png",sep="/")), 
+htmltools::img(src = knitr::image_uri(paste(system.file("help/figures", package = "ForSysXR"),"FORSYS_logo_small.png",sep="/")), 
                alt = 'logo', 
                style = 'position:absolute; top:0; right:0; padding:10px; width: 394px; height: 125px') # Added width and height as CSS
 ```

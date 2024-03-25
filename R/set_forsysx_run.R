@@ -1890,6 +1890,26 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
+      ###plotly####
+
+      # jp<-ggplot(treated_per_variable, aes_string(x = "ProjectNumber", y = "Area_treated", fill = report_variables[w])) +
+      #   geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+      #   xlab("Project rank") +
+      #   ylab("Area treated") +
+      #   cowplot::theme_cowplot() +
+      #   scale_fill_manual(values = as.vector(pals::kovesi.isoluminant_cgo_80_c38(length(unique(treated_per_variable[[2]])))),
+      #                     name = report_variables[w]) +
+      #   scale_x_continuous(breaks = my_breaks) +
+      #   theme(legend.position = "bottom",
+      #         legend.box = "horizontal",
+      #         legend.box.just = "center",
+      #         legend.title = element_text(hjust = 0.5),
+      #         legend.text = element_text(hjust = 0.5),
+      #         legend.justification = "center")
+      #
+      # plotly::ggplotly(jp)
+
+
     })
 
 
