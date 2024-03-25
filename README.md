@@ -1085,7 +1085,7 @@ set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_norma
 Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
-> Aparício, B.A., Bunzel, K., Day, M. and  Ager A. (2024).
+> Aparício, B.A., Bunzel, K., Day, M. and  Ager, A. (2024).
 > ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model. R package version 0.9. Available at
 > <https://https://github.com/forsys-sp/ForSysXR>.
 
