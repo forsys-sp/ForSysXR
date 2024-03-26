@@ -1,7 +1,7 @@
 # ForSysXR
 
 
-<img src="man/figures/forsys_consortium_logo.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
+<img src="man/figures/FORSYS_logo_small.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
 
 <!--- README.md is generated from README.Rmd. Please edit that file -->
 
