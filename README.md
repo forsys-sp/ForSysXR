@@ -1,7 +1,8 @@
+<img src="man/figures/FORSYS_logo_small.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
+
 # ForSysXR
 
 
-<img src="man/figures/forsys_consortium_logo.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
 
 <!--- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -1052,7 +1053,7 @@ explore (input_shapefile = stands_data,
 ```
 ### After running ForSys 
 The ForSysXR package allows the user to automatically generate a post-ForSys run report with the most typical analysis. This includes plotting the projects, quantifying the attainment of different objectives, and illustrating trade-offs.
-To generate this report, the user has to add the parameter ```build_report = TRUE```
+To generate this report, the user has to add the parameters ```build_report = TRUE``` and/or ```build_interac_report = TRUE``` to export an HTML with interactive maps that the user can toggle. 
 
 ``` r
 set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_normalized.shp",sep="/"),
@@ -1085,7 +1086,7 @@ set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_norma
 Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
-> Aparício, B.A., Bunzel, K., Day, M. and  Ager A. (2023).
+> Aparício, B.A., Bunzel, K., Day, M. and  Ager, A. (2024).
 > ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model. R package version 0.9. Available at
 > <https://https://github.com/forsys-sp/ForSysXR>.
 
