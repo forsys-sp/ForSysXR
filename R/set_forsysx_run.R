@@ -97,7 +97,6 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-
   if (file.exists(output_xml)) {
     #Delete file if it exists
     file.remove(output_xml)
@@ -1346,17 +1345,28 @@ set_forsysx_run <- function(input_shapefile,
 
 
       }else{
+        df_loop_effects_per_proj_final <- data.frame()
         for(x in 1:all_effects){
           my_effect_chosen <- effect_fields[x]
-          df_loop_effects <- prj_results[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen))]
+          df_loop_effects <- prj_results[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),paste0("Treat_",area))]
+
+          df_loop_effects_per_proj <- df_loop_effects
+
           df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
 
 
-          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "effect_name")
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Treat_Area","effect_name")
 
           df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+          df_loop_effects$area_cumulative <- cumsum(df_loop_effects$Treat_Area)
 
           df_loop_effects_final<-rbind(df_loop_effects_final,df_loop_effects)
+
+
+          df_loop_effects_per_proj$effect_name <- names(df_loop_effects_per_proj)[2]
+          colnames(df_loop_effects_per_proj)<-c("ProjectNumber", "treated_value","Treat_Area","effect_name")
+
+          df_loop_effects_per_proj_final<-rbind(df_loop_effects_per_proj_final,df_loop_effects_per_proj)
 
         }
 
@@ -1367,6 +1377,8 @@ set_forsysx_run <- function(input_shapefile,
                                                                             geom_point()+
                                                                             geom_line(linewidth=1)+
                                                                             scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                            scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                                               name = "Effect name") +
                                                                             xlab("Project number")+
                                                                             ylab("Objective attainment")+
                                                                             labs(color = "Effect name",tag="a)")+
@@ -1377,11 +1389,13 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=area_cumulative,y=effect_cumulative,color=effect_name))+
                                                                                 geom_point()+
                                                                                 geom_line(linewidth=1)+
-                                                                                scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
-                                                                                xlab("Project number")+
+                                                                                #scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                                scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                                                  name = "Effect name") +
+                                                                                xlab("Area treated")+
                                                                                 ylab("Cumulative objective attainment")+
                                                                                 labs(color = "Effect name",tag="b)")+
                                                                                 theme_classic())))
@@ -1391,6 +1405,29 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
+
+        #barplot
+
+
+
+        plot_attainment_per_project_barplot <- ggplot(df_loop_effects_per_proj_final, aes(x = ProjectNumber, y = treated_value, fill = effect_name)) +
+          geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+          xlab("Project rank") +
+          ylab("Objective treated") +
+          cowplot::theme_cowplot() +
+          scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                            name = "Effect") +
+          #scale_fill_discrete(name = "Effect")+
+          #scale_x_continuous(breaks = my_breaks) +
+          theme(legend.position = "bottom",
+                legend.box = "horizontal",
+                legend.box.just = "center",
+                legend.title = element_text(hjust = 0.5),
+                legend.text = element_text(hjust = 0.5),
+                legend.justification = "center")+
+          geom_segment(aes(x = 0.5, y = 0, xend = (max(ProjectNumber)+0.5), yend = 0),linewidth=1)
+
+        suppressWarnings(assign("plot_attainment_per_project_barplot",plot_attainment_per_project_barplot,pos = 1))
 
 
       }

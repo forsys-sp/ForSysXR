@@ -89,6 +89,7 @@ normalize_objectives <- function(stands, fields=NULL, availability_txt=NULL, out
     sf::st_write(stands,paste(stands_original_name),append=FALSE)
   }
 
-  return(head(stands))
+
+  return(stands)
 
   }

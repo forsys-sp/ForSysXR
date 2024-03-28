@@ -10,6 +10,7 @@
 #' @param objectives Vector containing the objective(s) field from input_shapefile
 #' @param threshold Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic
 #' @param threshold_logic Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")
+#' @param subunit_field Field from input_shapefile identifying the pre-defined planning areas
 #' @param burn_probability Field from input_shapefile containing the average burn probability
 #' @param flame_length Vector containing the field from input_shapefile with the expected flame length and the units (meters or feet)
 #' @param report_name Name to be used in the html report file
@@ -46,11 +47,10 @@ explore <- function(input_shapefile,
                     threshold_logic = c("single_value","and"),
                     burn_probability,
                     flame_length,
-                    export_static_report = FALSE
-                    #subunit_field,
+                    export_static_report = FALSE,
+                    subunit_field
                     #master_subunit
 ) {
-
 
 
 
@@ -70,7 +70,7 @@ explore <- function(input_shapefile,
     my_shp <- rmapshaper::ms_simplify(my_shp, keep = 0.05,
                                     keep_shapes = TRUE)
 
-    my_shp <- sf::st_make_valid(my_shp)
+    #my_shp <- sf::st_make_valid(my_shp)
     #if(max(nchar(names(my_shp)))>10){
     #  stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
     #}
@@ -90,24 +90,90 @@ explore <- function(input_shapefile,
     my_shp <- rmapshaper::ms_simplify(my_shp, keep = 0.05,
                                       keep_shapes = TRUE)
 
+    #my_shp <- st_make_valid(my_shp)
+  }
+
+
+  valids<-st_is_valid(my_shp)
+  unique(valids)
+
+  if(any(valids == FALSE)){
+    cat("Problems with geometry. Trying to fix",'\n')
     my_shp <- st_make_valid(my_shp)
+
+    valids<-st_is_valid(my_shp)
+    unique(valids)
+    if(any(valids == TRUE)){
+      cat("Geometry problems fixed",'\n')
+      }
   }
 
 
   cat("Analysing data and preparing maps",'\n')
 
+
+  sf::sf_use_s2(FALSE)
+
   my_shp <- sf::st_transform(my_shp, crs = 4326)
   my_shp_df <- sf::st_drop_geometry(my_shp)
 
-  sf::sf_use_s2(FALSE)
+
   #study area contour
   my_shp$dissp <- 1
-  my_shp_diss <- suppressMessages(suppressWarnings(my_shp %>%
-    group_by(dissp) %>%
-    summarise(m = mean(dissp)) %>%
-    sf::st_cast()))
+
+
+  my_shp<-sf::st_buffer(my_shp,dist=0)
+
+  my_shp2 <- geos::as_geos_geometry(my_shp)
+
+  my_shp_diss <- suppressMessages(suppressWarnings(my_shp2 %>%
+                      #geos::geos_buffer(distance = 0)%>%
+                      geos::geos_make_collection() %>%
+                      geos::geos_unary_union()))
+
+  my_shp_diss <- sf::st_as_sf(my_shp_diss)
+
+  my_shp_diss<-suppressWarnings(my_shp_diss%>%
+                                  sf::st_cast("MULTIPOLYGON") %>%
+                                  sf::st_cast("POLYGON"))
+
+
+  #maybe also linestring because this is only to plot the border#
+  my_shp_diss_line<-suppressWarnings(my_shp_diss%>%
+                                       sf::st_cast("MULTIPOLYGON") %>%
+                                       sf::st_cast("POLYGON") %>%
+                                       sf::st_cast("LINESTRING"))
 
   my_shp_use_gl<-sf::st_cast(my_shp,"POLYGON")
+
+
+  if(!missing(subunit_field)){
+    my_shp_subunit_diss_final_poly <- suppressWarnings(suppressMessages(my_shp %>%
+                                      group_by(get(subunit_field)) %>%
+                                      summarise(m = 0) %>%
+                                        sf::st_cast()))
+
+    my_shp_subunit_diss_final_poly_gl <- my_shp_subunit_diss_final_poly%>%
+      sf::st_cast("MULTIPOLYGON")%>%
+      #sf::st_cast("LINESTRING")%>%
+      sf::st_cast("POLYGON") #%>%
+  }
+
+
+
+
+
+
+
+
+
+  # my_shp_diss_polygon<-suppressWarnings(my_shp_diss%>%
+  #                                         sf::st_cast("MULTIPOLYGON") %>%
+  #                                         sf::st_cast("POLYGON"))
+
+
+
+
 
   #plotting
 
@@ -349,7 +415,7 @@ explore <- function(input_shapefile,
 
     flame_length_logical <- paste(flame_length[1],flame_length_unit,sep=" ")
     my_shp_above_FL_threshold <- subset(my_shp_df,eval(parse(text=flame_length_logical)))
-    total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area)][[1]])
+    total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area)])
     total_area_above_FL_threshold_perc <- total_area_above_FL_threshold/total_area*100
 
   }
@@ -357,7 +423,7 @@ explore <- function(input_shapefile,
 
 
   if(!missing(burn_probability)){
-    total_expected_ba_year <- sum(my_shp_df[,paste(area)][[1]]*my_shp_df[,paste(burn_probability)][[1]])
+    total_expected_ba_year <- sum(my_shp_df[,paste(area)]*my_shp_df[,paste(burn_probability)])
   }
 
 
@@ -374,10 +440,123 @@ explore <- function(input_shapefile,
     #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
     #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
 
-    leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
-                         color = 'black', opacity=1,  weight=1, label=NA)
+    leafgl::addGlPolylines(data = my_shp_diss_line,
+                         color = "black",
+                         weight = 0.5)
+
+
+    # leaflet::addPolygons(data = my_shp_diss, fillColor = NA, fillOpacity = 0,
+    #                      color = 'black', opacity=1,  weight=1, label=NA)
     #leafgl::addGlPolygons(data = my_shp, fillColor = NA, fillOpacity = 0,
     #                    color = 'black', opacity=1,  weight=1, label=NA)
+
+
+
+
+
+  if(!missing(subunit_field)){
+
+
+    #colourvalues::colour_palettes()
+
+#
+#
+#     colnames(my_shp_subunit_diss_final_poly_gl)<-c("subunit","m","geometry")
+#
+#     #q4_palette <- colorspace::sequential_hcl(15, palette = "sunset")
+#
+#     cols=colourvalues::colour_values_rgb(my_shp_subunit_diss_final_poly_gl[,paste("subunit")][[1]],  palette = "diverge_hcl",include_alpha = FALSE)/ 255
+#
+#     palFunc_landcover <- leaflet::colorFactor("RdYlBu",
+#                                               my_shp_subunit_diss_final_poly_gl$subunit)
+#
+#
+#     #palFunc_landcover <- leaflet::colorFactor(terrain.colors(nrow(my_shp_subunit_diss_final_poly)), my_shp_subunit_diss_final_poly$subunit)
+#
+#
+
+
+    colnames(my_shp_subunit_diss_final_poly)<-c("subunit","m","geometry")
+
+    #q4_palette <- colorspace::sequential_hcl(15, palette = "sunset")
+
+    cols=colourvalues::colour_values_rgb(my_shp_subunit_diss_final_poly[,paste("subunit")][[1]],  palette = "diverge_hcl",include_alpha = FALSE)/ 255
+
+    palFunc_landcover <- leaflet::colorFactor("RdYlBu",
+                                              my_shp_subunit_diss_final_poly$subunit)
+
+
+
+
+
+
+
+
+    available_plot_leaflet <- leaflet::leaflet() %>%
+    leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+    #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+    #leafgl::addGlPolylines(data = my_shp_subunit_diss_final_line,
+    #                       color = "grey40",
+    #                       weight = 0.5,
+    #                       group = 'subunit')%>%
+
+    leafgl::addGlPolylines(data = my_shp_diss_line,
+                           color = "black",
+                           weight = 0.5)%>%
+
+      leaflet::addPolygons(data = my_shp_subunit_diss_final_poly,
+                           fillColor = ~palFunc_landcover(subunit),
+                           fillOpacity = 0.75,
+                           color = 'black',
+                           opacity = 1,
+                           weight=0.5,
+                           label = ~subunit ,stroke = TRUE,
+                           highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                           group = 'subunit')%>%
+
+
+#
+#     leafgl::addGlPolygons(data = my_shp_subunit_diss_final_poly_gl,
+#                             #cols_fill= cols,
+#                             #cols_fill = NA,
+#                             fillOpacity = 0.75,
+#                             color = cols,
+#                             opacity = 1,
+#                             weight=0.5,
+#                             #popup = "landuse",
+#                             #label = ~landuse,
+#                             weight = 0.1,
+#                             #opacity=1,
+#                             #weight=1,
+#                             #label=NA,
+#                             highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+#                             group = "subunit")%>%
+
+  leaflet::addLegend(data=my_shp_subunit_diss_final_poly_gl, "topright",
+                     #colors = rgb(cols),
+                     pal = palFunc_landcover,
+                     values = ~my_shp_subunit_diss_final_poly_gl$subunit ,
+                     title = "Subunits",
+                     #labels = c("No", "Yes"),
+                     group = "subunit",
+                     opacity = 1)
+
+    # leaflet::addLegend(data=my_shp_subunit_diss_final_line, "topright",
+    #                  colors = "grey40",
+    #                  #pal = palFunc,
+    #                  #values = ~available_cha ,
+    #                  title = "Subunits",
+    #                  labels = c("Yes"),
+    #                  group = "subunit",
+    #                  opacity = 0.5)
+    #
+
+  all_groups_leaflet<-c(all_groups_leaflet,"subunit")
+
+  }
 
   ###############
 
@@ -1303,7 +1482,7 @@ explore <- function(input_shapefile,
 
   #combination_area_sf <- my_shp_df
 
-
+###aqui#####
 
   if(!missing(objectives)){
     if(!missing(available)){
@@ -1794,9 +1973,9 @@ explore <- function(input_shapefile,
 
       #exclude NAs
       flame_length_col <- flame_length_col[!is.na(flame_length_col)]
+      flame_length_col <- round(flame_length_col,1)
 
-
-      names(area_considered_table)[length(names(area_considered_table))]<-"Residual % of total area burning at high intensity"
+      #names(area_considered_table)[length(names(area_considered_table))]<-"Residual % of total area burning at high intensity"
       area_considered_table$`Residual % of total area burning at high intensity`<-flame_length_col
 
     }
@@ -1811,12 +1990,12 @@ explore <- function(input_shapefile,
       burn_probability_col <- burn_probability_col[!is.na(burn_probability_col)]
 
 
-      names(area_considered_table)[length(names(area_considered_table))]<-"Expected fire impacts"
-
+      #names(area_considered_table)[length(names(area_considered_table))]<-"Expected fire impacts"
+      area_considered_table$`Expected fire impacts`<-burn_probability_col
 
       for(t in  1:length(objectives)){
-        area_considered_table$fire_impact_on_priority <- area_considered_table$`Expected fire impacts`*area_considered_table[,paste(objectives[t])]
-        area_considered_table$fire_impact_on_priority <- area_considered_table$fire_impact_on_priority*100/area_considered_table$fire_impact_on_priority[1]
+        area_considered_table$fire_impact_on_priority <- round(area_considered_table$`Expected fire impacts`*area_considered_table[,paste(objectives[t])],1)
+        area_considered_table$fire_impact_on_priority <- round(area_considered_table$fire_impact_on_priority*100/area_considered_table$fire_impact_on_priority[1],1)
         names(area_considered_table)[length(names(area_considered_table))]<-paste("Expected fire impacts on",objectives[t],"(% burned per year)",sep=" ")
       }
     }

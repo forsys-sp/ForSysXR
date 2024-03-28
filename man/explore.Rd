@@ -18,7 +18,8 @@ explore(
   threshold_logic = c("single_value", "and"),
   burn_probability,
   flame_length,
-  export_static_report = FALSE
+  export_static_report = FALSE,
+  subunit_field
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ explore(
 \item{flame_length}{Vector containing the field from input_shapefile with the expected flame length and the units (meters or feet)}
 
 \item{export_static_report}{Logical. If TRUE, then an additional HTML report will be saved with static figures. Default is FALSE}
+
+\item{subunit_field}{Field from input_shapefile identifying the pre-defined planning areas}
 }
 \description{
 Explore defined data and ForSysX run before the run

@@ -80,7 +80,7 @@ load("my_work_space_vs2.RData")
 
 htmltools::img(src = knitr::image_uri(paste(system.file("help/figures", package = "ForSysXR"),"FORSYS_logo_small.png",sep="/")), 
                alt = 'logo', 
-               style = 'position:absolute; top:0; right:0; padding:10px; width: 394px; height: 125px') # Added width and height as CSS
+               style = 'position:absolute; top:0; right:0; padding:10px; width: 143; height: 128px') # Added width and height as CSS
 ```
 
 ## Settings used
@@ -144,6 +144,15 @@ is of particular interest when the effect is showed as PCP.
 suppressWarnings(print(plot_attainment_per_project_ggarranged))
 
 ```
+
+The figure below show the attainment for all effects reported, per project. This figure is of particular interest when the effect is showed as PCP.
+
+```{r, echo=FALSE, fig.cap=paste("Figure 4.", sep=" "),fig.height = 5,  fig.align = "center"}
+suppressWarnings(print(plot_attainment_per_project_barplot))
+
+```
+
+
 
 
 ## Additional resources
