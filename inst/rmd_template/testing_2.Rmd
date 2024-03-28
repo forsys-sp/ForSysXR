@@ -167,7 +167,7 @@ suppressWarnings(print(plot_treated_constraint_in_proj_ggarrange))
 
 ```{r, echo=FALSE}
 if(exists("my_plot_variables_bars_report")){
-  asis_output("### Costum variables\\n")}
+  asis_output("### Custom variables\\n")}
 ```
 
 ```{r, echo=FALSE, fig.cap=paste("Figure 5.", caption_report_variables, sep=" "),fig.height = fig.height_variables_bars,  fig.align = "center"}
@@ -179,9 +179,20 @@ suppressWarnings(print(my_plot_variables_bars_report))}
 
 
 
-### R Code used in set_forsysx_run
+```{r, echo=FALSE}
+if(exists("commands_given_print")){
+  asis_output("### R Code used in set_forsysx_run\\n")}
+```
 
-The inputed R code in the function set_forsysx_run is displayed below
+```{r, echo=FALSE, results='asis'}
+if(exists("commands_given_print")){
+  cat("The inputed R code in the function set_forsysx_run is displayed below \n")}
+```
+
+
+<!-- ### R Code used in set_forsysx_run -->
+
+<!-- The inputed R code in the function set_forsysx_run is displayed below -->
 ```{r}
 #cat(paste(commands_given_print), sep="\n",fill = TRUE,include=FALSE)
 # 
@@ -194,8 +205,8 @@ The inputed R code in the function set_forsysx_run is displayed below
 # most_recent_set_forsysx_run <- max(all_matching_set_forsysx_run)
 # 
 # commands_given_print <- my_list_input_variable$Last.command[most_recent_set_forsysx_run:length(my_list_input_variable$Last.command)]
-
-cat(commands_given_print,fill = TRUE)#,include=FALSE)
+if(exists("commands_given_print")){
+cat(commands_given_print,fill = TRUE)}#,include=FALSE)
 ```
 
 
