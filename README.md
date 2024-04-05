@@ -887,7 +887,7 @@ for(i in 1:3){
                    y_coordinate = "Point_Y",
                    max_number_projects = 1,
                    output_adjacency_matrix = "C:/Users/ForSysXR/temp_folder_shp",
-                   constraints = c("Area_ha", 500, 1.00),
+                   constraints = c("area_ha", 500, 1.00),
                    effect_fields = c("ob2_PCP"),
                    objectives = c("ob2_SPM","Treat","1","1","1"),
                    output_xml = paste("C:/Users/ForSysXR/temp_folder_shp/test_tutorial_zones_",i,".xml",sep=""),
