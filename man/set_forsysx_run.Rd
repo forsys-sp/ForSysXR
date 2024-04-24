@@ -32,7 +32,9 @@ set_forsysx_run(
   threshold,
   threshold_logic = c("single_value", "and"),
   subunit_field,
-  master_subunit,
+  master_subunit_field,
+  constaints_master_subunits,
+  constraint_by_master_subunit = FALSE,
   output_xml,
   run_forsysx,
   save_outputs,
@@ -97,7 +99,11 @@ set_forsysx_run(
 
 \item{subunit_field}{Field from input_shapefile identifying the pre-defined planning areas}
 
-\item{master_subunit}{If master subunits should be used}
+\item{master_subunit_field}{Optional. Master subunit field if enabling master subunits.}
+
+\item{constaints_master_subunits}{Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE}
+
+\item{constraint_by_master_subunit}{If constraints by master subunit should be used. Default is FALSE.}
 
 \item{output_xml}{Path and name (with xml extention) where the xml file for the run should be stored.}
 
