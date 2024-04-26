@@ -587,7 +587,7 @@ set_forsysx_run (input_shapefile = stands_data,
 
 The figure above shows the projects when considering the same threshold as previously but with an inverse distance power of 3. As illustrated, now the projects are more clustered together than when not using any IDP.
 
-A compreheensive comparison between using IDP or maximum project diameters is shown <a href="https://www.forsysplanning.org/learn/control-project-shape" target="_blank">here</a>.
+A compreheensive comparison between using IDP or maximum project diameters is shown [here](https://www.forsysplanning.org/learn/control-project-shape).
 
 ## Multiple priorities
 
