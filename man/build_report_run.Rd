@@ -10,14 +10,14 @@ build_report_run(
   effect_fields,
   area,
   subunit_field = NULL,
-  report_variables,
+  report_variables = NULL,
   static = TRUE,
-  interactive = FALSE,
+  interac = FALSE,
   write_commands = FALSE
 )
 }
 \arguments{
-\item{interactive}{}
+\item{interac}{}
 }
 \description{
 Title

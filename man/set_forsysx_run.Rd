@@ -44,7 +44,7 @@ set_forsysx_run(
   load_results = FALSE,
   build_report = FALSE,
   build_interac_report = FALSE,
-  report_variables,
+  report_variables = NULL,
   exe_path
 )
 }

@@ -51,7 +51,8 @@ Imports:
     colorspace (>= 2.1-0),
     leaflet.extras (>= 1.0.0),
     pals (>= 1.8),
-    rmapshaper (>= 0.5.0)
+    rmapshaper (>= 0.5.0),
+    geos(>= 0.2.4)
 Remotes:
     r-spatial/leafgl
     

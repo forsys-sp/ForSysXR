@@ -7,7 +7,7 @@
 #' @param subunit_field
 #' @param report_variables
 #' @param static
-#' @param interactive
+#' @param interac
 #'
 #' @return
 #' @export
@@ -18,9 +18,9 @@ build_report_run<-function(outputs_base_name,
                            effect_fields,
                            area,
                            subunit_field=NULL,
-                           report_variables,
+                           report_variables=NULL,
                            static=TRUE,
-                           interactive=FALSE,
+                           interac=FALSE,
                            write_commands=FALSE){
 
 
@@ -39,7 +39,7 @@ build_report_run<-function(outputs_base_name,
   last_name <- all_elements[,ncol(all_elements)]
 
 
-    output_summary_run = intersect(list.files(path_with_results, "Summary.txt$"), list.files(path_with_results,pattern = last_name))
+    output_summary_run = intersect(list.files(path_with_results, "Summary.txt$"), list.files(path_with_results,pattern = paste(last_name,"_Summary.txt$",sep="")))
 
 
 
@@ -58,9 +58,17 @@ build_report_run<-function(outputs_base_name,
 
     outputs_saved_shp <- outputs_saved_shp[!grepl(pattern = "_stand_data.shp$", x = outputs_saved_shp)]
 
+
+
     stand_csv_saved<-outputs_saved[grepl(pattern = ".csv$", x = outputs_saved)]
 
     stand_csv_saved <- stand_csv_saved[!grepl(pattern = "_Results.csv$", x = stand_csv_saved)]
+
+
+    if(!is.null(subunit_field)){
+      outputs_saved_shp <- outputs_saved_shp[grepl(pattern = paste(last_name,subunit_field,sep="_"), x = outputs_saved_shp)]
+      stand_csv_saved <- stand_csv_saved[grepl(pattern = paste(last_name,subunit_field,sep="_"), x = stand_csv_saved)]
+    }
 
 
 
@@ -85,12 +93,31 @@ build_report_run<-function(outputs_base_name,
 
       df_loop_effects_final <- data.frame()
 
+      my_palette_brewer.dark2 <- pals::brewer.dark2(8)
+      unique_effect_names <- unique(paste0("ETrt_",effect_fields))
+      color_mapping_brewer.dark2 <- setNames(my_palette_brewer.dark2[1:length(unique_effect_names)], unique_effect_names)
+
 
       if(length(prj_results$Subunit)>0){
 
+        #limit to 6 subunits
+        if(length(unique(prj_results$Subunit))>6){
+          prj_results_use <- prj_results[order(prj_results$Subunit),]
+
+          subunits_sample_use <- unique(prj_results_use$Subunit)[1:6] %>%
+            .[!is.na(.)]
+
+          subunits_sample_use
+          prj_results_use <- prj_results_use[prj_results_use$Subunit %in% subunits_sample_use]
+        }else{
+          prj_results_use <- prj_results
+        }
+
+
+
         for(x in 1:all_effects){
           my_effect_chosen <- effect_fields[x]
-          df_loop_effects <- prj_results[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),"Subunit")]
+          df_loop_effects <- prj_results_use[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),"Subunit")]
           df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
 
 
@@ -140,6 +167,187 @@ build_report_run<-function(outputs_base_name,
 
 
 
+        #barplots for subunits
+
+        max_scale_y <- max(df_loop_effects_final$effect)+(max(df_loop_effects_final$effect)*0.05)
+        min_scale_y <- min(df_loop_effects_final$effect)
+
+
+        if(min_scale_y>=0){
+          min_scale_y <- 0
+        }else{
+          min_scale_y <- min_scale_y -(min(df_loop_effects_final$effect)*0.05)
+        }
+
+
+
+
+
+        Pattern1_list_bar_attain <- lapply(unique(df_loop_effects_final$Subunit), function(b) {
+          plot_attainment_per_project_barplot_no_subs <- df_loop_effects_final %>%
+            filter(Subunit == b) %>%
+            ggplot(aes(x = ProjectNumber, y = effect, fill = effect_name)) +
+            geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+            xlab("Project rank") +
+            ylab("Objective treated") +
+            cowplot::theme_cowplot() +
+            #scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_final$effect_name)))),
+            #                  name = "Effect") +
+            scale_fill_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+            ggtitle(paste0("Subunit ", b)) +
+            ylim(min_scale_y, max_scale_y) +
+            theme(legend.position = "bottom",
+                  legend.box = "horizontal",
+                  legend.box.just = "center",
+                  legend.title = element_text(hjust = 0.5),
+                  legend.text = element_text(hjust = 0.5),
+                  legend.justification = "center") +
+            geom_segment(aes(x = 0.5, y = 0, xend = (max(ProjectNumber) + 0.5), yend = 0), linewidth = 1)
+
+          #suppressWarnings(assign(paste0("plot_attainment_per_project_barplot_", b), plot_attainment_per_project_barplot, pos = 1))
+        })
+
+
+
+        plot_attainment_per_project_barplot_no_subs<- ggpubr::ggarrange(plotlist=Pattern1_list_bar_attain,
+                                                                   ncol = 2,nrow=ceiling(length(Pattern1_list_bar_attain)/2),common.legend = TRUE)
+
+
+        suppressWarnings(assign("plot_attainment_per_project_barplot_no_subs",plot_attainment_per_project_barplot_no_subs,pos = 1))
+        suppressWarnings(assign("Pattern1_list_bar_attain",Pattern1_list_bar_attain,pos = 1))
+
+
+
+        #barplot for all subunits
+
+        df_loop_effects_final_allsubs <- data.frame()
+        for(x in 1:all_effects){
+          my_effect_chosen <- effect_fields[x]
+          df_loop_effects <- prj_results[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),"Subunit",paste0("Treat_",area))]
+          df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Subunit","Treat_Area","effect_name")
+
+          df_loop_effects <- df_loop_effects[order(df_loop_effects$Subunit),]
+
+          df_loop_effects_x<-as.data.frame(df_loop_effects%>%
+                                        group_by(ProjectNumber)%>%
+                                        reframe(effect = sum(effect),
+                                                Treat_Area = sum(Treat_Area),
+                                                effect_name=effect_name[1]))
+
+
+          #df_loop_effects <- df_loop_effects[order(df_loop_effects$Subunit),]
+          df_loop_effects_x$effect_cumulative <- cumsum(df_loop_effects_x$effect)
+          df_loop_effects_x$area_cumulative <- cumsum(df_loop_effects_x$Treat_Area)
+
+
+          df_loop_effects_final_allsubs<-rbind(df_loop_effects_final_allsubs,df_loop_effects_x)
+
+        }
+
+
+
+
+        plot_attainment_per_project_no_subunits <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final_allsubs,aes(x=ProjectNumber,y=effect,color=effect_name))+
+                                                                            geom_point()+
+                                                                            geom_line(linewidth=1)+
+                                                                            scale_x_continuous(breaks = 1:max(df_loop_effects_final_allsubs$ProjectNumber))+
+                                                                            xlab("Project number")+
+                                                                            ylab("Objective attainment")+
+                                                                            labs(color = "Effect name",tag="a)")+
+                                                                            theme_classic())))
+
+        suppressWarnings(assign("plot_attainment_per_project_no_subunits",plot_attainment_per_project_no_subunits,pos = 1))
+
+
+
+        plot_attainment_per_project_cum_no_subunits <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final_allsubs,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+                                                                                geom_point()+
+                                                                                geom_line(linewidth=1)+
+                                                                                scale_x_continuous(breaks = 1:max(df_loop_effects_final_allsubs$ProjectNumber))+
+                                                                                xlab("Project number")+
+                                                                                ylab("Cumulative objective attainment")+
+                                                                                labs(color = "Effect name",tag="b)")+
+                                                                                theme_classic())))
+
+        suppressWarnings(assign("plot_attainment_per_project_cum_no_subunits",plot_attainment_per_project_cum_no_subunits,pos = 1))
+
+
+
+        plot_attainment_per_project_ggarranged_no_subunits<- ggpubr::ggarrange(plot_attainment_per_project_no_subunits,plot_attainment_per_project_cum_no_subunits,
+                                                                   ncol = 1,nrow=2,common.legend = TRUE)
+
+
+        suppressWarnings(assign("plot_attainment_per_project_ggarranged_no_subunits",plot_attainment_per_project_ggarranged_no_subunits,pos = 1))
+
+
+
+
+        df_loop_effects_per_proj_final_no_subs <- data.frame()
+        for(x in 1:all_effects){
+          my_effect_chosen <- effect_fields[x]
+          df_loop_effects <- prj_results_use[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),paste0("Treat_",area))]
+
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Treat_Area")
+
+          df_loop_effects<-data.frame(df_loop_effects%>%
+            group_by(ProjectNumber)%>%
+            summarise(effect_use = sum(effect),
+                      Treat_Area_use = sum(Treat_Area),
+                      effect_name = paste0("ETrt_",my_effect_chosen)))
+
+          df_loop_effects_per_proj <- df_loop_effects
+
+          df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Treat_Area","effect_name")
+
+          df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+          df_loop_effects$area_cumulative <- cumsum(df_loop_effects$Treat_Area)
+
+          df_loop_effects_final_allsubs<-rbind(df_loop_effects_final_allsubs,df_loop_effects)
+
+
+          df_loop_effects_per_proj$effect_name <- df_loop_effects_per_proj$effect_name[1]
+          colnames(df_loop_effects_per_proj)<-c("ProjectNumber", "treated_value","Treat_Area","effect_name")
+
+          df_loop_effects_per_proj_final_no_subs<-rbind(df_loop_effects_per_proj_final_no_subs,df_loop_effects_per_proj)
+
+        }
+
+
+        plot_attainment_per_project_barplot <- ggplot(df_loop_effects_per_proj_final_no_subs, aes(x = ProjectNumber, y = treated_value, fill = effect_name)) +
+          geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+          xlab("Project rank") +
+          ylab("Objective treated") +
+          cowplot::theme_cowplot() +
+          #scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final_no_subs$effect_name)))),
+          #                  name = "Effect") +
+          scale_fill_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+          #scale_fill_discrete(name = "Effect")+
+          #scale_x_continuous(breaks = my_breaks) +
+          theme(legend.position = "bottom",
+                legend.box = "horizontal",
+                legend.box.just = "center",
+                legend.title = element_text(hjust = 0.5),
+                legend.text = element_text(hjust = 0.5),
+                legend.justification = "center")+
+          geom_segment(aes(x = 0.5, y = 0, xend = (max(ProjectNumber)+0.5), yend = 0),linewidth=1)
+
+        suppressWarnings(assign("plot_attainment_per_project_barplot",plot_attainment_per_project_barplot,pos = 1))
+
+
+
+
+        #barplots for the subunits
+
+
+
+
+
       }else{
 
         df_loop_effects_per_proj_final <- data.frame()
@@ -175,14 +383,16 @@ build_report_run<-function(outputs_base_name,
         min_value_pcps <- min(unlist(df_loop_effects_final[,numeric_cols]))
 
 
+
         if(min_value_pcps<0){
           plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name))+
                                                                               geom_point()+
                                                                               geom_line(linewidth=1)+
                                                                               geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$ProjectNumber)+0.5), yend = 0,linewidth=1,color="black")+
                                                                               scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
-                                                                              scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
-                                                                                                 name = "Effect name") +
+                                                                              #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                              #                   name = "Effect name") +
+                                                                              scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
                                                                               xlab("Project number")+
                                                                               ylab("Objective attainment")+
                                                                               labs(color = "Effect name",tag="a)")+
@@ -198,8 +408,9 @@ build_report_run<-function(outputs_base_name,
                                                                                   geom_line(linewidth=1)+
                                                                                   geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$area_cumulative)+0.5), yend = 0,linewidth=1,color="black")+
                                                                                   #scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
-                                                                                  scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
-                                                                                                     name = "Effect name") +
+                                                                                  #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                                  #                   name = "Effect name") +
+                                                                                  scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
                                                                                   xlab("Area treated")+
                                                                                   ylab("Cumulative objective attainment")+
                                                                                   labs(color = "Effect name",tag="b)")+
@@ -219,8 +430,9 @@ build_report_run<-function(outputs_base_name,
                                                                               geom_line(linewidth=1)+
                                                                               #geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$ProjectNumber)+0.5), yend = 0,linewidth=1,color="black")+
                                                                               scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
-                                                                              scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
-                                                                                                 name = "Effect name") +
+                                                                              #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                              #                   name = "Effect name") +
+                                                                              scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
                                                                               xlab("Project number")+
                                                                               ylab("Objective attainment")+
                                                                               labs(color = "Effect name",tag="a)")+
@@ -236,8 +448,9 @@ build_report_run<-function(outputs_base_name,
                                                                                   geom_line(linewidth=1)+
                                                                                   #geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$area_cumulative)+0.5), yend = 0,linewidth=1,color="black")+
                                                                                   #scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
-                                                                                  scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
-                                                                                                     name = "Effect name") +
+                                                                                  #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                                  #                   name = "Effect name") +
+                                                                                  scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
                                                                                   xlab("Area treated")+
                                                                                   ylab("Cumulative objective attainment")+
                                                                                   labs(color = "Effect name",tag="b)")+
@@ -261,8 +474,9 @@ build_report_run<-function(outputs_base_name,
           xlab("Project rank") +
           ylab("Objective treated") +
           cowplot::theme_cowplot() +
-          scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
-                            name = "Effect") +
+          #scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+          #                  name = "Effect") +
+          scale_fill_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
           #scale_fill_discrete(name = "Effect")+
           #scale_x_continuous(breaks = my_breaks) +
           theme(legend.position = "bottom",
@@ -276,6 +490,9 @@ build_report_run<-function(outputs_base_name,
         suppressWarnings(assign("plot_attainment_per_project_barplot",plot_attainment_per_project_barplot,pos = 1))
 
 
+        Pattern1_list_bar_attain <- 1
+
+        suppressWarnings(assign("Pattern1_list_bar_attain",Pattern1_list_bar_attain,pos = 1))
       }
 
 
@@ -707,7 +924,7 @@ build_report_run<-function(outputs_base_name,
 
 
       #plot report_variables
-      if(!missing(report_variables)){
+      if(!is.null(report_variables)){
 
         # output_shp_run_variable<-subset(output_shp_run,Treat==1)
         #
@@ -2231,7 +2448,7 @@ build_report_run<-function(outputs_base_name,
 
       suppressWarnings(assign("last_name",last_name,pos = 1)) #,pos = 1
 
-      suppressWarnings(assign("build_interac_report",interactive,pos = 1)) #,pos = 1
+      suppressWarnings(assign("build_interac_report_use",interac,pos = 1)) #,pos = 1
 
       path_for_rmd <- system.file("rmd_template", package = "ForSysXR")
       #setwd(system.file("rmd_template", package = "ForSysXR"))
@@ -2253,7 +2470,7 @@ build_report_run<-function(outputs_base_name,
 
 
 
-    if(interactive==TRUE){
+    if(interac==TRUE){
 
 
 
@@ -2669,7 +2886,7 @@ build_report_run<-function(outputs_base_name,
       cat("Generating interactive htlm report",'\n')
       setwd(path_with_results)
       #suppressWarnings(suppressMessages(generate_report()))
-      capture.output(suppressWarnings(suppressMessages(generate_report_interac(output_file=paste("report_",last_name,".html",sep="")))))
+      capture.output(suppressWarnings(suppressMessages(generate_report_interac(output_file=paste("report_interactive_",last_name,".html",sep="")))))
 
       #clean-up unecessary files
       # file.remove(paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))

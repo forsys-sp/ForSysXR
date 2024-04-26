@@ -95,9 +95,10 @@ set_forsysx_run <- function(input_shapefile,
                             load_results=FALSE,
                             build_report=FALSE,
                             build_interac_report=FALSE,
-                            report_variables,
+                            report_variables=NULL,
                             exe_path #,xml_path
                             ) {
+
 
 
 
@@ -192,14 +193,19 @@ set_forsysx_run <- function(input_shapefile,
 
 
   if(class(input_shapefile)[1]=="character"){
-    if(plot_results==TRUE | !missing(output_adjacency_matrix)){
+    if(plot_results==TRUE | !missing(output_adjacency_matrix) | build_report==TRUE | build_interac_report==TRUE){
     my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
 
     if(max(nchar(names(my_shp)))>10){
       stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
     }
 
-  }}
+    }}
+
+
+  # if(class(input_shapefile)[1]=="character"){
+  #   if(plot_results==TRUE | missing(output_adjacency_matrix)){
+  #     my_shp <- input_shapefile}}
 
 
 
@@ -1121,8 +1127,7 @@ set_forsysx_run <- function(input_shapefile,
     xml_data_use <- gsub(paste("MinValue=\"NestedConstraint_minval\"",sep=""),paste("MinValue=\"1.00\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("MaxValue=\"NestedConstraint_maxval\"",sep=""),paste("MaxValue=\"10.00\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("Step=\"NestedConstraint_step\"",sep=""),paste("Step=\"1.00\"",sep=""),unlist(xml_data_use))
-
-    #xml_data_use <- gsub(paste("NestedSubunitsEnable=\"1\"",sep=""),"NestedSubunitsEnable=\"0\"",unlist(xml_data_use))
+    xml_data_use <- gsub(paste("NestedSubunitConstraintFields=\"0\"",sep=""),"NestedSubunitConstraintFields=\"1\"",unlist(xml_data_use))
   }
 
 
@@ -1305,7 +1310,7 @@ if(build_report==TRUE | build_interac_report==TRUE){
                              subunit_field=subunit_field,
                              report_variables=report_variables,
                              static=build_report,
-                             interactive=build_interac_report,
+                             interac=build_interac_report,
                              write_commands=TRUE)}
 
 
