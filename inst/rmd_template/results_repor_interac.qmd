@@ -134,6 +134,18 @@ suppressWarnings(print(plot_attainment_per_project_ggarranged))
 
 ```
 
+```{r, echo=FALSE, results='asis'}
+if(exists("plot_attainment_per_project_ggarranged_no_subunits")){
+  cat("The figures below show the overall attainment per project (top) and the cumulative attainment (bottom) for the effects stored. Subunits are ignored in the calculations. This figure is of particular interest when the effect is showed as PCP. \n")}
+```
+
+```{r, echo=FALSE, fig.height = 10,  fig.align = "center"}
+if(exists("plot_attainment_per_project_ggarranged_no_subunits")){
+suppressWarnings(print(plot_attainment_per_project_ggarranged_no_subunits))}  
+
+```
+
+
 
 The figure below show the attainment for all effects reported, per project. This figure is of particular interest when the effect is showed as PCP.
 
@@ -142,6 +154,17 @@ suppressWarnings(print(plot_attainment_per_project_barplot))
 
 ```
 
+
+```{r, echo=FALSE, results='asis'}
+if(exists("plot_attainment_per_project_barplot_no_subs")){
+  cat("The figure below show the attainment for all effects reported, per project and per subunit (only showing a maximum of six subunits). This figure is of particular interest when the effect is showed as PCP. \n")}
+```
+
+```{r, echo=FALSE, fig.height = ceiling(length(Pattern1_list_bar_attain)/2)*5,  fig.align = "center"}
+if(exists("plot_attainment_per_project_barplot_no_subs")){
+suppressWarnings(print(plot_attainment_per_project_barplot_no_subs))}  
+
+```
 
 
 

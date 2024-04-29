@@ -225,27 +225,29 @@ set_forsysx_run <- function(input_shapefile,
 
 
     #keep only the stand id data
-    my_shp_adj <- my_shp[,stand_id]
-    colnames(my_shp_adj) <- c("V1","geometry")
-    #order by the stand id
-    my_shp_adj <- my_shp_adj[order(my_shp_adj$V1),]
-
-
-    my_shp_df_nei <- as.data.frame(my_shp_adj)
+    # my_shp_adj <- my_shp[,stand_id]
+    # colnames(my_shp_adj) <- c("V1","geometry")
+    # #order by the stand id
+    # my_shp_adj <- my_shp_adj[order(my_shp_adj$V1),]
+    #
+    #
+    # my_shp_df_nei <- as.data.frame(my_shp_adj)
 
 
     cat("Generating adjacency matrix",'\n')
-    adj_raw <- neighborsDataFrame_expp(spdep::poly2nb(my_shp_adj, queen=FALSE))
-    adj_raw$id_correct <- my_shp_df_nei[adj_raw$id,1]
-    adj_raw$id_neigh_correct <- my_shp_df_nei[adj_raw$id_neigh,1]
+    gen_adj_forsysx(exe_path, input_shapefile,stand_id,output_adjacency_matrix)
 
-    adj_final <- adj_raw[,c(4,3)]
-
-    colnames(adj_final) <- c(stand_id,paste(" Adjacent_",stand_id,sep=""))
-
-    #write.csv(adj_final,paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep=""),row.names = FALSE)
-
-    write.table(adj_final, file=paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep=""), sep=",", row.names = FALSE, quote=FALSE)
+    # adj_raw <- neighborsDataFrame_expp(spdep::poly2nb(my_shp_adj, queen=FALSE))
+    # adj_raw$id_correct <- my_shp_df_nei[adj_raw$id,1]
+    # adj_raw$id_neigh_correct <- my_shp_df_nei[adj_raw$id_neigh,1]
+    #
+    # adj_final <- adj_raw[,c(4,3)]
+    #
+    # colnames(adj_final) <- c(stand_id,paste(" Adjacent_",stand_id,sep=""))
+    #
+    # #write.csv(adj_final,paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep=""),row.names = FALSE)
+    #
+    # write.table(adj_final, file=paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep=""), sep=",", row.names = FALSE, quote=FALSE)
 
     adjacency_matrix <- paste(output_adjacency_matrix,"/adjacency_matrix_forsys.csv",sep="")
   }
