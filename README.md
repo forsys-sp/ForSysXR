@@ -388,7 +388,7 @@ plot_1
 As shown in the figure above, only stands above the threshold are targeted for treatments.
 
 
-## Maximum project diameter##
+## Maximum project diameter
 
 Sometimes projects can grow more than desired due to landscape restrictions, as exemplified above. One way to control how much a project can grow is by setting a maximum project diameter value (in meters). An example is presented below
 
@@ -587,7 +587,7 @@ set_forsysx_run (input_shapefile = stands_data,
 
 The figure above shows the projects when considering the same threshold as previously but with an inverse distance power of 3. As illustrated, now the projects are more clustered together than when not using any IDP.
 
-
+A compreheensive comparison between using IDP or maximum project diameters is shown [here](https://www.forsysplanning.org/learn/control-project-shape).
 
 ## Multiple priorities
 
