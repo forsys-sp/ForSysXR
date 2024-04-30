@@ -5,6 +5,7 @@
 #' @param effect_fields
 #' @param area
 #' @param subunit_field
+#' @param master_subunit_field
 #' @param report_variables
 #' @param static
 #' @param interac
@@ -18,6 +19,7 @@ build_report_run<-function(outputs_base_name,
                            effect_fields,
                            area,
                            subunit_field=NULL,
+                           master_subunit_field=NULL,
                            report_variables=NULL,
                            static=TRUE,
                            interac=FALSE,
@@ -861,6 +863,12 @@ build_report_run<-function(outputs_base_name,
         my_shp$sub_id_package <- my_shp[,paste(subunit_field)][[1]]
       }
 
+
+
+      my_shp_subunits <- my_shp %>%
+        group_by(sub_id_package) %>%
+        summarise(m = mean(sub_id_package)) %>%
+        sf::st_cast()
 
 
 
@@ -2526,8 +2534,6 @@ build_report_run<-function(outputs_base_name,
 
 
 
-
-
           my_breaks<-max(output_shp_run$ProjectNum)/4
 
           my_breaks<-round(c(my_breaks,my_breaks*2,my_breaks*3,my_breaks*4),0)
@@ -2561,6 +2567,7 @@ build_report_run<-function(outputs_base_name,
           #my_shp_wgs84<-st_cast(my_shp_wgs84,"LINESTRING")
 
           ################################
+          if(is.null(subunit_field)){
           projects_plot_leaflet <- leaflet::leaflet() %>%
             leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
             leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>%
@@ -2657,6 +2664,286 @@ build_report_run<-function(outputs_base_name,
           #   leaflet::hideGroup("ProjectNum")
           #
 
+}
+
+
+
+
+
+          #subunit
+          if(!is.null(subunit_field) & is.null(master_subunit_field)){
+
+            my_shp_subunits_use<-suppressWarnings(my_shp_subunits%>%
+                                                    sf::st_cast("MULTIPOLYGON") %>%
+                                                    sf::st_cast("POLYGON")%>%
+                                                    sf::st_cast("LINESTRING"))
+
+
+            my_shp_subunits_use_wgs84 <-sf::st_transform(my_shp_subunits_use,crs = 4326)
+
+
+            projects_plot_leaflet <- leaflet::leaflet() %>%
+              leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+              leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>%
+              #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+              #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+              #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+
+              #leaflet::addPolygons(data = my_shp_wgs84, fillColor = NA, fillOpacity = 0,
+              #                     color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+              leafgl::addGlPolylines(data = my_shp_diss_line_wgs84,
+                                     #cols_fill= cols,
+                                     #fillColor = "transparent",
+                                     #fillOpacity = 0,
+                                     #color = NA,
+                                     color = "black",
+                                     #opacity = 1,
+                                     #weight=0.5,
+                                     #popup = "ProjectNum",
+                                     #label = ~landuse,
+                                     weight = 0.5) %>%#,
+              #opacity=1,
+              #weight=1,
+              #label=NA,
+              #highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+              #group = "ProjectNum")
+
+              leafgl::addGlPolylines(data = my_shp_subunits_use_wgs84,
+                                     #cols_fill= cols,
+                                     #fillColor = "transparent",
+                                     #fillOpacity = 0,
+                                     #color = NA,
+                                     color = "black",
+                                     #opacity = 1,
+                                     #weight=0.5,
+                                     #popup = "ProjectNum",
+                                     #label = ~landuse,
+                                     weight = 0.5,
+                                     group = "Subunits") %>%
+
+              leafgl::addGlPolygons(data = output_shp_run_wgs84,
+                                    #cols_fill= cols,
+                                    #cols_fill = NA,
+                                    fillOpacity = 0.75,
+                                    #fillColor = cols_obj1,
+                                    color = cols_obj1,
+                                    opacity = 1,
+                                    #weight=0.5,
+                                    #popup = "ProjectNum",
+                                    #stroke_colour = NA,
+                                    #stroke_width = 0,
+                                    #label = ~landuse,
+                                    weight = 0,
+                                    #opacity=1,
+                                    #weight=1,
+                                    #label=NA,
+                                    highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                                    group = "Projects") %>%
+              leaflet::addLegend(data=output_shp_run_wgs84, "topleft",
+                                 #colors = rgb(cols),
+                                 pal = palFunc_objective_1,
+                                 values = ~output_shp_run_wgs84$ProjectNum ,
+                                 title = "Project number",
+                                 labels =  my_breaks,
+                                 #group = "ProjectNum",
+                                 opacity = 1)%>%
+
+
+              leafgl::addGlPolygons(data = output_shp_run_treat_wgs84,
+                                    #cols_fill= cols,
+                                    #cols_fill = NA,
+                                    fillOpacity = 0.75,
+                                    color = cols_treat,
+                                    opacity = 1,
+                                    weight=0.5,
+                                    popup = "ProjectNum",
+                                    #label = ~landuse,
+                                    weight = 0.1,
+                                    #opacity=1,
+                                    #weight=1,
+                                    #label=NA,
+                                    highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                                    group = "Projects - Treat") %>%
+              # leaflet::addLegend(data=output_shp_run_treat_wgs84, "topleft",
+              #                    #colors = rgb(cols),
+              #                    pal = palFunc_treat,
+              #                    values = ~output_shp_run_treat_wgs84$ProjectNum ,
+              #                    title = "Project number",
+              #                    #labels = c("No", "Yes"),
+              #                    group = "ProjectNum_treat",
+              #                    opacity = 1)%>%
+
+              leaflet::addLayersControl(baseGroups = c("Esri.NatGeoWorldMap", "ESRI World Imagery"),
+                                        position = "topright",
+                                        overlayGroups = c("Subunits","Projects","Projects - Treat"),
+                                        options = leaflet::layersControlOptions(collapsed = F))%>%
+              leaflet::hideGroup(c("Subunits","Projects","Projects - Treat"))%>%
+              leaflet.extras::addFullscreenControl(position = "topleft", pseudoFullscreen = FALSE)
+
+
+
+
+
+          }
+
+
+
+
+
+          if(!is.null(subunit_field) & !is.null(master_subunit_field)){
+
+            my_shp_subunits_use<-suppressWarnings(my_shp_subunits%>%
+                                                    sf::st_cast("MULTIPOLYGON") %>%
+                                                    sf::st_cast("POLYGON")%>%
+                                                    sf::st_cast("LINESTRING"))
+
+
+            my_shp_subunits_use_wgs84 <-sf::st_transform(my_shp_subunits_use,crs = 4326)
+
+
+
+
+            #master
+            my_shp_master_subunits <- my_shp %>%
+              group_by(.data[[master_subunit_field]])%>%
+              summarise(m = mean(.data[[master_subunit_field]])) %>%
+              sf::st_cast()
+
+            my_shp_master_subunits_use<-suppressWarnings(my_shp_master_subunits%>%
+                                                    sf::st_cast("MULTIPOLYGON") %>%
+                                                    sf::st_cast("POLYGON")%>%
+                                                    sf::st_cast("LINESTRING"))
+
+
+            my_shp_master_subunits_use_wgs84 <-sf::st_transform(my_shp_master_subunits_use,crs = 4326)
+
+
+
+
+            projects_plot_leaflet <- leaflet::leaflet() %>%
+              leaflet::addProviderTiles('Esri.NatGeoWorldMap', group = "Esri.NatGeoWorldMap") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+              leaflet::addProviderTiles("Esri.WorldImagery", group = "ESRI World Imagery") %>%
+              #leaflet::addProviderTiles("Esri.WorldImagery", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+              #leaflet::addProviderTiles("Esri.WorldTopoMap", group = "Basemaps") %>% #,leaflet::providerTileOptions(minZoom = 4, maxZoom = 15
+              #leaflet::addLayersControl(baseGroups = c('Esri.NatGeoWorldMap',"Esri.WorldImagery","Esri.WorldTopoMap"), position = "topleft")%>%
+
+
+              #leaflet::addPolygons(data = my_shp_wgs84, fillColor = NA, fillOpacity = 0,
+              #                     color = 'black', opacity=1,  weight=1, label=NA) %>%
+
+              leafgl::addGlPolylines(data = my_shp_diss_line_wgs84,
+                                     #cols_fill= cols,
+                                     #fillColor = "transparent",
+                                     #fillOpacity = 0,
+                                     #color = NA,
+                                     color = "black",
+                                     #opacity = 1,
+                                     #weight=0.5,
+                                     #popup = "ProjectNum",
+                                     #label = ~landuse,
+                                     weight = 0.5) %>%#,
+              #opacity=1,
+              #weight=1,
+              #label=NA,
+              #highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+              #group = "ProjectNum")
+
+              leafgl::addGlPolylines(data = my_shp_master_subunits_use_wgs84,
+                                     #cols_fill= cols,
+                                     #fillColor = "transparent",
+                                     #fillOpacity = 0,
+                                     #color = NA,
+                                     color = "black",
+                                     #opacity = 1,
+                                     #weight=0.5,
+                                     #popup = "ProjectNum",
+                                     #label = ~landuse,
+                                     weight = 0.5,
+                                     group = "Master Subunits") %>%
+
+
+              leafgl::addGlPolylines(data = my_shp_subunits_use_wgs84,
+                                     #cols_fill= cols,
+                                     #fillColor = "transparent",
+                                     #fillOpacity = 0,
+                                     #color = NA,
+                                     color = "black",
+                                     #opacity = 1,
+                                     #weight=0.5,
+                                     #popup = "ProjectNum",
+                                     #label = ~landuse,
+                                     weight = 0.5,
+                                     group = "Subunits") %>%
+
+              leafgl::addGlPolygons(data = output_shp_run_wgs84,
+                                    #cols_fill= cols,
+                                    #cols_fill = NA,
+                                    fillOpacity = 0.75,
+                                    #fillColor = cols_obj1,
+                                    color = cols_obj1,
+                                    opacity = 1,
+                                    #weight=0.5,
+                                    #popup = "ProjectNum",
+                                    #stroke_colour = NA,
+                                    #stroke_width = 0,
+                                    #label = ~landuse,
+                                    weight = 0,
+                                    #opacity=1,
+                                    #weight=1,
+                                    #label=NA,
+                                    highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                                    group = "Projects") %>%
+              leaflet::addLegend(data=output_shp_run_wgs84, "topleft",
+                                 #colors = rgb(cols),
+                                 pal = palFunc_objective_1,
+                                 values = ~output_shp_run_wgs84$ProjectNum ,
+                                 title = "Project number",
+                                 labels =  my_breaks,
+                                 #group = "ProjectNum",
+                                 opacity = 1)%>%
+
+
+              leafgl::addGlPolygons(data = output_shp_run_treat_wgs84,
+                                    #cols_fill= cols,
+                                    #cols_fill = NA,
+                                    fillOpacity = 0.75,
+                                    color = cols_treat,
+                                    opacity = 1,
+                                    weight=0.5,
+                                    popup = "ProjectNum",
+                                    #label = ~landuse,
+                                    weight = 0.1,
+                                    #opacity=1,
+                                    #weight=1,
+                                    #label=NA,
+                                    highlightOptions = leaflet::highlightOptions(weight=2, fillOpacity = 0, opacity=1, color='black'),
+                                    group = "Projects - Treat") %>%
+              # leaflet::addLegend(data=output_shp_run_treat_wgs84, "topleft",
+              #                    #colors = rgb(cols),
+              #                    pal = palFunc_treat,
+              #                    values = ~output_shp_run_treat_wgs84$ProjectNum ,
+              #                    title = "Project number",
+              #                    #labels = c("No", "Yes"),
+              #                    group = "ProjectNum_treat",
+              #                    opacity = 1)%>%
+
+              leaflet::addLayersControl(baseGroups = c("Esri.NatGeoWorldMap", "ESRI World Imagery"),
+                                        position = "topright",
+                                        overlayGroups = c("Master Subunits","Subunits","Projects","Projects - Treat"),
+                                        options = leaflet::layersControlOptions(collapsed = F))%>%
+              leaflet::hideGroup(c("Master Subunits","Subunits","Projects","Projects - Treat"))%>%
+              leaflet.extras::addFullscreenControl(position = "topleft", pseudoFullscreen = FALSE)
+
+
+
+
+
+          }
+
+
+
 
 
           suppressWarnings(assign("projects_plot_leaflet",projects_plot_leaflet,pos = 1))
@@ -2664,6 +2951,9 @@ build_report_run<-function(outputs_base_name,
 
           #suppressWarnings(assign("my_plot_projects_report",my_plot_projects_report,pos = 1))
           suppressWarnings(assign("caption_fig1","Location of the projects created by ForSysX. Warmer colors represent higher priority",pos = 1))
+
+
+
 
 
 

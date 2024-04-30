@@ -10,6 +10,7 @@ build_report_run(
   effect_fields,
   area,
   subunit_field = NULL,
+  master_subunit_field = NULL,
   report_variables = NULL,
   static = TRUE,
   interac = FALSE,
