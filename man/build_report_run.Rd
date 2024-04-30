@@ -18,7 +18,23 @@ build_report_run(
 )
 }
 \arguments{
-\item{interac}{}
+\item{outputs_base_name}{Path and name where the outputs should be stored}
+
+\item{effect_fields}{Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments}
+
+\item{area}{Field from input_shapefile containing the area of each stand}
+
+\item{subunit_field}{Optional. Field from input_shapefile identifying the pre-defined planning areas}
+
+\item{master_subunit_field}{Optional. Master subunit field if enabling master subunits.}
+
+\item{report_variables}{Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created}
+
+\item{static}{Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is TRUE}
+
+\item{interac}{Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
+
+\item{write_commands}{If TRUE, the list of commands used in the R script are printed in the report. Default is FALSE}
 }
 \description{
 Title

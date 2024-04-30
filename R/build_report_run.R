@@ -1,14 +1,15 @@
 #' Title
 #'
-#' @param outputs_base_name
+#' @param outputs_base_name Path and name where the outputs should be stored
 #' @param stand_shapefile
-#' @param effect_fields
-#' @param area
-#' @param subunit_field
-#' @param master_subunit_field
-#' @param report_variables
-#' @param static
-#' @param interac
+#' @param effect_fields Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments
+#' @param area Field from input_shapefile containing the area of each stand
+#' @param subunit_field Optional. Field from input_shapefile identifying the pre-defined planning areas
+#' @param master_subunit_field Optional. Master subunit field if enabling master subunits.
+#' @param report_variables Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created
+#' @param static Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is TRUE
+#' @param interac Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE
+#' @param write_commands If TRUE, the list of commands used in the R script are printed in the report. Default is FALSE
 #'
 #' @return
 #' @export

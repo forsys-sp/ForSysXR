@@ -97,7 +97,7 @@ set_forsysx_run(
 
 \item{threshold_logic}{Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")}
 
-\item{subunit_field}{Field from input_shapefile identifying the pre-defined planning areas}
+\item{subunit_field}{Optional. Field from input_shapefile identifying the pre-defined planning areas}
 
 \item{master_subunit_field}{Optional. Master subunit field if enabling master subunits.}
 

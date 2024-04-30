@@ -25,7 +25,7 @@
 #' @param effect_fields Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments
 #' @param objectives Vector containing the field(s) from input_shapefile identifying the treatment priorities, type, minimum weight, maximum weight, and step. Five elements in the vector characterize each objective, following the order c("objective","treatment type","min weight","max weight", "step").
 #' @param objective_direction Direction ("minimize" or "maximize") for the objectives. If maximize, stands with highest values will be selected first. If minimize, stands with lowest values will be selected first. Default is "maximize"
-#' @param subunit_field Field from input_shapefile identifying the pre-defined planning areas
+#' @param subunit_field Optional. Field from input_shapefile identifying the pre-defined planning areas
 #' @param master_subunit_field Optional. Master subunit field if enabling master subunits.
 #' @param constaints_master_subunits Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE
 #' @param constraint_by_master_subunit If constraints by master subunit should be used. Default is FALSE.
@@ -1310,6 +1310,7 @@ if(build_report==TRUE | build_interac_report==TRUE){
                              effect_fields=effect_fields,
                              area=area,
                              subunit_field=subunit_field,
+                             master_subunit_field=master_subunit_field,
                              report_variables=report_variables,
                              static=build_report,
                              interac=build_interac_report,
