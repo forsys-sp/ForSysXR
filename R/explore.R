@@ -1,9 +1,9 @@
 #' Explore defined data and ForSysX run before the run
 #'
 #' @param input_shapefile Shapefile containing the stands that will be used in the prioritization process
-#' @param area Field from input_shapefile containing the area of each stands
+#' @param area_field Field from input_shapefile containing the area of each stands
 #' @param stand_id Field from input_shapefile containing the unique identifier for individual stands
-#' @param available Field from input_shapefile containing the available stands
+#' @param available_field Field from input_shapefile containing the available stands
 #' @param exclude_field Field from input_shapefile identifying the stands to be excluded
 #' @param land_cover Field from input_shapefile identifying the land cover in each stand
 #' @param land_ownership Field from input_shapefile identifying the land ownership in each stand
@@ -15,15 +15,16 @@
 #' @param flame_length Vector containing the field from input_shapefile with the expected flame length and the units (meters or feet)
 #' @param report_name Name to be used in the html report file
 #' @param export_static_report Logical. If TRUE, then an additional HTML report will be saved with static figures. Default is FALSE
+#' @param web_upload Logical. If TRUE, the HTML file will be automatically uploaded to a default website, allowing for an easy share between users. Default is FALSE.
 #' @return
 #' @export
 #' @examples
 explore <- function(input_shapefile,
                     report_name,
                     stand_id,
-                    area,
+                    area_field,
                     #available_for_management, #default is to not have stands with availability info
-                    available,
+                    available_field,
                     #exclude_stands, #the default is not to have info on exclude in stands
                     exclude_field,
                     land_cover,
@@ -48,12 +49,16 @@ explore <- function(input_shapefile,
                     burn_probability,
                     flame_length,
                     export_static_report = FALSE,
-                    subunit_field
+                    subunit_field,
+                    web_upload=FALSE
                     #master_subunit
 ) {
 
 
 
+if(missing(area_field)){
+  stop("Missing area_field with no default")
+}
 
 
   if(class(input_shapefile)[1]=="character"){
@@ -94,25 +99,26 @@ explore <- function(input_shapefile,
   }
 
 
-  valids<-st_is_valid(my_shp)
-  unique(valids)
 
-  if(any(valids == FALSE)){
-    cat("Problems with geometry. Trying to fix",'\n')
-    my_shp <- st_make_valid(my_shp)
+  #valids<-unique(sf::st_is_valid(my_shp,NA_on_exception = TRUE))
+  #unique(valids)
 
-    valids<-st_is_valid(my_shp)
+  #if(any(valids == FALSE)){
+  #  cat("Problems with geometry. Trying to fix",'\n')
+    my_shp <- sf::st_make_valid(my_shp)
+
+    valids<-sf::st_is_valid(my_shp)
     unique(valids)
-    if(any(valids == TRUE)){
-      cat("Geometry problems fixed",'\n')
+    if(any(valids == FALSE)){
+      cat("Unable to fix geomtry",'\n')
       }
-  }
+  #}
 
 
   cat("Analysing data and preparing maps",'\n')
 
 
-  sf::sf_use_s2(FALSE)
+  suppressMessages(suppressWarnings(sf::sf_use_s2(FALSE)))
 
   my_shp <- sf::st_transform(my_shp, crs = 4326)
   my_shp_df <- sf::st_drop_geometry(my_shp)
@@ -122,7 +128,7 @@ explore <- function(input_shapefile,
   my_shp$dissp <- 1
 
 
-  my_shp<-sf::st_buffer(my_shp,dist=0)
+  my_shp<-suppressMessages(suppressWarnings(sf::st_buffer(my_shp,dist=0)))
 
   my_shp2 <- geos::as_geos_geometry(my_shp)
 
@@ -256,11 +262,11 @@ explore <- function(input_shapefile,
 
 
 
-      threshold_diss <- threshold_diss %>%
+      threshold_diss <- suppressMessages(suppressWarnings(threshold_diss %>%
         group_by(threshold_diss[,3][[1]]) %>%
         summarise(m = mean(threshold_diss[,3][[1]])) %>%
         #mutate(centrum = T) %>%
-        sf::st_cast()
+        sf::st_cast()))
 
 
 
@@ -338,7 +344,7 @@ explore <- function(input_shapefile,
 
     #integer_val <- total_n_objectives%%1==0
 
-    #integer_val <- decimalplaces(total_n_objectives)
+    integer_val <- decimalplaces(total_n_objectives)
 
     if(integer_val != 0)
       stop("Wrong number of arguments when defining the objectives")
@@ -401,7 +407,7 @@ explore <- function(input_shapefile,
 
   ###new plot test######
 
-  total_area <- sum(my_shp_df[,paste(area)])
+  total_area <- sum(my_shp_df[,paste(area_field)])
 
 
 
@@ -415,7 +421,7 @@ explore <- function(input_shapefile,
 
     flame_length_logical <- paste(flame_length[1],flame_length_unit,sep=" ")
     my_shp_above_FL_threshold <- subset(my_shp_df,eval(parse(text=flame_length_logical)))
-    total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area)])
+    total_area_above_FL_threshold <- sum(my_shp_above_FL_threshold[,paste(area_field)])
     total_area_above_FL_threshold_perc <- total_area_above_FL_threshold/total_area*100
 
   }
@@ -423,7 +429,7 @@ explore <- function(input_shapefile,
 
 
   if(!missing(burn_probability)){
-    total_expected_ba_year <- sum(my_shp_df[,paste(area)]*my_shp_df[,paste(burn_probability)])
+    total_expected_ba_year <- sum(my_shp_df[,paste(area_field)]*my_shp_df[,paste(burn_probability)])
   }
 
 
@@ -560,18 +566,17 @@ explore <- function(input_shapefile,
 
   ###############
 
-  if(!missing(available)){
-    available_diss <- my_shp[,paste(available)][1]
+  if(!missing(available_field)){
+    available_diss <- my_shp[,paste(available_field)][1]
+
+    available_area_sf <- subset(my_shp, get(available_field)==1)
+    available_area<-sum(available_area_sf[,paste(area_field)][[1]])
 
 
-    available_area_sf <- subset(my_shp, get(available)==1)
-    available_area<-sum(available_area_sf[,paste(area)][[1]])
-
-
-    available_diss <- available_area_sf %>%
-      group_by(available_area_sf[,paste(available)][[1]]) %>%
-      summarise(m = mean(available_area_sf[,paste(available)][[1]])) %>%
-      sf::st_cast()
+    available_diss <- suppressMessages(suppressWarnings(available_area_sf %>%
+      group_by(available_area_sf[,paste(available_field)][[1]]) %>%
+      summarise(m = mean(available_area_sf[,paste(available_field)][[1]])) %>%
+      sf::st_cast()))
 
 
 
@@ -653,10 +658,10 @@ explore <- function(input_shapefile,
   if(!missing(exclude_field)){
     exclude_diss <- my_shp[,paste(exclude_field)][1]
 
-    exclude_diss <- exclude_diss %>%
+    exclude_diss <- suppressMessages(suppressWarnings(exclude_diss %>%
       group_by(exclude_diss[,1][[1]]) %>%
       summarise(m = mean(exclude_diss[,1][[1]])) %>%
-      sf::st_cast()
+      sf::st_cast()))
 
     colnames(exclude_diss)<-c("exclude","m","geometry")
 
@@ -696,7 +701,7 @@ explore <- function(input_shapefile,
 
 
     not_exclude_area_sf <- subset(my_shp, get(exclude_field)==0)
-    not_exclude_area<-sum(not_exclude_area_sf[,paste(area)][[1]])
+    not_exclude_area<-sum(not_exclude_area_sf[,paste(area_field)][[1]])
   }
 
   #   if(export_static_report==TRUE){
@@ -870,7 +875,7 @@ explore <- function(input_shapefile,
 
       threshold_loop_sf <- subset(my_shp, eval(parse(text=theshold_command_use_loop)))
 
-      threshold_loop_area<-sum(threshold_loop_sf[,paste(area)][[1]])
+      threshold_loop_area<-sum(threshold_loop_sf[,paste(area_field)][[1]])
 
       threshold_df_final$area_considered[e] <- threshold_loop_area
 
@@ -890,10 +895,10 @@ explore <- function(input_shapefile,
   if(!missing(land_cover)){
     land_cover_diss <- my_shp[,paste(land_cover)][1]
 
-    land_cover_diss <- land_cover_diss %>%
+    land_cover_diss <- suppressMessages(suppressWarnings(land_cover_diss %>%
       group_by(land_cover_diss[,1][[1]]) %>%
       summarise(m = mode(land_cover_diss[,1][[1]])) %>%
-      sf::st_cast()
+      sf::st_cast()))
 
     colnames(land_cover_diss)<-c("land_cover_use","m","geometry")
     land_cover_diss$land_cover_use <- factor(land_cover_diss$land_cover_use)
@@ -999,10 +1004,10 @@ explore <- function(input_shapefile,
 
     land_ownership_diss <- my_shp[,paste(land_ownership)][1]
 
-    land_ownership_diss <- land_ownership_diss %>%
+    land_ownership_diss <- suppressMessages(suppressWarnings(land_ownership_diss %>%
       group_by(land_ownership_diss[,1][[1]]) %>%
       summarise(m = mode(land_ownership_diss[,1][[1]])) %>%
-      sf::st_cast()
+      sf::st_cast()))
 
     colnames(land_ownership_diss)<-c("land_ownership_use","m","geometry")
     land_ownership_diss$land_ownership_use <- factor(land_ownership_diss$land_ownership_use)
@@ -1079,7 +1084,7 @@ explore <- function(input_shapefile,
     obj_total_landscape_final<-data.frame()
 
     for(b in 1:length(objectives)){
-      obj1_total_landscape <- my_shp[,c(area,paste(objectives)[b])]
+      obj1_total_landscape <- my_shp[,c(area_field,paste(objectives)[b])]
       obj1_total_landscape <- sum(obj1_total_landscape[,paste(objectives[[b]])][[1]])
       obj1_total_landscape <- c(obj1_total_landscape,b)
       obj_total_landscape_final <-rbind(obj_total_landscape_final,obj1_total_landscape)
@@ -1099,15 +1104,15 @@ explore <- function(input_shapefile,
 
     for(a in 1:length(objectives)){
 
-      if(!missing(available)){
-        obj1_after_available <- available_area_sf[,c(area,paste(objectives)[a])]
+      if(!missing(available_field)){
+        obj1_after_available <- available_area_sf[,c(area_field,paste(objectives)[a])]
         obj1_after_available <- sum(obj1_after_available[,paste(objectives)[[a]]][[1]])
       }else{
         obj1_after_available <- obj1_total_landscape
       }
 
       if(!missing(exclude_field)){
-        obj1_after_exclude <- not_exclude_area_sf[,c(area,paste(objectives)[a])]
+        obj1_after_exclude <- not_exclude_area_sf[,c(area_field,paste(objectives)[a])]
         obj1_after_exclude <- sum(obj1_after_exclude[,paste(objectives)[[a]]][[1]])
       }else{
         obj1_after_exclude <- obj1_total_landscape
@@ -1140,7 +1145,7 @@ explore <- function(input_shapefile,
 
           threshold_loop_sf <- subset(my_shp, eval(parse(text=theshold_command_use_loop)))
 
-          obj1_after_threshold <- threshold_loop_sf[,c(area,paste(objectives)[a])]
+          obj1_after_threshold <- threshold_loop_sf[,c(area_field,paste(objectives)[a])]
           obj1_after_threshold<-sum(obj1_after_threshold[,paste(objectives[[a]])][[1]])
 
           objective_with_threshold <- c(obj1_after_threshold,a,r)
@@ -1484,16 +1489,18 @@ explore <- function(input_shapefile,
 
 ###aqui#####
 
+  combination_area_sf<-my_shp
+
   if(!missing(objectives)){
-    if(!missing(available)){
-      combination_area_sf <- subset(my_shp, get(available)==1)
+    if(!missing(available_field)){
+      combination_area_sf <- subset(my_shp, get(available_field)==1)
       after_available <- combination_area_sf
-      available_area <- sum(combination_area_sf[,paste(area)][[1]])
+      available_area <- sum(combination_area_sf[,paste(area_field)][[1]])
 
       if(!missing(flame_length)){
         #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
         my_shp_above_FL_threshold_available <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
-        total_above_FL_threshold_available <- sum(my_shp_above_FL_threshold_available[,paste(area)][[1]])
+        total_above_FL_threshold_available <- sum(my_shp_above_FL_threshold_available[,paste(area_field)][[1]])
         total_above_FL_threshold_available_perc <- round(total_above_FL_threshold_available/total_area*100,1)
       }else{
         total_above_FL_threshold_available_perc<-NA
@@ -1501,7 +1508,7 @@ explore <- function(input_shapefile,
 
 
       if(!missing(burn_probability)){
-        total_expected_ba_year_available <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
+        total_expected_ba_year_available <- sum(combination_area_sf[,paste(area_field)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
       }else{
         total_expected_ba_year_available<-NA
       }
@@ -1510,8 +1517,8 @@ explore <- function(input_shapefile,
       get_objectives_df_avai <- data.frame()
       for(a in 1:length(objectives)){
 
-        if(!missing(available)){
-          obj1_after_available <- combination_area_sf[,c(area,paste(objectives)[a])]
+        if(!missing(available_field)){
+          obj1_after_available <- combination_area_sf[,c(area_field,paste(objectives)[a])]
           obj1_after_available <- sum(obj1_after_available[,paste(objectives)[[a]]][[1]])
         }else{
           obj1_after_available <- obj1_total_landscape
@@ -1530,10 +1537,10 @@ explore <- function(input_shapefile,
 
       after_available$dissp <- 1
 
-      after_available_sf_plot <- after_available %>%
+      after_available_sf_plot <- suppressMessages(suppressWarnings(after_available %>%
         group_by(dissp) %>%
         summarise(m = mean(dissp)) %>%
-        st_cast()
+        st_cast()))
 
 
       after_available_sf_plot$considered <- "Yes"
@@ -1578,20 +1585,20 @@ explore <- function(input_shapefile,
     if(!missing(exclude_field)){
       combination_area_sf <- subset(combination_area_sf, get(exclude_field)==0)
       after_available_and_exclude <- combination_area_sf
-      not_exclude_area <- sum(combination_area_sf[,paste(area)][[1]])
+      not_exclude_area <- sum(combination_area_sf[,paste(area_field)][[1]])
 
 
       if(!missing(flame_length)){
         #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
         my_shp_above_FL_threshold_available_exclude <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
-        total_above_FL_threshold_available_exclude <- sum(my_shp_above_FL_threshold_available_exclude[,paste(area)][[1]])
+        total_above_FL_threshold_available_exclude <- sum(my_shp_above_FL_threshold_available_exclude[,paste(area_field)][[1]])
         total_above_FL_threshold_available_exclude_perc <- total_above_FL_threshold_available_exclude/total_area*100
       }else{
         total_above_FL_threshold_available_exclude_perc<-NA
       }
 
       if(!missing(burn_probability)){
-        total_expected_ba_year_available_exclude <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
+        total_expected_ba_year_available_exclude <- sum(combination_area_sf[,paste(area_field)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
       }else{
         total_expected_ba_year_available_exclude<-NA
       }
@@ -1599,7 +1606,7 @@ explore <- function(input_shapefile,
       get_objectives_df_avai_excl <- data.frame()
       for(a in 1:length(objectives)){
         if(!missing(exclude_field)){
-          obj1_after_exclude <- combination_area_sf[,c(area,paste(objectives)[a])]
+          obj1_after_exclude <- combination_area_sf[,c(area_field,paste(objectives)[a])]
           obj1_after_exclude <- sum(obj1_after_exclude[,paste(objectives)[[a]]][[1]])
         }else{
           obj1_after_exclude <- obj1_total_landscape
@@ -1686,7 +1693,7 @@ explore <- function(input_shapefile,
 
         combination_area_sf <- subset(combination_area_sf, eval(parse(text=theshold_command_use_loop)))
 
-        threshold_loop_area<-sum(combination_area_sf[,paste(area)][[1]])
+        threshold_loop_area<-sum(combination_area_sf[,paste(area_field)][[1]])
 
         threshold_df_final$area_considered[e] <- threshold_loop_area
 
@@ -1697,7 +1704,7 @@ explore <- function(input_shapefile,
         if(!missing(flame_length)){
           #flame_length_logical <- paste(flame_length[1]," >= 8",sep="")
           my_shp_above_FL_threshold_available_exclude_threshold <- subset(combination_area_sf,eval(parse(text=flame_length_logical)))
-          total_above_FL_threshold_available_exclude_threshold <- sum(my_shp_above_FL_threshold_available_exclude_threshold[,paste(area)][[1]])
+          total_above_FL_threshold_available_exclude_threshold <- sum(my_shp_above_FL_threshold_available_exclude_threshold[,paste(area_field)][[1]])
           total_above_FL_threshold_available_exclude_threshold_perc <- round(total_above_FL_threshold_available_exclude_threshold/total_area*100,1)
 
 
@@ -1708,7 +1715,7 @@ explore <- function(input_shapefile,
 
 
         if(!missing(burn_probability)){
-          total_expected_ba_year_available_exclude_threshold <- sum(combination_area_sf[,paste(area)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
+          total_expected_ba_year_available_exclude_threshold <- sum(combination_area_sf[,paste(area_field)][[1]]*combination_area_sf[,paste(burn_probability)][[1]])
           total_expected_ba_year_available_exclude_threshold_df<-c(total_expected_ba_year_available_exclude_threshold_df,total_expected_ba_year_available_exclude_threshold)
         }else{
           total_expected_ba_year_available_exclude_threshold_df<-NA
@@ -1719,7 +1726,7 @@ explore <- function(input_shapefile,
 
         for(a in 1:length(objectives)){
           if(!missing(exclude_field)){
-            obj1_after_threshold <- combination_area_sf[,c(area,paste(objectives)[a])]
+            obj1_after_threshold <- combination_area_sf[,c(area_field,paste(objectives)[a])]
             obj1_after_threshold <- sum(obj1_after_threshold[,paste(objectives)[[a]]][[1]])
           }else{
             obj1_after_threshold <- obj1_total_landscape
@@ -1763,10 +1770,10 @@ explore <- function(input_shapefile,
       #after_available_and_exclude_and_thresholds
       after_available_and_exclude_and_thresholds$dissp <- 1
 
-      after_available_and_exclude_and_thresholds_sf_plot <- after_available_and_exclude_and_thresholds %>%
+      after_available_and_exclude_and_thresholds_sf_plot <- suppressMessages(suppressWarnings(after_available_and_exclude_and_thresholds %>%
         group_by(dissp) %>%
         summarise(m = mean(dissp)) %>%
-        st_cast()
+        st_cast()))
 
 
       after_available_and_exclude_and_thresholds_sf_plot$considered <- "Yes"
@@ -1812,7 +1819,7 @@ explore <- function(input_shapefile,
 
 
 
-    combination_area <- sum(combination_area_sf[,paste(area)][[1]])
+    combination_area <- sum(combination_area_sf[,paste(area_field)][[1]])
 
     combination_objective_final <- numeric()
     for(z in 1:nrow(objectives_df_final)){
@@ -1835,10 +1842,10 @@ explore <- function(input_shapefile,
 
     combination_area_sf$dissp <- 1
 
-    combination_area_sf_plot <- combination_area_sf %>%
+    combination_area_sf_plot <- suppressMessages(suppressWarnings(combination_area_sf %>%
       group_by(dissp) %>%
       summarise(m = mean(dissp)) %>%
-      st_cast()
+      st_cast()))
 
 
     combination_area_sf_plot$considered <- "Yes"
@@ -1939,7 +1946,7 @@ explore <- function(input_shapefile,
       area_considered_table["Planning area",(h+3)] <- round(obj_total_landscape_final$objective_value[[h]]/obj_total_landscape_final$objective_value[[h]]*100,1)
 
 
-      if(!missing(available)){
+      if(!missing(available_field)){
         area_considered_table["Available land",(h+3)] <- round(get_objectives_df_avai$after_only_available[[h]]*100/obj_total_landscape_final$objective_value[[h]],1)
       }
 
@@ -2254,8 +2261,8 @@ explore <- function(input_shapefile,
 
 
   if(missing(objectives)){
-    if(!missing(available)){
-      combination_area_sf <- subset(combination_area_sf, get(available)==1)
+    if(!missing(available_field)){
+      combination_area_sf <- subset(combination_area_sf, get(available_field)==1)
     }
 
     if(!missing(exclude_field)){
@@ -2281,17 +2288,17 @@ explore <- function(input_shapefile,
 
 
 
-    combination_area <- sum(combination_area_sf[,paste(area)][[1]])
+    combination_area <- sum(combination_area_sf[,paste(area_field)][[1]])
 
 
     #export final figure with only considered stands
 
     combination_area_sf$dissp <- 1
 
-    combination_area_sf_plot <- combination_area_sf %>%
+    combination_area_sf_plot <- suppressMessages(suppressWarnings(combination_area_sf %>%
       group_by(dissp) %>%
       summarise(m = mean(dissp)) %>%
-      st_cast()
+      st_cast()))
 
 
     combination_area_sf_plot$considered <- "Yes"
@@ -2402,5 +2409,12 @@ explore <- function(input_shapefile,
   }
 
   file.remove(paste(path_for_rmd,"my_work_space_vs2.RData",sep="/"))
+
+  if(web_upload==TRUE){
+    output_folder <- getwd()
+    ForSysXR:::upload_content(output_folder_web=output_folder,
+                                    last_name_web=report_name,
+                                    explore=TRUE)
+  }
 
 }

@@ -51,6 +51,21 @@ output:
       margin-left: auto;
       margin-right: auto
     }
+    
+    .leaflet-control-layers-toggle { 
+     background-image: url("https://github.com/bmaparicio/MTTfireCAL/blob/master/figures_support/layers.png?raw=true") !important;
+     width: 44px !important; 
+     height: 44px !important; 
+ }
+
+
+ .leaflet-control-fullscreen-button { 
+     background-image: url("https://github.com/bmaparicio/MTTfireCAL/blob/master/figures_support/fullscreen.png?raw=true") !important;
+     width: 30px !important; 
+     height: 30px !important; 
+ }
+
+    
 ```  
 
   

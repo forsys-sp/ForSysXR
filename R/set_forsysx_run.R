@@ -41,6 +41,7 @@
 #' @param build_report Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE
 #' @param build_interac_report Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE
 #' @param report_variables Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created
+#' @param web_upload Logical. If TRUE, the HTML file will be automatically uploaded to a default website, allowing for an easy share between users. Default is FALSE.
 #' @import dplyr sf ggplot2 shiny
 #' @return
 #' @export
@@ -96,9 +97,9 @@ set_forsysx_run <- function(input_shapefile,
                             build_report=FALSE,
                             build_interac_report=FALSE,
                             report_variables=NULL,
+                            web_upload=FALSE,
                             exe_path #,xml_path
                             ) {
-
 
 
 
@@ -1109,6 +1110,7 @@ set_forsysx_run <- function(input_shapefile,
   if (missing(master_subunit_field)){
     xml_data_use <- gsub(paste("NestedSubunitsEnable=\"1\"",sep=""),"NestedSubunitsEnable=\"0\"",unlist(xml_data_use))
     #xml_data_use <- gsub(paste("NestedSubunitsEnable=\"1\"",sep=""),"NestedSubunitsEnable=\"0\"",unlist(xml_data_use))
+    master_subunit_field<-NULL
   }
 
 
@@ -1543,6 +1545,19 @@ if(build_report==TRUE | build_interac_report==TRUE){
 
   }
 
+
+  if(web_upload==TRUE & build_interac_report==TRUE){
+    ForSysXR:::upload_content(output_folder_web=path_with_results,
+                                    last_name_web=last_name,
+                                    static=FALSE)
+  }
+
+
+  if(web_upload==TRUE & build_interac_report==FALSE){
+    ForSysXR:::upload_content(output_folder_web=path_with_results,
+                                    last_name_web=last_name,
+                                    static=TRUE)
+  }
 
 
   }

@@ -45,6 +45,7 @@ set_forsysx_run(
   build_report = FALSE,
   build_interac_report = FALSE,
   report_variables = NULL,
+  web_upload = FALSE,
   exe_path
 )
 }
@@ -124,6 +125,8 @@ set_forsysx_run(
 \item{build_interac_report}{Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
 
 \item{report_variables}{Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created}
+
+\item{web_upload}{Logical. If TRUE, the HTML file will be automatically uploaded to a default website, allowing for an easy share between users. Default is FALSE.}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
 

@@ -8,8 +8,8 @@ explore(
   input_shapefile,
   report_name,
   stand_id,
-  area,
-  available,
+  area_field,
+  available_field,
   exclude_field,
   land_cover,
   land_ownership,
@@ -19,7 +19,8 @@ explore(
   burn_probability,
   flame_length,
   export_static_report = FALSE,
-  subunit_field
+  subunit_field,
+  web_upload = FALSE
 )
 }
 \arguments{
@@ -29,9 +30,9 @@ explore(
 
 \item{stand_id}{Field from input_shapefile containing the unique identifier for individual stands}
 
-\item{area}{Field from input_shapefile containing the area of each stands}
+\item{area_field}{Field from input_shapefile containing the area of each stands}
 
-\item{available}{Field from input_shapefile containing the available stands}
+\item{available_field}{Field from input_shapefile containing the available stands}
 
 \item{exclude_field}{Field from input_shapefile identifying the stands to be excluded}
 
@@ -52,6 +53,8 @@ explore(
 \item{export_static_report}{Logical. If TRUE, then an additional HTML report will be saved with static figures. Default is FALSE}
 
 \item{subunit_field}{Field from input_shapefile identifying the pre-defined planning areas}
+
+\item{web_upload}{Logical. If TRUE, the HTML file will be automatically uploaded to a default website, allowing for an easy share between users. Default is FALSE.}
 }
 \description{
 Explore defined data and ForSysX run before the run
