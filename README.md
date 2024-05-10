@@ -16,7 +16,7 @@ ForSys was developed by the Forest Service Rocky Mountain Research Station to pr
 
 The ForSysXR package allows the user to set and run ForSysX from R using Windows batch files and DLL wrappers. This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program.
 
-More detailed information can be obtained from the full [ForSysX manual](https://github.com/forsys-sp/forsysr). 
+More detailed information can be obtained from the full [ForSysX manual](https://www.forsysplanning.org/learn/how-to-use-forsys). 
 Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) a publicly available R package ([ForSysR](https://github.com/forsys-sp/forsysr)), and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
 
 
