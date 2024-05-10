@@ -1490,6 +1490,7 @@ if(missing(area_field)){
 ###aqui#####
 
   combination_area_sf<-my_shp
+  available_area <- sum(combination_area_sf[,paste(area_field)][[1]])
 
   if(!missing(objectives)){
     if(!missing(available_field)){
