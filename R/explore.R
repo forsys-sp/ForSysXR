@@ -99,20 +99,22 @@ if(missing(area_field)){
   }
 
 
-
-  #valids<-unique(sf::st_is_valid(my_shp,NA_on_exception = TRUE))
+  valids<-geos::geos_is_valid(geos::as_geos_geometry(my_shp))
   #unique(valids)
 
-  #if(any(valids == FALSE)){
-  #  cat("Problems with geometry. Trying to fix",'\n')
+  if(any(valids == FALSE)){
+    cat("Problems with geometry. Trying to fix",'\n')
     my_shp <- sf::st_make_valid(my_shp)
 
-    valids<-sf::st_is_valid(my_shp)
+    #valids<-sf::st_is_valid(my_shp)
+    valids<-geos::geos_is_valid(geos::as_geos_geometry(my_shp))
     unique(valids)
     if(any(valids == FALSE)){
       cat("Unable to fix geomtry",'\n')
+    }else{
+        cat("Geomtry fixed",'\n')
       }
-  #}
+  }
 
 
   cat("Analysing data and preparing maps",'\n')
