@@ -10,6 +10,7 @@
 #' @param static Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is TRUE
 #' @param interac Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE
 #' @param write_commands If TRUE, the list of commands used in the R script are printed in the report. Default is FALSE
+#' @param spatial_optimization Logical. If TRUE, then the treatment areas are spatially aggregated into patches (projects) of adjacent stands. If FALSE, then projects are not created and stands are sorted based on their relevance for the objective(s). Default is TRUE.
 #'
 #' @return
 #' @export
@@ -24,7 +25,8 @@ build_report_run<-function(outputs_base_name,
                            report_variables=NULL,
                            static=TRUE,
                            interac=FALSE,
-                           write_commands=FALSE){
+                           write_commands=FALSE,
+                           spatial_optimization=TRUE){
 
 
   all_effects <- length(effect_fields)
@@ -101,7 +103,7 @@ build_report_run<-function(outputs_base_name,
       color_mapping_brewer.dark2 <- setNames(my_palette_brewer.dark2[1:length(unique_effect_names)], unique_effect_names)
 
 
-      if(length(prj_results$Subunit)>0){
+      if(length(prj_results$Subunit)>0 & spatial_optimization==TRUE){
 
         #limit to 6 subunits
         if(length(unique(prj_results$Subunit))>6){
@@ -351,7 +353,9 @@ build_report_run<-function(outputs_base_name,
 
 
 
-      }else{
+      }
+
+      if(length(prj_results$Subunit)==0 & spatial_optimization==TRUE){
 
         df_loop_effects_per_proj_final <- data.frame()
         for(x in 1:all_effects){
@@ -498,6 +502,161 @@ build_report_run<-function(outputs_base_name,
         suppressWarnings(assign("Pattern1_list_bar_attain",Pattern1_list_bar_attain,pos = 1))
       }
 
+      if(length(prj_results$Subunit)==0 & spatial_optimization==FALSE){
+
+        stand_csv_saved_use <- read.csv(paste(path_with_results,"/",stand_csv_saved,sep=""))
+        stand_csv_saved_use <- subset(stand_csv_saved_use,Treat==1)
+
+
+        df_loop_effects_per_proj_final <- data.frame()
+        for(x in 1:all_effects){
+          my_effect_chosen <- effect_fields[x]
+          df_loop_effects <- stand_csv_saved_use[,c("StandRank",paste0(my_effect_chosen),paste0(area))]
+
+          df_loop_effects_per_proj <- df_loop_effects
+
+          df_loop_effects$effect_name <- paste0(my_effect_chosen)
+
+
+          colnames(df_loop_effects) <- c("StandRank", "effect", "Treat_Area","effect_name")
+
+          df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+          df_loop_effects$area_cumulative <- cumsum(df_loop_effects$Treat_Area)
+
+          df_loop_effects_final<-rbind(df_loop_effects_final,df_loop_effects)
+
+
+          df_loop_effects_per_proj$effect_name <- names(df_loop_effects_per_proj)[2]
+          colnames(df_loop_effects_per_proj)<-c("StandRank", "treated_value","Treat_Area","effect_name")
+
+          df_loop_effects_per_proj_final<-rbind(df_loop_effects_per_proj_final,df_loop_effects_per_proj)
+
+
+          my_palette_brewer.dark2 <- pals::brewer.dark2(8)
+          unique_effect_names <- unique(paste0(effect_fields))
+          color_mapping_brewer.dark2 <- setNames(my_palette_brewer.dark2[1:length(unique_effect_names)], unique_effect_names)
+
+        }
+
+
+
+
+        #get the min value. If negative, we add an y=0 line
+        numeric_cols <- sapply(df_loop_effects_final, is.numeric)
+        min_value_pcps <- min(unlist(df_loop_effects_final[,numeric_cols]))
+
+
+
+        if(min_value_pcps<0){
+          plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=StandRank,y=effect,color=effect_name))+
+                                                                              geom_point()+
+                                                                              geom_line(linewidth=1)+
+                                                                              geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$StandRank)+0.5), yend = 0,linewidth=1,color="black")+
+                                                                              scale_x_continuous(breaks = 1:max(df_loop_effects_final$StandRank))+
+                                                                              #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                              #                   name = "Effect name") +
+                                                                              scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+                                                                              xlab("Stand Rank")+
+                                                                              ylab("Objective attainment")+
+                                                                              labs(color = "Effect name",tag="a)")+
+                                                                              theme_classic())))
+
+          suppressWarnings(assign("plot_attainment_per_project",plot_attainment_per_project,pos = 1))
+
+
+
+
+          plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=area_cumulative,y=effect_cumulative,color=effect_name))+
+                                                                                  geom_point()+
+                                                                                  geom_line(linewidth=1)+
+                                                                                  geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$area_cumulative)+0.5), yend = 0,linewidth=1,color="black")+
+                                                                                  #scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                                  #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                                  #                   name = "Effect name") +
+                                                                                  scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+                                                                                  xlab("Area treated")+
+                                                                                  ylab("Cumulative objective attainment")+
+                                                                                  labs(color = "Effect name",tag="b)")+
+                                                                                  theme_classic())))
+
+
+          suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
+
+        }
+
+
+
+
+        if(min_value_pcps>=0){
+          plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=StandRank,y=effect,color=effect_name))+
+                                                                              geom_point()+
+                                                                              geom_line(linewidth=1)+
+                                                                              #geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$StandRank)+0.5), yend = 0,linewidth=1,color="black")+
+                                                                              scale_x_continuous(breaks = 1:max(df_loop_effects_final$StandRank))+
+                                                                              #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                              #                   name = "Effect name") +
+                                                                              scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+                                                                              xlab("Stand Rank")+
+                                                                              ylab("Objective attainment")+
+                                                                              labs(color = "Effect name",tag="a)")+
+                                                                              theme_classic())))
+
+          suppressWarnings(assign("plot_attainment_per_project",plot_attainment_per_project,pos = 1))
+
+
+
+
+          plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=area_cumulative,y=effect_cumulative,color=effect_name))+
+                                                                                  geom_point()+
+                                                                                  geom_line(linewidth=1)+
+                                                                                  #geom_segment(x = 0, y = 0, xend = (max(df_loop_effects_final$area_cumulative)+0.5), yend = 0,linewidth=1,color="black")+
+                                                                                  #scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                                  #scale_color_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+                                                                                  #                   name = "Effect name") +
+                                                                                  scale_color_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+                                                                                  xlab("Area treated")+
+                                                                                  ylab("Cumulative objective attainment")+
+                                                                                  labs(color = "Effect name",tag="b)")+
+                                                                                  theme_classic())))
+
+
+          suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
+
+        }
+
+
+
+
+
+        #barplot
+
+
+
+        plot_attainment_per_project_barplot <- ggplot(df_loop_effects_per_proj_final, aes(x = StandRank, y = treated_value, fill = effect_name)) +
+          geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+          xlab("Stand Rank") +
+          ylab("Objective treated") +
+          cowplot::theme_cowplot() +
+          #scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final$effect_name)))),
+          #                  name = "Effect") +
+          scale_fill_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+          #scale_fill_discrete(name = "Effect")+
+          #scale_x_continuous(breaks = my_breaks) +
+          theme(legend.position = "bottom",
+                legend.box = "horizontal",
+                legend.box.just = "center",
+                legend.title = element_text(hjust = 0.5),
+                legend.text = element_text(hjust = 0.5),
+                legend.justification = "center")+
+          geom_segment(aes(x = 0.5, y = 0, xend = (max(StandRank)+0.5), yend = 0),linewidth=1)
+
+        suppressWarnings(assign("plot_attainment_per_project_barplot",plot_attainment_per_project_barplot,pos = 1))
+
+
+        Pattern1_list_bar_attain <- 1
+
+        suppressWarnings(assign("Pattern1_list_bar_attain",Pattern1_list_bar_attain,pos = 1))
+      }
 
 
 
@@ -1087,7 +1246,7 @@ build_report_run<-function(outputs_base_name,
           plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
                                                                           geom_point()+
                                                                           geom_line(linewidth=1)+
-                                                                          scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                          scale_x_continuous(breaks = 1:max(df_loop_constraints_final$ProjectNumber))+
                                                                           xlab("Project number")+
                                                                           ylab("Treated constraint")+
                                                                           labs(color = "Constraint name",linetype="Subunit")+
@@ -1100,13 +1259,16 @@ build_report_run<-function(outputs_base_name,
           plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
                                                                                        geom_point()+
                                                                                        geom_line(linewidth=1)+
-                                                                                       scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                                       scale_x_continuous(breaks = 1:max(df_loop_constraints_final$ProjectNumber))+
                                                                                        xlab("Project number")+
                                                                                        ylab("Proportion of constraint treated and total constraint inside project (%)")+
                                                                                        labs(color = "Constraint name",linetype="Subunit")+
                                                                                        theme_classic())))
 
-        }else{
+        }
+
+        if(length(prj_results$Subunit)==0){
+
 
           for(x in 1:length(constraints_name_for_figure)){
             my_constraint_chosen <- constraints_name_for_figure[x]
@@ -1131,7 +1293,7 @@ build_report_run<-function(outputs_base_name,
           plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name))+
                                                                           geom_point()+
                                                                           geom_line(linewidth=1)+
-                                                                          scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                          scale_x_continuous(breaks = 1:max(df_loop_constraints_final$ProjectNumber))+
                                                                           xlab("Project number")+
                                                                           ylab("Treated constraint")+
                                                                           labs(color = "Constraint name",linetype="Subunit")+
@@ -1144,13 +1306,15 @@ build_report_run<-function(outputs_base_name,
           plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name))+
                                                                                        geom_point()+
                                                                                        geom_line(linewidth=1)+
-                                                                                       scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                                       scale_x_continuous(breaks = 1:max(df_loop_constraints_final$ProjectNumber))+
                                                                                        xlab("Project number")+
                                                                                        ylab("Proportion of constraint treated and total constraint inside project (%)")+
                                                                                        labs(color = "Constraint name",linetype="Subunit")+
                                                                                        theme_classic())))
 
         }
+
+
 
 
 
@@ -1168,11 +1332,26 @@ build_report_run<-function(outputs_base_name,
         #suppressWarnings(assign("attainment_fig_constraint1",paste("Attainment per project (top) and the cumulative attainment (bottom) for the effects stored"),pos = 1))
         suppressWarnings(assign("caption_fig_constraint1",paste("Treated constraint(s) per project (top) and Proportion of constraint treated and total constraint inside project (%) per project (bottom)."),pos = 1))
 
+        heigh_fig_treated_constraints <- 10
+        suppressWarnings(assign("heigh_fig_treated_constraints",heigh_fig_treated_constraints,pos = 1))
 
 
         #suppressWarnings(assign("plot_perc_treated_constraint_in_proj",plot_perc_treated_constraint_in_proj,pos = 1))
         #suppressWarnings(assign("caption_fig_constraint1",paste("Treated constraint(s) per project"),pos = 1))
         #suppressWarnings(assign("caption_fig_constraint2",paste("Proportion of constraint treated and total constraint inside project (%) per project"),pos = 1))
+
+
+        if(spatial_optimization==FALSE){
+          plot_treated_constraint_in_proj_ggarrange <- plot_treated_constraint
+          heigh_fig_treated_constraints <- 5
+
+
+          suppressWarnings(assign("plot_treated_constraint_in_proj_ggarrange",plot_treated_constraint_in_proj_ggarrange,pos = 1))
+          suppressWarnings(assign("heigh_fig_treated_constraints",heigh_fig_treated_constraints,pos = 1))
+
+          #suppressWarnings(assign("attainment_fig_constraint1",paste("Attainment per project (top) and the cumulative attainment (bottom) for the effects stored"),pos = 1))
+          suppressWarnings(assign("caption_fig_constraint1",paste("Treated constraint(s)"),pos = 1))
+        }
 
       }
 

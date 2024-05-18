@@ -1316,7 +1316,8 @@ if(build_report==TRUE | build_interac_report==TRUE){
                              report_variables=report_variables,
                              static=build_report,
                              interac=build_interac_report,
-                             write_commands=TRUE)}
+                             write_commands=TRUE,
+                             spatial_optimization = spatial_optimization)}
 
 
 

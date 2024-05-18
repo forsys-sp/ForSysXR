@@ -188,7 +188,7 @@ suppressWarnings(print(plot_attainment_per_project_barplot_no_subs))}
 
 ### Amount of constraint treated
 
-```{r, echo=FALSE, fig.cap=paste("Figure 4.", caption_fig_constraint1, sep=" "),fig.height = 10,  fig.align = "center"}
+```{r, echo=FALSE, fig.cap=paste("Figure 4.", caption_fig_constraint1, sep=" "),fig.height = heigh_fig_treated_constraints,  fig.align = "center"}
 suppressWarnings(print(plot_treated_constraint_in_proj_ggarrange))
 
 ```

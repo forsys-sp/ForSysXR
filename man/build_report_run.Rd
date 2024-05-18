@@ -14,7 +14,8 @@ build_report_run(
   report_variables = NULL,
   static = TRUE,
   interac = FALSE,
-  write_commands = FALSE
+  write_commands = FALSE,
+  spatial_optimization = TRUE
 )
 }
 \arguments{
@@ -35,6 +36,8 @@ build_report_run(
 \item{interac}{Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
 
 \item{write_commands}{If TRUE, the list of commands used in the R script are printed in the report. Default is FALSE}
+
+\item{spatial_optimization}{Logical. If TRUE, then the treatment areas are spatially aggregated into patches (projects) of adjacent stands. If FALSE, then projects are not created and stands are sorted based on their relevance for the objective(s). Default is TRUE.}
 }
 \description{
 Title
