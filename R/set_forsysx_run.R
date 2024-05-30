@@ -1145,8 +1145,8 @@ set_forsysx_run <- function(input_shapefile,
     xml_data_use <- gsub(paste("MinField=\"NestedConstraint_Minfield\"",sep=""),paste("MinField=\"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("Slack=\"NestedConstraint_slack\"",sep=""),paste("Slack=\"",constaints_master_subunits[3],"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("MinValue=\"NestedConstraint_minval\"",sep=""),paste("MinValue=\"",constaints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("MaxValue=\"NestedConstraint_maxval\"",sep=""),paste("MaxValue=\"10.00\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("Step=\"NestedConstraint_step\"",sep=""),paste("Step=\"1.00\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("MaxValue=\"NestedConstraint_maxval\"",sep=""),paste("MaxValue=\"",constaints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("Step=\"NestedConstraint_step\"",sep=""),paste("Step=\"0.00\"",sep=""),unlist(xml_data_use))
 
     #xml_data_use <- gsub(paste("NestedSubunitsEnable=\"1\"",sep=""),"NestedSubunitsEnable=\"0\"",unlist(xml_data_use))
   }

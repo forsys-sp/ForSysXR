@@ -103,7 +103,7 @@ build_report_run<-function(outputs_base_name,
       color_mapping_brewer.dark2 <- setNames(my_palette_brewer.dark2[1:length(unique_effect_names)], unique_effect_names)
 
 
-      if(length(prj_results$Subunit)>0 & spatial_optimization==TRUE){
+      if(length(prj_results$Subunit)>0 & is.null(master_subunit_field) & spatial_optimization==TRUE){
 
         #limit to 6 subunits
         if(length(unique(prj_results$Subunit))>6){
@@ -113,7 +113,7 @@ build_report_run<-function(outputs_base_name,
             .[!is.na(.)]
 
           subunits_sample_use
-          prj_results_use <- prj_results_use[prj_results_use$Subunit %in% subunits_sample_use]
+          prj_results_use <- prj_results_use[prj_results_use$Subunit %in% subunits_sample_use,]
         }else{
           prj_results_use <- prj_results
         }
@@ -226,6 +226,9 @@ build_report_run<-function(outputs_base_name,
         #barplot for all subunits
 
         df_loop_effects_final_allsubs <- data.frame()
+
+
+
         for(x in 1:all_effects){
           my_effect_chosen <- effect_fields[x]
           df_loop_effects <- prj_results[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),"Subunit",paste0("Treat_",area))]
@@ -293,7 +296,7 @@ build_report_run<-function(outputs_base_name,
         df_loop_effects_per_proj_final_no_subs <- data.frame()
         for(x in 1:all_effects){
           my_effect_chosen <- effect_fields[x]
-          df_loop_effects <- prj_results_use[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),paste0("Treat_",area))]
+          df_loop_effects <- prj_results[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),paste0("Treat_",area))]
 
           colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Treat_Area")
 
@@ -658,6 +661,263 @@ build_report_run<-function(outputs_base_name,
         suppressWarnings(assign("Pattern1_list_bar_attain",Pattern1_list_bar_attain,pos = 1))
       }
 
+      if(length(prj_results$Subunit)>0 & !is.null(master_subunit_field) & spatial_optimization==TRUE){
+
+        prj_results_use <- subset(prj_results,Aggregate==1)
+
+        #limit to 6 subunits
+        if(length(unique(prj_results$Subunit))>6){
+
+
+          prj_results_use <- prj_results_use[order(prj_results_use$Subunit),]
+
+          subunits_sample_use <- unique(prj_results_use$Subunit)[1:6] %>%
+            .[!is.na(.)]
+
+
+          prj_results_use <- prj_results_use[prj_results_use$Subunit %in% subunits_sample_use,]
+        }else{
+          prj_results_use <- prj_results_use
+        }
+
+
+
+        for(x in 1:all_effects){
+          my_effect_chosen <- effect_fields[x]
+          df_loop_effects <- prj_results_use[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),"Subunit")]
+          df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Subunit","effect_name")
+
+          df_loop_effects_x <-data.frame(df_loop_effects %>%
+                                           group_by(Subunit)%>%
+                                           reframe(effect_cumulative=cumsum(effect)))
+
+          df_loop_effects <- df_loop_effects[order(df_loop_effects$Subunit),]
+          df_loop_effects$effect_cumulative <- df_loop_effects_x$effect_cumulative
+
+
+          #df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+
+          df_loop_effects_final<-rbind(df_loop_effects_final,df_loop_effects)
+
+        }
+
+
+
+
+        plot_attainment_per_project <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect,color=effect_name,linetype=factor(Subunit)))+
+                                                                            geom_point()+
+                                                                            geom_line(linewidth=1)+
+                                                                            scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                            xlab("Project number")+
+                                                                            ylab("Objective attainment")+
+                                                                            labs(color = "Effect name",linetype="Subunit",tag="a)")+
+                                                                            theme_classic())))
+
+        suppressWarnings(assign("plot_attainment_per_project",plot_attainment_per_project,pos = 1))
+
+
+
+        plot_attainment_per_project_cum <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name,linetype=factor(Subunit)))+
+                                                                                geom_point()+
+                                                                                geom_line(linewidth=1)+
+                                                                                scale_x_continuous(breaks = 1:max(df_loop_effects_final$ProjectNumber))+
+                                                                                xlab("Project number")+
+                                                                                ylab("Cumulative objective attainment")+
+                                                                                labs(color = "Effect name",linetype="Subunit",tag="b)")+
+                                                                                theme_classic())))
+
+        suppressWarnings(assign("plot_attainment_per_project_cum",plot_attainment_per_project_cum,pos = 1))
+
+
+
+
+        #barplots for subunits
+
+        max_scale_y <- max(df_loop_effects_final$effect)+(max(df_loop_effects_final$effect)*0.05)
+        min_scale_y <- min(df_loop_effects_final$effect)
+
+
+        if(min_scale_y>=0){
+          min_scale_y <- 0
+        }else{
+          min_scale_y <- min_scale_y -(min(df_loop_effects_final$effect)*0.05)
+        }
+
+
+
+
+
+        Pattern1_list_bar_attain <- lapply(unique(df_loop_effects_final$Subunit), function(b) {
+          plot_attainment_per_project_barplot_no_subs <- df_loop_effects_final %>%
+            filter(Subunit == b) %>%
+            ggplot(aes(x = ProjectNumber, y = effect, fill = effect_name)) +
+            geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+            xlab("Project rank") +
+            ylab("Objective treated") +
+            cowplot::theme_cowplot() +
+            #scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_final$effect_name)))),
+            #                  name = "Effect") +
+            scale_fill_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+            ggtitle(paste0("Subunit ", b)) +
+            ylim(min_scale_y, max_scale_y) +
+            theme(legend.position = "bottom",
+                  legend.box = "horizontal",
+                  legend.box.just = "center",
+                  legend.title = element_text(hjust = 0.5),
+                  legend.text = element_text(hjust = 0.5),
+                  legend.justification = "center") +
+            geom_segment(aes(x = 0.5, y = 0, xend = (max(ProjectNumber) + 0.5), yend = 0), linewidth = 1)
+
+          #suppressWarnings(assign(paste0("plot_attainment_per_project_barplot_", b), plot_attainment_per_project_barplot, pos = 1))
+        })
+
+
+
+        plot_attainment_per_project_barplot_no_subs<- ggpubr::ggarrange(plotlist=Pattern1_list_bar_attain,
+                                                                        ncol = 2,nrow=ceiling(length(Pattern1_list_bar_attain)/2),common.legend = TRUE)
+
+
+        suppressWarnings(assign("plot_attainment_per_project_barplot_no_subs",plot_attainment_per_project_barplot_no_subs,pos = 1))
+        suppressWarnings(assign("Pattern1_list_bar_attain",Pattern1_list_bar_attain,pos = 1))
+
+
+
+        #barplot for all subunits
+
+        df_loop_effects_final_allsubs <- data.frame()
+        prj_results_vs_master <- subset(prj_results,Aggregate ==1)
+
+        for(x in 1:all_effects){
+          my_effect_chosen <- effect_fields[x]
+          df_loop_effects <- prj_results_vs_master[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),"Subunit",paste0("Treat_",area))]
+          df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Subunit","Treat_Area","effect_name")
+
+          df_loop_effects <- df_loop_effects[order(df_loop_effects$Subunit),]
+
+          df_loop_effects_x<-as.data.frame(df_loop_effects%>%
+                                             group_by(ProjectNumber)%>%
+                                             reframe(effect = sum(effect),
+                                                     Treat_Area = sum(Treat_Area),
+                                                     effect_name=effect_name[1]))
+
+
+          #df_loop_effects <- df_loop_effects[order(df_loop_effects$Subunit),]
+          df_loop_effects_x$effect_cumulative <- cumsum(df_loop_effects_x$effect)
+          df_loop_effects_x$area_cumulative <- cumsum(df_loop_effects_x$Treat_Area)
+
+
+          df_loop_effects_final_allsubs<-rbind(df_loop_effects_final_allsubs,df_loop_effects_x)
+
+        }
+
+
+
+
+        plot_attainment_per_project_no_subunits <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final_allsubs,aes(x=ProjectNumber,y=effect,color=effect_name))+
+                                                                                        geom_point()+
+                                                                                        geom_line(linewidth=1)+
+                                                                                        scale_x_continuous(breaks = 1:max(df_loop_effects_final_allsubs$ProjectNumber))+
+                                                                                        xlab("Project number")+
+                                                                                        ylab("Objective attainment")+
+                                                                                        labs(color = "Effect name",tag="a)")+
+                                                                                        theme_classic())))
+
+        suppressWarnings(assign("plot_attainment_per_project_no_subunits",plot_attainment_per_project_no_subunits,pos = 1))
+
+
+
+        plot_attainment_per_project_cum_no_subunits <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_effects_final_allsubs,aes(x=ProjectNumber,y=effect_cumulative,color=effect_name))+
+                                                                                            geom_point()+
+                                                                                            geom_line(linewidth=1)+
+                                                                                            scale_x_continuous(breaks = 1:max(df_loop_effects_final_allsubs$ProjectNumber))+
+                                                                                            xlab("Project number")+
+                                                                                            ylab("Cumulative objective attainment")+
+                                                                                            labs(color = "Effect name",tag="b)")+
+                                                                                            theme_classic())))
+
+        suppressWarnings(assign("plot_attainment_per_project_cum_no_subunits",plot_attainment_per_project_cum_no_subunits,pos = 1))
+
+
+
+        plot_attainment_per_project_ggarranged_no_subunits<- ggpubr::ggarrange(plot_attainment_per_project_no_subunits,plot_attainment_per_project_cum_no_subunits,
+                                                                               ncol = 1,nrow=2,common.legend = TRUE)
+
+
+        suppressWarnings(assign("plot_attainment_per_project_ggarranged_no_subunits",plot_attainment_per_project_ggarranged_no_subunits,pos = 1))
+
+
+
+
+        df_loop_effects_per_proj_final_no_subs <- data.frame()
+        for(x in 1:all_effects){
+          my_effect_chosen <- effect_fields[x]
+          df_loop_effects <- prj_results_vs_master[,c("ProjectNumber",paste0("ETrt_",my_effect_chosen),paste0("Treat_",area))]
+
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Treat_Area")
+
+          df_loop_effects<-data.frame(df_loop_effects%>%
+                                        group_by(ProjectNumber)%>%
+                                        summarise(effect_use = sum(effect),
+                                                  Treat_Area_use = sum(Treat_Area),
+                                                  effect_name = paste0("ETrt_",my_effect_chosen)))
+
+          df_loop_effects_per_proj <- df_loop_effects
+
+          df_loop_effects$effect_name <- paste0("ETrt_",my_effect_chosen)
+
+
+          colnames(df_loop_effects) <- c("ProjectNumber", "effect", "Treat_Area","effect_name")
+
+          df_loop_effects$effect_cumulative <- cumsum(df_loop_effects$effect)
+          df_loop_effects$area_cumulative <- cumsum(df_loop_effects$Treat_Area)
+
+          df_loop_effects_final_allsubs<-rbind(df_loop_effects_final_allsubs,df_loop_effects)
+
+
+          df_loop_effects_per_proj$effect_name <- df_loop_effects_per_proj$effect_name[1]
+          colnames(df_loop_effects_per_proj)<-c("ProjectNumber", "treated_value","Treat_Area","effect_name")
+
+          df_loop_effects_per_proj_final_no_subs<-rbind(df_loop_effects_per_proj_final_no_subs,df_loop_effects_per_proj)
+
+        }
+
+
+        plot_attainment_per_project_barplot <- ggplot(df_loop_effects_per_proj_final_no_subs, aes(x = ProjectNumber, y = treated_value, fill = effect_name)) +
+          geom_bar(stat = "identity", position = position_stack(reverse = TRUE), color = "black") +
+          xlab("Project rank") +
+          ylab("Objective treated") +
+          cowplot::theme_cowplot() +
+          #scale_fill_manual(values = as.vector(pals::brewer.dark2(length(unique(df_loop_effects_per_proj_final_no_subs$effect_name)))),
+          #                  name = "Effect") +
+          scale_fill_manual(values = color_mapping_brewer.dark2, name = "Effect name") +
+          #scale_fill_discrete(name = "Effect")+
+          #scale_x_continuous(breaks = my_breaks) +
+          theme(legend.position = "bottom",
+                legend.box = "horizontal",
+                legend.box.just = "center",
+                legend.title = element_text(hjust = 0.5),
+                legend.text = element_text(hjust = 0.5),
+                legend.justification = "center")+
+          geom_segment(aes(x = 0.5, y = 0, xend = (max(ProjectNumber)+0.5), yend = 0),linewidth=1)
+
+        suppressWarnings(assign("plot_attainment_per_project_barplot",plot_attainment_per_project_barplot,pos = 1))
+
+
+
+
+        #barplots for the subunits
+
+
+
+
+
+      }
 
 
 
@@ -1208,11 +1468,27 @@ build_report_run<-function(outputs_base_name,
       df_loop_constraints_final <- data.frame()
 
       if(length(number_scenarios_created) == 1){
-        if(length(prj_results$Subunit)>0){
+        if(length(prj_results$Subunit)>0 & is.null(master_subunit_field)){
+
+
+          if(length(unique(prj_results$Subunit))>6){
+
+
+            prj_results_use <- prj_results[order(prj_results$Subunit),]
+
+            subunits_sample_use <- unique(prj_results_use$Subunit)[1:6] %>%
+              .[!is.na(.)]
+
+
+            prj_results_use <- prj_results_use[prj_results_use$Subunit %in% subunits_sample_use,]
+          }else{
+            prj_results_use <- prj_results
+          }
+
 
           for(x in 1:length(constraints_name_for_figure)){
             my_constraint_chosen <- constraints_name_for_figure[x]
-            df_loop_constraints <- prj_results[,c("ProjectNumber",paste0("Treat_",my_constraint_chosen),paste0("Total_",my_constraint_chosen),"Subunit")]
+            df_loop_constraints <- prj_results_use[,c("ProjectNumber",paste0("Treat_",my_constraint_chosen),paste0("Total_",my_constraint_chosen),"Subunit")]
             df_loop_constraints$constraint_name <- paste0(my_constraint_chosen)
 
 
@@ -1266,6 +1542,85 @@ build_report_run<-function(outputs_base_name,
                                                                                        theme_classic())))
 
         }
+
+
+        if(length(prj_results$Subunit)>0 & !is.null(master_subunit_field)){
+
+          prj_results_use <- subset(prj_results,Aggregate==1)
+
+
+          if(length(unique(prj_results_use$Subunit))>6){
+
+
+            prj_results_use <- prj_results_use[order(prj_results_use$Subunit),]
+
+            subunits_sample_use <- unique(prj_results_use$Subunit)[1:6] %>%
+              .[!is.na(.)]
+
+
+            prj_results_use <- prj_results_use[prj_results_use$Subunit %in% subunits_sample_use,]
+          }else{
+            prj_results_use <- prj_results_use
+          }
+
+
+          for(x in 1:length(constraints_name_for_figure)){
+            my_constraint_chosen <- constraints_name_for_figure[x]
+            df_loop_constraints <- prj_results_use[,c("ProjectNumber",paste0("Treat_",my_constraint_chosen),paste0("Total_",my_constraint_chosen),"Subunit")]
+            df_loop_constraints$constraint_name <- paste0(my_constraint_chosen)
+
+
+            colnames(df_loop_constraints) <- c("ProjectNumber", "Treat_constraint","Total_constraint","Subunit", "constraint_name")
+
+
+
+            df_loop_constraints_x <-data.frame(df_loop_constraints %>%
+                                                 group_by(Subunit)%>%
+                                                 reframe(treat_constraint_cumulative=cumsum(Treat_constraint),
+                                                         total_constraint_cumulative=cumsum(Total_constraint)))
+
+            df_loop_constraints <- df_loop_constraints[order(df_loop_constraints$Subunit),]
+            df_loop_constraints$treat_constraint_cumulative <- df_loop_constraints_x$treat_constraint_cumulative
+            df_loop_constraints$total_constraint_cumulative <- df_loop_constraints_x$total_constraint_cumulative
+
+            #
+            #
+            # df_loop_constraints$treat_constraint_cumulative <- cumsum(df_loop_constraints$Treat_constraint)
+            # df_loop_constraints$total_constraint_cumulative <- cumsum(df_loop_constraints$Total_constraint)
+
+            #get percentage of constraint treated of the total constraint inside the project
+            df_loop_constraints$perc_treated_constraint_in_proj <- df_loop_constraints$Treat_constraint/df_loop_constraints$Total_constraint*100
+
+
+            df_loop_constraints_final<-rbind(df_loop_constraints_final,df_loop_constraints)
+
+
+
+          }
+          plot_treated_constraint <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=Treat_constraint,color=constraint_name,linetype=factor(Subunit)))+
+                                                                          geom_point()+
+                                                                          geom_line(linewidth=1)+
+                                                                          scale_x_continuous(breaks = 1:max(df_loop_constraints_final$ProjectNumber))+
+                                                                          xlab("Project number")+
+                                                                          ylab("Treated constraint")+
+                                                                          labs(color = "Constraint name",linetype="Subunit")+
+                                                                          theme_classic())))
+
+          suppressWarnings(assign("plot_treated_constraint",plot_treated_constraint,pos = 1))
+
+
+
+          plot_perc_treated_constraint_in_proj <- (suppressWarnings(suppressMessages(ggplot2::ggplot(df_loop_constraints_final,aes(x=ProjectNumber,y=perc_treated_constraint_in_proj,color=constraint_name,linetype=factor(Subunit)))+
+                                                                                       geom_point()+
+                                                                                       geom_line(linewidth=1)+
+                                                                                       scale_x_continuous(breaks = 1:max(df_loop_constraints_final$ProjectNumber))+
+                                                                                       xlab("Project number")+
+                                                                                       ylab("Proportion of constraint treated and total constraint inside project (%)")+
+                                                                                       labs(color = "Constraint name",linetype="Subunit")+
+                                                                                       theme_classic())))
+
+        }
+
 
         if(length(prj_results$Subunit)==0){
 
