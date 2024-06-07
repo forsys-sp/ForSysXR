@@ -55,7 +55,6 @@ explore <- function(input_shapefile,
 ) {
 
 
-
 if(missing(area_field)){
   stop("Missing area_field with no default")
 }
@@ -1543,7 +1542,7 @@ if(missing(area_field)){
       after_available_sf_plot <- suppressMessages(suppressWarnings(after_available %>%
         group_by(dissp) %>%
         summarise(m = mean(dissp)) %>%
-        st_cast()))
+        sf::st_cast()))
 
 
       after_available_sf_plot$considered <- "Yes"
@@ -1776,7 +1775,7 @@ if(missing(area_field)){
       after_available_and_exclude_and_thresholds_sf_plot <- suppressMessages(suppressWarnings(after_available_and_exclude_and_thresholds %>%
         group_by(dissp) %>%
         summarise(m = mean(dissp)) %>%
-        st_cast()))
+        sf::st_cast()))
 
 
       after_available_and_exclude_and_thresholds_sf_plot$considered <- "Yes"
@@ -1848,7 +1847,7 @@ if(missing(area_field)){
     combination_area_sf_plot <- suppressMessages(suppressWarnings(combination_area_sf %>%
       group_by(dissp) %>%
       summarise(m = mean(dissp)) %>%
-      st_cast()))
+      sf::st_cast()))
 
 
     combination_area_sf_plot$considered <- "Yes"
@@ -1971,8 +1970,8 @@ if(missing(area_field)){
       }
 
 
-      area_considered_table[,(h+5)] <- area_considered_table[,paste(objectives[h])]/area_considered_table[,1]*100
-      names(area_considered_table)[(h+5)]<-paste(objectives[h],"Potential treatment leverage (PCP per area)",sep=" ")
+      area_considered_table[,(1+ncol(area_considered_table))] <- area_considered_table[,paste(objectives[h])]/area_considered_table[,1]*100
+      names(area_considered_table)[ncol(area_considered_table)]<-paste(objectives[h],"Potential treatment leverage (PCP per area)",sep=" ")
     }
 
 
