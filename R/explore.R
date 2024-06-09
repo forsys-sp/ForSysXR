@@ -703,6 +703,12 @@ if(missing(area_field)){
 
     not_exclude_area_sf <- subset(my_shp, get(exclude_field)==0)
     not_exclude_area<-sum(not_exclude_area_sf[,paste(area_field)][[1]])
+  }else{
+    if(!missing(available_field)){
+    not_exclude_area<-available_area}
+
+    if(missing(available_field)){
+      not_exclude_area<-total_area}
   }
 
   #   if(export_static_report==TRUE){
@@ -1611,7 +1617,7 @@ if(missing(area_field)){
           obj1_after_exclude <- combination_area_sf[,c(area_field,paste(objectives)[a])]
           obj1_after_exclude <- sum(obj1_after_exclude[,paste(objectives)[[a]]][[1]])
         }else{
-          obj1_after_exclude <- obj1_total_landscape
+          obj1_after_exclude <- obj_total_landscape_final[a,1]
         }
 
         get_objectives_df_avai_excl <- rbind(get_objectives_df_avai_excl,c(obj1_after_exclude,a))
@@ -1731,7 +1737,7 @@ if(missing(area_field)){
             obj1_after_threshold <- combination_area_sf[,c(area_field,paste(objectives)[a])]
             obj1_after_threshold <- sum(obj1_after_threshold[,paste(objectives)[[a]]][[1]])
           }else{
-            obj1_after_threshold <- obj1_total_landscape
+            obj1_after_threshold <- obj_total_landscape_final[a,1]
           }
 
           get_objectives_df_avai_excl_threshold <- rbind(get_objectives_df_avai_excl_threshold,c(obj1_after_threshold,a,e))
