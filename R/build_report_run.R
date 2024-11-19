@@ -3003,7 +3003,7 @@ build_report_run<-function(outputs_base_name,
 
 
 
-      cat("Generating htlm report",'\n')
+      cat("Generating html report",'\n')
       setwd(path_with_results)
       #suppressWarnings(suppressMessages(generate_report()))
       capture.output(suppressWarnings(suppressMessages(generate_report(output_file=paste("report_",last_name,".html",sep="")))))
