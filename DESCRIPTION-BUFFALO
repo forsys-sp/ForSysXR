@@ -1,0 +1,58 @@
+Package: ForSysXR
+Type: Package
+Title: ForSys Scenario Planning
+Version: 0.1.0
+Authors@R: 
+    c(
+        person(given = "Bruno",
+           family = "A. Aparício",
+           role = c("aut", "cre"),
+           email = "bruno.a.aparicio@gmail.com",),
+        person(given = "Ken",
+           family = "Bunzel",
+           role = c("aut"),
+           email = "kbunzel@kingbirdsoftware.com"),
+        person(given = "Alan",
+           family = "Ager",
+           role = c("aut"),
+           email = "alan.ager@oregonstate.edu"),
+        person(given = "Michelle",
+           family = "Day",
+           role = c("aut"),
+           email = "michelle.day@usda.gov")
+    )
+Description: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.2.3
+Depends: 
+    R (>= 2.10)
+Imports:
+    ggplot2 (>= 3.4.1),
+    dplyr (>= 1.1.2),
+    sf (>= 1.0-14),
+    shiny (>= 1.7.5),
+    spdep (>= 1.2-8),
+    stringr (>= 1.5.0),
+    readtext (>= 0.90),
+    ggpubr (>= 0.6.0),
+    rlang (>= 1.1.1),
+    tidyverse (>= 2.0.0),
+    spsUtil (>= 0.2.2),
+    rmarkdown (>= 2.24),
+    rmdformats (>= 1.0.4),
+    knitr (>= 1.43),
+    htmltools (>= 0.5.6),
+    raster (>= 3.6-23),
+    pacman (>= 0.5.1),
+    leaflet (>= 2.2.0),
+    viridis (>= 0.6.4),
+    colorspace (>= 2.1-0),
+    leaflet.extras (>= 1.0.0),
+    pals (>= 1.8),
+    rmapshaper (>= 0.5.0),
+    geos(>= 0.2.4)
+Remotes:
+    r-spatial/leafgl
+    
