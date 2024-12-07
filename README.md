@@ -1,47 +1,68 @@
+<img src="man/figures/FORSYS_logo_small.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
+
 # ForSysXR
+
+
 
 <!--- README.md is generated from README.Rmd. Please edit that file -->
 
-<img src="man/figures/forsys_consortium_logo.png" align="right" style="height:90px!important; position:absolute; top:10px; right:10px" />
+
+
 
 ## Scenario planning for land management
 
-ForSys was developed by the Forest Service Rocky Mountain Research Station to provide a platform for prioritizing risk reduction and restoration investments using spatial optimization methods that are widely used in conservation planning and forest industry.  The development of ForSys was motivated by gaps in decision support tools for rendering the growing number of Forest Service land condition assessments into optimized project areas as part of prioritization and planning efforts. ForSys is designed around the concept that restoration and risk reduction activities occur at the stand polygon scale (1-20 ha; 2.5 – 50 acres) that need to be organized into project areas (5,000 – 25,000 acres) to achieve landscape-scale management goals and meet logistical and administrative constraints. ForSys solves typical spatial planning problems where treatments are allocated to optimize one or more restoration objectives accounting for multiple hierarchical spatial constraints and treatment thresholds. ForSys integrates forest landscape planning, spatial optimization, and the science and literature on scenario analyses that emphasize the importance of examining large arrays of management scenarios and considering uncertain future disturbances. ForSys has been applied to prioritization projects at a range of scales, including sub-watershed projects, national forests, regions, and the entire National Forest network.
+ForSys was developed by the Forest Service Rocky Mountain Research Station to provide a platform for prioritizing risk reduction and restoration investments using spatial optimization methods that are widely used in conservation planning and the forest industry.  The development of ForSys was motivated by gaps in decision support tools for rendering the growing number of Forest Service land condition assessments into optimized project areas as part of prioritization and planning efforts. ForSys is designed around the concept that restoration and risk reduction activities occur at the stand polygon scale (1-20 ha; 2.5 – 50 acres) that need to be organized into project areas (5,000 – 25,000 acres) to achieve landscape-scale management goals and meet logistical and administrative constraints. ForSys solves typical spatial planning problems where treatments are allocated to optimize one or more restoration objectives accounting for multiple hierarchical spatial constraints and treatment thresholds. ForSys integrates forest landscape planning, spatial optimization, and the science and literature on scenario analyses that emphasize the importance of examining large arrays of management scenarios and considering uncertain future disturbances. ForSys has been applied to prioritization projects at a range of scales, including sub-watershed projects, national forests, regions, and the entire national forest network.
 
 
-This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program.
+The ForSysXR package allows the user to set and run ForSysX from R using Windows batch files and DLL wrappers. This tutorial was designed to illustrate the program’s basic functionality, familiarize the user with inputs and results using a simple example ForSysX run, and provide data descriptions and preparation recommendations for users who wish to use local datasets within the program.
 
-More detailed information can be obtained from the full [ForSysX manual](https://github.com/forsys-sp/forsysr). 
-Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) an R script ([ForSysR](https://github.com/forsys-sp/forsysr)) available for R programmers upon request, and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
+More detailed information can be obtained from the full [ForSysX manual](https://www.forsysplanning.org/learn/how-to-use-forsys). 
+Note that the ForSys platform currently exists in three formats: 1) an executable C++ desktop application (ForSysX), 2) a publicly available R package ([ForSysR](https://github.com/forsys-sp/forsysr)), and 3) a DLL created from the C++ that can be wrapped within other applications. This tutorial covers only the use of the DLL wrapped in a new R package that executes C++ (ForSysX) from R. 
 
 
 
 
 ## Installation
 
-The current official version of the *forsys* package can be installed
-from [GitHub](https://github.com/forsys-sp/forsysr/) using the following
+The latest official version of the _ForSysXR_ package can be installed from [GitHub](https://github.com/forsys-sp/ForSysXR/) using the following code. The repository is currently private, which means that you need to create a personal access token to install the package in R. The token can be generated by going to the following url (https://github.com/settings/tokens): (1) log into your github account, (2) add a brief description to the token (required), (3) set the expiration date, and (4) click on the checkbox for 'repo'. Add that token text string to the _remotes::install_github_ function below and R will download and install the forsysr package to your computer. We recommend updating other packages when prompted.
+
+```{r, eval = FALSE}
+if (!require(remotes)) install.packages("remotes")
+remotes::install_github("forsys-sp/ForSysXR", auth_token = 'your_token_here')
+```
+
+
+<!--For the moment, ForSysXR is not public. To install the package on your machine, please download the zipped package [here](https://github.com/forsys-sp/ForSysXR/archive/master.zip).
+
+After the download, install the package as follows
+
+``` r
+library("devtools")
+install_local(path = "C:/Users/Downloads/ForSysXR-main.zip")
+```-->
+
+<!--The current official version of the *forsys* package can be installed
+from [GitHub](https://github.com/forsys-sp/ForSysXR/) using the following
 code. 
 
 We recommend updating other packages when prompted.
 
 ``` r
 if (!require(remotes)) install.packages("remotes")
-remotes::install_github("forsys-sp/forsysr")
-remotes::install_github("forsys-sp/patchmax")
-```
+remotes::install_github("forsys-sp/ForSysXR")
+```-->
 
-After installing ForSysXR package, the user needs to download
+After installing the ForSysXR package, the user needs to download
 and unzip the ForSysXDLL from
-[here](https://github.com/bmaparicio/ForSysXR/raw/main/ForSysXDLLDist.zip).
-This step is crucial as it downloads ForSysX executable that will later
+[here](https://github.com/forsys-sp/ForSysXR/raw/main/ForSysXDLLDist_2024-08-23.zip).
+This step is crucial as it downloads the ForSysX executable that will later
 be run from R.
 
 ## Usage
 
 Below we demonstrate how the *ForSysXR* package can be used and highlight the flexibility of the algorithm in solving multiple problems.
-For brevity, the dataset used is distributed with the package. First, we will
-load the *forsys* package.
+For simplicity, the dataset used is distributed with the package. First, we will
+load the *forsysXR* package.
 
 ``` r
 library(ForSysXR)
@@ -49,6 +70,8 @@ library(ForSysXR)
 # In order to run the examples below, these additional libraries are required:
 library(sf)
 library(dplyr)
+library(ggplot2)
+library(ggpubr)
 ```
 
 ### Loading data
@@ -56,7 +79,7 @@ library(dplyr)
 Although *forsys* can support many different types of treatment unit
 data, here our treatment units are represented as polygons in a spatial
 vector format. Each polygon represents a different treatment unit. 
-Please note that geodatabase format is not supported by *ForSysX*. Only shapefile format is currently supported
+Please note that geodatabase format is not supported by *ForSysX*. Only shapefile format is currently supported.
 
 ``` r
 # load treatment unit data
@@ -64,26 +87,25 @@ data(stands_data)
 # show the first rows in the attribute table
 head(stands_data)
 ```
-
-    ## Simple feature collection with 6 features and 10 fields
-    ## Geometry type: POLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: 571829.6 ymin: 4449945 xmax: 577284.2 ymax: 4455392
-    ## Projected CRS: ETRS89 / UTM zone 29N
-    ##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2
-    ## 1        1 2.149784 577104.1 4455304        1     0  649.1051 2.632802
-    ## 2        2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031
-    ## 3        3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908
-    ## 4        4 1.283715 576908.8 4451242        1     0  252.8004 2.378386
-    ## 5        5 1.393932 577108.5 4451299        1     0  269.7420 2.388572
-    ## 6        6 1.077390 574488.3 4452205        1     0  146.1724 2.339832
-    ##   obj_3        threshold                  geometry
-    ## 1 0.0017115583  1.750002 POLYGON ((577284.2 4455239,...
-    ## 2 0.0004543819  1.627590 POLYGON ((571986 4450002, 5...
-    ## 3 0.0008986479  1.996994 POLYGON ((572168.8 4450285,...
-    ## 4 0.0037384391  2.315409 POLYGON ((576948.2 4451149,...
-    ## 5 0.0038692370  2.815383 POLYGON ((577192.4 4451290,...
-    ## 6 0.0020394307  1.976931 POLYGON ((574485.3 4452268,...
+    ##Simple feature collection with 6 features and 11 fields
+    ##Geometry type: POLYGON
+    ##Dimension:     XY
+    ##Bounding box:  xmin: 571829.6 ymin: 4449945 xmax: 577284.2 ymax: 4455392
+    ##Projected CRS: ETRS89 / UTM zone 29N
+    ##    Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2        obj_3 threshold subunit
+    ##1        1 2.149784 577104.1 4455304        1     0  649.1051 2.632802 0.0017115583  1.750002       2
+    ##2        2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031 0.0004543819  1.627590       1
+    ##3        3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908 0.0008986479  1.996994       1
+    ##4        4 1.283715 576908.8 4451242        1     0  252.8004 2.378386 0.0037384391  2.315409       2
+    ##5        5 1.393932 577108.5 4451299        1     0  269.7420 2.388572 0.0038692370  2.815383       2
+    ##6        6 1.077390 574488.3 4452205        1     0  146.1724 2.339832 0.0020394307  1.976931       2
+    ##                    geometry
+    ##1 POLYGON ((577284.2 4455239,...
+    ##2 POLYGON ((571986 4450002, 5...
+    ##3 POLYGON ((572168.8 4450285,...
+    ##4 POLYGON ((576948.2 4451149,...
+    ##5 POLYGON ((577192.4 4451290,...
+    ##6 POLYGON ((574485.3 4452268,...
 
 ``` r
 # plot the treatment units
@@ -153,6 +175,88 @@ ggarrange(plot_1,plot_2,plot_3,plot_4,plot_5,nrow=3,ncol=2)
 ```
 <img src="man/figures/fig_2.png" width="900" />
 
+
+## Before running a ForSys Scenario
+
+ForSysX (and ForSysXR) require that fields in the input shapefile follow a specific format. 
+Hence, before setting a ForSys run, it is highly recommended to evaluate if the shapefile can be used without issues. If issues are detected, they can easily be corrected within the ForSysXR package.
+
+To evaluate the validity of the input shapefile, one can do as follows:
+
+``` r
+check_input_shapefile(input_shapefile =  stands_data,
+                      stand_id="Stand_ID",
+                      area="Area_ha",
+                      available="availuse",
+                      exclude_field="water",
+                      subunit_field="subunit",
+                      make_valid = TRUE)
+```
+    ## All fields match ForSysX required formats. The input shapefile was not updated.
+
+The message above means that the input shapefile is ready to be used in ForSysXR as no issues were found. 
+As an example of what to expect when issues are found and how to easily solve it, one can modify the existing shapefile and re-run the the check_input_shapefile, this time with make_valid set to FALSE
+
+``` r
+modified_stands_data <- stands_data
+
+#change the fields Stand_ID and availuse from integer to numeric. This should trigger
+#an issue as ForSysXR require these fields to be integer
+modified_stands_data$Stand_ID <- as.numeric(modified_stands_data$Stand_ID)
+modified_stands_data$availuse <- as.numeric(modified_stands_data$availuse)
+
+check_input_shapefile(input_shapefile =  modified_stands_data,
+                      stand_id="Stand_ID",
+                      area="Area_ha",
+                      available="availuse",
+                      exclude_field="water",
+                      subunit_field="subunit",
+                      make_valid = FALSE)
+```
+    ## Changes in the input shapefiles are required. 
+    ## Re-run check_input_shapefile with make_valid = TRUE if you wish to correct and overwrite the current shapefile in the golbal environment (does not change the shapefile in local machine). 
+    ## The problems found with the shapefile are listed below: 
+    ## • The stand id field is not an integer 
+    ## • The available field is not an integer 
+
+To easily correct the issues, one can set the make_valid back to TRUE. This will overwrite the shapefile (either in the global environment when the shapefile is loaded in R, or on the local machine when the input_shapefile is the path for the file in the user's machine). Note that the default is true.
+
+``` r
+check_input_shapefile(input_shapefile =  modified_stands_data,
+                      stand_id="Stand_ID",
+                      area="Area_ha",
+                      available="availuse",
+                      exclude_field="water",
+                      subunit_field="subunit",
+                      make_valid = TRUE)
+```
+    ## The input shapefile in the global environment was updated. The following fields were updated to match ForSysX required formats: 
+    ## • Stand_ID 
+    ## • availuse
+
+To be completely sure that the shapefile was corrected, one can also do as follows:
+
+``` r
+str(modified_stands_data)
+``` 
+
+    ## Classes ‘sf’ and 'data.frame':	1028 obs. of  12 variables:
+    ## $ Stand_ID : int  1 2 3 4 5 6 7 8 9 10 ...
+    ## $ Area_ha  : num  2.15 1.31 1.31 1.28 1.39 ...
+    ## $ X_Coord  : num  577104 571959 572198 576909 577109 ...
+    ## $ Y_Coord  : num  4455304 4450037 4450204 4451242 4451299 ...
+    ## $ availuse : int  1 1 1 1 1 1 1 1 1 1 ...
+    ## $ water    : int  0 0 0 0 0 0 0 0 0 0 ...
+    ## $ obj_1    : num  649 1093 1072 253 270 ...
+    ## $ obj_2    : num  2.63 2.42 2.4 2.38 2.39 ...
+    ## $ obj_3    : num  0.001712 0.000454 0.000899 0.003738 0.003869 ...
+    ## $ threshold: num  1.75 1.63 2 2.32 2.82 ...
+    ## $ subunit  : int  2 1 1 2 2 2 2 2 2 2 ...
+
+As showed above, the Stand_ID and the availuse fields are integers and no longer numeric.
+Note that in this function, only the parameters input_shapefile, stand_id, and area are mandatory. However, we recommend validating all the fields listed above whenever they are present in the input shapefile.
+
+
 ## Running a ForSys Scenario
 
 *Forsys* prioritizes projects by maximizing an objective given one or
@@ -160,16 +264,23 @@ more constraints. The objectives represent one or more management
 priorities, while a constraint can be perceived as the condition required to stop the prioritization process. Common constraints are total area treated and/or total cost.
 Thresholds are environmental or categorical conditions that
 trigger the need to treat an individual treatment unit or stand (e.g., 
-particular ownership or minimum forest cover). *Forsys* then builds
+distance to road or minimum forest cover). *Forsys* then builds
 projects and ranks them in order of their priority. Projects can be
 either predefined units (e.g., watersheds) or can be built dynamically.
 
 The example below sets a simple *ForSysX* run. It uses the stands_data shown above to delineate the top 50 ha
-within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each.
+within each predefined project based on ‘priority1’. This run defines a total of 10 projects of 50 ha each. The constraints are set as a vector, where the first element is the constraint field, the second element is the constraint value and the third is the constraint slack.
+
 
 ``` r
+#We can start by storing some paths
+#as variables since they will be present in almost all the upcoming exercises.
+
+my_output_folder <- "C:/Users/ForSysXR"
+my_exe_path <-"C:/Users/ForSysXR/ForSysXConsole.exe"
+
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_1",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_1",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -178,16 +289,14 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 output_adjacency_matrix ="C:/Users/ForSysXR",
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 output_adjacency_matrix = my_output_folder,
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 output_xml = paste(my_output_folder,"tutorial_objective1.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
@@ -200,33 +309,33 @@ plotted above. Project rank \#1 (darkest red) is the highest-ranked
 project.
 
 
-The amount of objective targeted for treatment per project can be plotted as follows
+The amount of objective targeted for treatment per project can be plotted as follows:
 
 
 ``` r
-result_table <- read.csv("C:/Users/ForSysXR/run_tutorial_1_Results.csv")
+result_table <- read.csv(paste(my_output_folder,"run_tutorial_1_Results.csv",sep="/"))
 
 ggplot(result_table,aes(x=ProjectNumber,y=ETrt_obj_1))+
   geom_line()+
   scale_x_continuous(breaks = 1:10)+
-  xlab("Objective attainment")+
-  ylab("Project number")+
+  xlab("Project number")+
+  ylab("Objective attainment")+
   theme_classic()
 ```
 
 <img src="man/figures/attainment_run1.jpg" width="600" align="center"/>
 
 
-## Using threshold 
+## Using a treatment threshold 
 
-It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may be not targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
+It is possible to define a treatment threshold in ForSys. For instance, a given stand may be available for treatment, but if it does not contain a certain value of biomass or any fire metric, it may not be targeted for treatment. Here, the field threshold represents the predicted flame length in meters. As an example, one could limit the treatments to be allocated only in areas with predicted flame lengths greater than 2 meters.
 
 
 We run *forsys* with the following arguments. Note the use of adjacency_matrix (uses the adjacency created above instead of generating a new file) and the parameter threshold.
 
 ``` r
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_threshold_2",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_threshold_2",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -235,27 +344,25 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 adjacency_matrix ="C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/test_tutorial_vs3_threshold.xml",
+                 output_xml = paste(my_output_folder,"run_tutorial_threshold_2.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  threshold=c("threshold",">",2),
                  save_outputs = c("stand_csv","shapefile","image"))
 ```
 
-<img src="man/figures/threshold_figure_projects.jpg" width="600" align="center"/>
+<img src="man/figures/threshold_figure_updated.jpg" width="600" align="center"/>
 
 
 To assess the impact of the use of the threshold in the treated area in each project, one can run the following script
 
 ``` r
-output_threshold <- sf::st_read("C:/Users/ForSysXR/run_tutorial_threshold_2_1_2_49-50.shp") %>%
+output_threshold <- sf::st_read(paste(my_output_folder,"run_tutorial_threshold_2_1_2_49-50.shp",sep="/")) %>%
   filter(Treat==1)
 
 plot_1 <- stands_data  %>%
@@ -272,13 +379,176 @@ plot_1 <- stands_data  %>%
                      labels="Treat")+
   guides(fill=guide_legend(title=""),
          color=guide_legend(title=""))
-
+plot_1
 ```
 
 
 <img src="man/figures/threshold_figure.jpg" width="600" align="center"/>
 
 As shown in the figure above, only stands above the threshold are targeted for treatments.
+
+
+## Maximum project diameter
+
+Sometimes projects can grow more than desired due to landscape restrictions, as exemplified above. One way to control how much a project can grow is by setting a maximum project diameter value (in meters). An example is presented below
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_threshold_2_max_diameter",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_threshold_2_max_diameter.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2),
+                 max_project_diameter = 1000,
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/max_diameter_figure.jpg" width="600" align="center"/>
+
+
+
+## Using more than one treatment threshold 
+
+It is also possible to define more than one treatment threshold in ForSys. Multiple thresholds can be specified by simply adding more factors to the threshold parameter. Here, we also added the parameter max_project_diameter that sets a maximum diameter for the projects (in meters).
+
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_two_thresholds",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 max_project_diameter=1000,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_two_thresholds.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2,
+                             "obj_2",">=",2.5),
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/threshold_figure_two_thresholds_projects.jpg" width="600" align="center"/>
+
+
+The two thresholds used above can be combined using the "and" or "or" logic. This can be specified in the optional parameter threshold_logic. If the user specifies an "and" logic, stands can be selected whenever all thresholds are met; the "or" logic sets stand as selectable whenever any of the thresholds are met. Multiple values can also be used, similar to when defining objectives. Users can set a minimum value, a maximum value, and a step. This is also an input of threshold_logic. If a single value should be used, then "single_value" must be specified; if multiple values with stepping should be used, then "multiple_value" must be specified.
+
+Whenever missing, the default is threshold_logic = c("single_value","and").
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_two_thresholds_or",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 max_project_diameter=1000,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_two_thresholds_or.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2,
+                             "obj_2",">=",2.5),
+                 threshold_logic = c("single_value","or"),
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+<img src="man/figures/threshold_figure_two_thresholds_projects_or.jpg" width="600" align="center"/>
+
+
+
+To run multiple values as thresholds with a given stepping, more information has to be given when defining the threshold(s). The threshold parameter is defined by five factors in the following order: threshold name, operator, minimum value, maximum value, step.
+Also, to run multiple values, the thrshold_logic has to be updated to "multiple_value" as follows:
+
+``` r
+set_forsysx_run (input_shapefile = stands_data,
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_two_thresholds_multiple_value",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 10,
+                 max_project_diameter=1000,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
+                 effect_fields = c("obj_1","obj_2","obj_3"),
+                 objectives = c("obj_1","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"run_tutorial_two_thresholds_multiple_value.xml",sep="/"),
+                 run_forsysx = 1,
+                 plot_results=TRUE,
+                 exe_path = my_exe_path,
+                 threshold=c("threshold",">",2,2,1,
+                             "obj_2",">=",0.5,2.5,2),
+                 threshold_logic = c("multiple_value","and"),
+                 save_outputs = c("stand_csv","shapefile","image"))
+```
+
+To plot the results:
+
+```r
+for(i in c(1,3)){
+  shp_data_i <- sf::st_read(paste(my_output_folder,"/run_tutorial_two_thresholds_multiple_value_1_2_",i,"_49-50.shp",sep=""))
+  
+  stands_data$diss <- 1
+  real_value <- i-0.5
+  plot_i <- stands_data  %>%
+    #mutate_at(c('diss'), ~na_if(., 0)) %>%
+    #st_combine() %>%
+    ggplot() +
+    geom_sf(aes(fill=diss),fill="grey",color=NA) +
+    #ggtitle("Projects ranking") +
+    theme_void()+
+    theme(plot.title=element_text(hjust=0.5))+
+    #guides(fill="none")+
+    geom_sf(data=shp_data_i,aes(fill=ProjectNum),color=NA)+
+    scale_fill_viridis_c(option = "turbo",direction=-1)+
+    labs(fill='Project number',
+         title=paste("threshold > 2 & obj_2 >= ",real_value, sep=""))
+  
+  
+  assign(paste("plot_",i,sep=""),plot_i)
+  rm(shp_data_i,plot_i)
+}
+
+ggpubr::ggarrange(plot_1,plot_3,nrow=1,ncol=2,common.legend = TRUE,legend="bottom")
+```
+
+
+<img src="man/figures/threshold_figure_two_thresholds_projects_and_stepping.jpg" width="600" align="center"/>
+
 
 
 
@@ -290,7 +560,7 @@ The first parameter one can change is the Inverse Distance Power (IDP). This par
 
 ``` r
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_IDP_1",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_IDP_1",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -299,16 +569,14 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 output_adjacency_matrix ="C:/Users/ForSysXR",
-                 constraints_name = "Area_ha",
-                 constraints_value = "50.00",
-                 constraints_slack = "1.00",
+                 output_adjacency_matrix = my_output_folder,
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/tutorial_objective1.xml",
+                 output_xml = paste(my_output_folder,"tutorial_objective1.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  threshold=c("threshold",">",2),
                  inverse_distance_power=3,
                  save_outputs = c("stand_csv","shapefile","image"))
@@ -319,7 +587,7 @@ set_forsysx_run (input_shapefile = stands_data,
 
 The figure above shows the projects when considering the same threshold as previously but with an inverse distance power of 3. As illustrated, now the projects are more clustered together than when not using any IDP.
 
-
+A compreheensive comparison between using IDP or maximum project diameters is shown [here](https://www.forsysplanning.org/learn/control-project-shape).
 
 ## Multiple priorities
 
@@ -327,10 +595,20 @@ In many prioritization studies, more than one objective is often considered.  Wh
 
 ForSysX and ForSysXR allow the user to normalize the objectives using the PCP (percentage contribution concerning the total problem of all treatable units) and SPM (percentage difference from the maximum value of the objective). Hence, the sum of the PCP of all stands is 100 and the maximum SPM value of any stand is 100. Usually, the SPM is used as an objective and the PCP as an effect.
 
+
+Note that it is important to consider stand size in these calculations, otherwise stand selection will be biased towards
+larger stands. For datasets where there is a large range in stand size, metrics should be
+weighted to account for size. The Calculate PCP and SPM function has the option to Multiply
+by area of stand to automatically account for stand size in calculation. 
+
+
 To normalize the objectives, the function normalize_objectives can be used
 
 ``` r
-normalize_objectives(stands_data, fields=c("obj_1","obj_2","obj_3"), availability_txt="availuse",output_name="C:/Users/ForSysXR")
+normalize_objectives(stands_data,
+                     fields = c("obj_1","obj_2","obj_3"),
+                     availability_txt = "availuse",
+                     output_name = my_output_folder)
 
 ## Simple feature collection with 1028 features and 16 fields
 ## Geometry type: POLYGON
@@ -338,13 +616,13 @@ normalize_objectives(stands_data, fields=c("obj_1","obj_2","obj_3"), availabilit
 ## Bounding box:  xmin: 571404.6 ymin: 4448921 xmax: 579181 ymax: 4456309
 ## Projected CRS: ETRS89 / UTM zone 29N
 ## First 10 features:
-##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2        obj_3 threshold
-##1         1 2.149784 577104.1 4455304        1     0  649.1051 2.632802 0.0017115583  1.750002
-##2         2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031 0.0004543819  1.627590
-##3         3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908 0.0008986479  1.996994
-##4         4 1.283715 576908.8 4451242        1     0  252.8004 2.378386 0.0037384391  2.315409
-##5         5 1.393932 577108.5 4451299        1     0  269.7420 2.388572 0.0038692370  2.815383
-##6         6 1.077390 574488.3 4452205        1     0  146.1724 2.339832 0.0020394307  1.976931
+##   Stand_ID  Area_ha  X_Coord Y_Coord availuse water     obj_1    obj_2        obj_3 threshold subunit
+##1         1 2.149784 577104.1 4455304        1     0  649.1051 2.632802 0.0017115583  1.750002       2
+##2         2 1.307183 571959.4 4450037        1     0 1092.8525 2.421031 0.0004543819  1.627590       1
+##3         3 1.313889 572198.1 4450204        1     0 1072.2005 2.397908 0.0008986479  1.996994       1
+##4         4 1.283715 576908.8 4451242        1     0  252.8004 2.378386 0.0037384391  2.315409       2
+##5         5 1.393932 577108.5 4451299        1     0  269.7420 2.388572 0.0038692370  2.815383       2
+##6         6 1.077390 574488.3 4452205        1     0  146.1724 2.339832 0.0020394307  1.976931       2
 ##                         geometry obj_1_SPM obj_2_SPM obj_3_SPM  obj_1_PCP obj_2_PCP   obj_3_PCP
 ##1  POLYGON ((577284.2 4455239,... 25.264164  91.44424  6.847841 0.15205560 0.1149056 0.029964043
 ##2  POLYGON ((571986 4450002, 5... 42.535493  84.08887  1.817954 0.25600530 0.1056631 0.007954809
@@ -359,8 +637,8 @@ This shapefile will be used to run ForSysX with multiobjectives. In the example,
 
 
 ``` r
-set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized.shp",
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_multiobjectives",
+set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_normalized.shp",sep="/"),
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_multiobjectives",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -369,18 +647,16 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 10,
-                 adjacency_matrix = "C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
-                 constraints_name = "Area_ha",
-                 constraints_value = "50",
-                 constraints_slack = "1.00",
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1_PCP","obj_2_PCP","obj_3_PCP"),
                  objectives = c("obj_1_SPM","Treat","1","1","1",
                                 "obj_2_SPM","Treat","1","1","1",
                                 "obj_3_SPM","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/test_tutorial_multiobjectives.xml",
+                 output_xml = paste(my_output_folder,"test_tutorial_multiobjectives.xml",sep="/"),
                  run_forsysx = 1,
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  save_outputs = c("stand_csv","shapefile","image"))
 
 ``` 
@@ -390,7 +666,7 @@ set_forsysx_run (input_shapefile = "C:/Users/ForSysXR/forsysXR_stands_normalized
 One can plot the attainment for each objective and the overall attainment as follows 
 
 ``` r
-result_table <- read.csv("C:/Users/aparicio/Desktop/ForSysXR/run_tutorial_multiobjectives_300_Results.csv")
+result_table <- read.csv(paste(my_output_folder,"run_tutorial_multiobjectives_Results.csv",sep="/"))
 head(result_table)
 
 #area_treated <- result_table[,"Treat_Area_ha"]
@@ -468,7 +744,7 @@ In the following example, we set the number of projects per subunit as three, ea
 
 ``` r
 set_forsysx_run (input_shapefile = stands_data,
-                 outputs_base_name = "C:/Users/ForSysXR/run_tutorial_subunits",
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_subunits",sep="/"),
                  stand_id = "Stand_ID",
                  area = "Area_ha",
                  available = "availuse",
@@ -477,17 +753,15 @@ set_forsysx_run (input_shapefile = stands_data,
                  x_coordinate = "X_Coord",
                  y_coordinate = "Y_Coord",
                  max_number_projects = 3,
-                 adjacency_matrix = "C:/Users/ForSysXR/adjacency_matrix_forsys.csv",
-                 constraints_name = "Area_ha",
-                 constraints_value = 50,
-                 constraints_slack = "1.00",
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
                  effect_fields = c("obj_1","obj_2","obj_3"),
                  objectives = c("obj_1","Treat","1","1","1"),
-                 output_xml = "C:/Users/ForSysXR/test_tutorial_multiobjectives.xml",
+                 output_xml = paste(my_output_folder,"test_tutorial_subunits.xml",sep="/"),
                  run_forsysx = 1,
                  subunit_field = "subunit",
                  plot_results=TRUE,
-                 exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
+                 exe_path = my_exe_path,
                  save_outputs = c("stand_csv","shapefile","image"))
 ``` 
 
@@ -499,8 +773,8 @@ set_forsysx_run (input_shapefile = stands_data,
 ForSysXR can be used to run predefined XML files. This can be useful to include in R scripts or loops. This function is similar to run zones in ForSysX
 
 ``` r
-run_forsysx_xml(exe_path = "C:/Users/ForSysXR/ForSysXConsole.exe",
-                xml_path = "C:/Users/ForSysXR/run_tutorial_1.xml")
+run_forsysx_xml(exe_path = my_exe_path,
+                xml_path = paste(my_output_folder,"tutorial_objective1.xml",sep="/"))
 ``` 
 
 
@@ -613,9 +887,7 @@ for(i in 1:3){
                    y_coordinate = "Point_Y",
                    max_number_projects = 1,
                    output_adjacency_matrix = "C:/Users/ForSysXR/temp_folder_shp",
-                   constraints_name = "area_ha",
-                   constraints_value = 500,
-                   constraints_slack = "1.00",
+                   constraints = c("area_ha", 500, 1.00),
                    effect_fields = c("ob2_PCP"),
                    objectives = c("ob2_SPM","Treat","1","1","1"),
                    output_xml = paste("C:/Users/ForSysXR/temp_folder_shp/test_tutorial_zones_",i,".xml",sep=""),
@@ -647,16 +919,18 @@ for(j in 2:length(all_shps_results)){
   all_shps_results_i <- rbind(all_shps_results_i,all_shps_results_j)
 }
 
-stands_data_FBN %>%
+plot1 <- stands_data_FBN %>%
   filter(!ID_forsys %in% all_shps_results_i$ID_forsys) %>%
   ggplot() +
   geom_sf(fill="grey80",colour=NA)+
   geom_sf(data=all_shps_results_i,aes(fill=factor(ProjectNum)),colour="black",alpha=0.4)+
-  ggtitle("Restoration projects") +
+  ggtitle("Regular run") +
   #scale_fill_viridis_c(option = "inferno",na.value = "grey50",direction=-1)+
   theme_void()+
   theme(plot.title=element_text(hjust=0.5))+
   guides(fill=guide_legend(title="Project number"))
+
+plot1
 ``` 
 
 <img src="man/figures/regular_run_zones.jpg" width="600" align="center"/>
@@ -673,7 +947,7 @@ To run ForSysXR with zones interactively one can simply use the parameter ```run
 
 ``` r
 run_forsysx_xml(exe_path="C:/Users/ForSysXR/ForSysXConsole.exe", 
-                xml_folder="C:/Users/ForSysXR/temp_folder_shp/xml_to_use",
+                xml_folder="C:/Users/ForSysXR/temp_folder_shp",
                 run_zones_interactive=TRUE)
 ``` 
 
@@ -708,6 +982,10 @@ plot2 <- stands_data_FBN %>%
         legend.title = element_text(size = 12), 
         legend.key.size = unit(0.5, 'cm'))+
   guides(fill=guide_legend(title="Project number"))
+
+
+ggarrange(plot1,plot2,nrow=1,ncol=2,legend="bottom",common.legend = TRUE)
+
 ```
 
 <img src="man/figures/regular_and_interactive_runs.jpg" width="900" align="center"/>
@@ -718,6 +996,89 @@ As illustrated by the figure above, the restoration projects generated when runn
 The projects are implemented in sequence. This means that the first project only has the limitation imposed in the XML file, while the following projects combine the limitations in the XML with the spatial limitation of including stands that are already part of another project. Hence, only the first project is the same between methods.
 
 
+## Exporting reports before and after a ForSys run
+### Before running ForSys
+It is possible to generate reports to guide the user in both the pre-run and the post-run. First, before running ForSys, it might be useful to explore the users' dataset and intended ForSys parameterization. This allows detection of potential errors in the parameterization by displaying the stands considered for the ForSys run. It can be done using the function ```explore``` as follows
+
+``` r
+setwd(my_output_folder)
+
+explore (input_shapefile = stands_data,
+         report_name="test",
+         stand_id = "Stand_ID",
+         area = "Area_ha",
+         available = "availuse",
+         exclude_field = "water",
+         threshold = c("threshold",">",2,
+                        "obj_3","<=",0.005),
+         objectives = c("obj_1","obj_3"))
+```
+
+This function exports an HTML with live maps. Land ownership and land cover can also be mapped in this function. To do so, one can generate this data as follows
+
+``` r
+#generate land cover
+# Example vector of names
+landuse_vector <- c("Agriculture", "Pine forest", "Eucalyptus", "Water/Urban")
+
+# Populate the data frame with random names
+set.seed(42)
+stands_data$landuse <- sample(landuse_vector, nrow(stands_data), replace = TRUE)
+stands_data <- within(stands_data, landuse[water == 1] <- 'Water/Urban')
+
+#generate land ownership
+landownership_vector <- c("Private", "Public", "County")
+
+# Populate the data frame with random names
+nrow(stands_data)
+
+stands_data$landownership <- "Private"
+
+stands_data <- within(stands_data, landownership[Stand_ID <= 650] <- 'Public')
+stands_data <- within(stands_data, landownership[Stand_ID > 650 & Stand_ID <= 800] <- 'County')
+
+#Now re-run the function explore with these fields
+
+explore (input_shapefile = stands_data,
+         report_name="test",
+         stand_id = "Stand_ID",
+         area = "Area_ha",
+         available = "availuse",
+         exclude_field = "water",
+         threshold = c("threshold",">",2,
+                       "landownership","==","Public"),
+         land_cover = "landuse",
+         land_ownership = "landownership",
+         objectives = c("obj_1","obj_3"))
+```
+### After running ForSys 
+The ForSysXR package allows the user to automatically generate a post-ForSys run report with the most typical analysis. This includes plotting the projects, quantifying the attainment of different objectives, and illustrating trade-offs.
+To generate this report, the user has to add the parameters ```build_report = TRUE``` and/or ```build_interac_report = TRUE``` to export an HTML with interactive maps that the user can toggle. 
+
+``` r
+set_forsysx_run (input_shapefile = paste(my_output_folder,"forsysXR_stands_normalized.shp",sep="/"),
+                 outputs_base_name = paste(my_output_folder,"run_tutorial_report",sep="/"),
+                 stand_id = "Stand_ID",
+                 area = "Area_ha",
+                 available = "availuse",
+                 exclude_field = "water",
+                 seed_stands_only_available_stands = 1,
+                 x_coordinate = "X_Coord",
+                 y_coordinate = "Y_Coord",
+                 max_number_projects = 3,
+                 adjacency_matrix = paste(my_output_folder,"adjacency_matrix_forsys.csv",sep="/"),
+                 constraints = c("Area_ha", 50, 1.00),
+                 effect_fields = c("obj_1_PCP","obj_2_PCP","obj_3_PCP"),
+                 objectives = c("obj_1_SPM","Treat","1","1","1"),
+                 output_xml = paste(my_output_folder,"test_tutorial_report.xml",sep="/"),
+                 run_forsysx = 1,
+                 #subunit_field = "subunit",
+                 #plot_results=TRUE,
+                 build_report = TRUE,
+                 exe_path = my_exe_path,
+                 save_outputs = c("stand_csv","shapefile","image"),
+                 overwrite_data = TRUE)
+```
 
 
 ## Citation
@@ -725,9 +1086,9 @@ The projects are implemented in sequence. This means that the first project only
 Please cite the *forsys* package when using it in publications. To cite
 the current official version, please use:
 
-> Aparício, B.A., Bunzel, K. and  Ager A. (2023).
+> Aparício, B.A., Bunzel, K., Day, M. and  Ager, A. (2024).
 > ForSysXR: A R package to execute C++ (ForSysX) version of the ForSys scenario planning model. R package version 0.9. Available at
-> <https://https://github.com/bmaparicio/ForSysXR>.
+> <https://https://github.com/forsys-sp/ForSysXR>.
 
 ## Additional resources
 
@@ -739,4 +1100,4 @@ contains information on the *forsys* package.
 
 If you have any questions about the *ForSysXR* package or suggestions for
 improving it, please [post an issue on the code
-repository](https://github.com/bmaparicio/ForSysXR/issues).
+repository](https://github.com/forsys-sp/ForSysXR/issues).

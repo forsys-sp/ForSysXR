@@ -2,8 +2,8 @@
 % Please edit documentation in R/set_forsysx_run.R
 \name{set_forsysx_run}
 \alias{set_forsysx_run}
-\title{Primary function for running the ForSysX treatment planner from R without an existent XML
-existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml}
+\title{Primary function for running the ForSysX planning system from R without an
+existing XML file. If an XML file defining the run already exists, consider using run_forsys_xml}
 \usage{
 set_forsysx_run(
   input_shapefile,
@@ -11,7 +11,7 @@ set_forsysx_run(
   stand_id,
   area,
   available,
-  seed_stands_only_available_stands,
+  seed_stands_only_available_stands = 0,
   exclude_field,
   x_coordinate,
   y_coordinate,
@@ -19,24 +19,33 @@ set_forsysx_run(
   max_project_diameter = -1,
   max_number_projects,
   inverse_distance_power = 0,
-  maximize_distance = 0,
   MaximizeDistanceOpt = 0,
-  patchbuster_identifier = NULL,
-  patchbuster_weight = NULL,
+  patchbuster_identifier,
+  patchbuster_weight,
   adjacency_matrix,
   output_adjacency_matrix,
-  constraints_name,
-  constraints_value,
-  constraints_slack,
+  constraints,
+  constraints_logic = c("single_value", "and"),
   effect_fields,
+  objective_direction = "maximize",
   objectives,
   threshold,
+  threshold_logic = c("single_value", "and"),
   subunit_field,
-  master_subunit,
+  master_subunit_field,
+  constaints_master_subunits,
+  constraint_by_master_subunit = FALSE,
   output_xml,
   run_forsysx,
   save_outputs,
+  spatial_optimization = TRUE,
+  overwrite_data = FALSE,
   plot_results = FALSE,
+  load_results = FALSE,
+  build_report = FALSE,
+  build_interac_report = FALSE,
+  report_variables = NULL,
+  web_upload = FALSE,
   exe_path
 )
 }
@@ -65,37 +74,65 @@ set_forsysx_run(
 
 \item{inverse_distance_power}{When this value is not zero, inverse distance weighting of the objective value is used in the stand selection process. A higher value will produce more tightly clumped stands in a project area, but sacrifices the overall objective. A value of zero means that the objective value is not modified by distance}
 
+\item{MaximizeDistanceOpt}{Binary. If 1, then Maximize Distance will be used and the effect of inverse distance weighting is reversed. Useful when creating fuelbreak networks. Default is 0.}
+
+\item{patchbuster_identifier}{Optional. Field containing the patch identifier. Only use when setting a patchbuster run}
+
+\item{patchbuster_weight}{Optional. Weight for the patchbuster function. Only use when setting a patchbuster run.}
+
 \item{adjacency_matrix}{A csv file containing the adjacency file. Can be generated using the parameter output_adjacency_matrix.}
 
 \item{output_adjacency_matrix}{Path where the adjacency matrix should be stored. Ignore if adjacency file was generated previous, and use the parameter adjacency_matrix}
 
-\item{constraints_name}{Field from input_shapefile that will be used as a constraint. Typical area or cost.}
+\item{constraints}{Vector containing the constraint(s) field, the constraint value (or minimum, maximum and step to be used), and the slack value to be used. The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
-\item{constraints_value}{Constraint value}
-
-\item{constraints_slack}{Constraint slack.}
+\item{constraints_logic}{Vector with two elements containing the constraint logic. The first element refers to if a single value should be used for the constraint ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple constraints must be combined, either selecting stands where all constraints are met ("and") or select stands where any of the constraints are met ("or"). Default is c("single_value","and")}
 
 \item{effect_fields}{Field(s) from input_shapefile that sould be stored in the output to measure the effect of the treatments}
 
-\item{objectives}{Field(s) from input_shapefile identifying the treatment priorities}
+\item{objective_direction}{Direction ("minimize" or "maximize") for the objectives. If maximize, stands with highest values will be selected first. If minimize, stands with lowest values will be selected first. Default is "maximize"}
 
-\item{threshold}{Vector containing the threshold field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value}
+\item{objectives}{Vector containing the field(s) from input_shapefile identifying the treatment priorities, type, minimum weight, maximum weight, and step. Five elements in the vector characterize each objective, following the order c("objective","treatment type","min weight","max weight", "step").}
 
-\item{subunit_field}{Field from input_shapefile identifying the pre-defined planning areas}
+\item{threshold}{Vector containing the threshold(s) field, the symbol of inequality or equality (">","<","==",">=","<="), and the threshold value (or minimum, maximum and step to be used). The vector can have a length of 3 or 5 elements, depending if using single_value or multiple_value in the constraints_logic}
 
-\item{master_subunit}{If master subunits should be used}
+\item{threshold_logic}{Vector with two elements containing the threshold logic. The first element refers to if a single value should be used for the threshold ("single_value") or if multiple values with stepping should be used ("multiple_value"). The second element refers to how multiple thresholds must be combined, either selecting stands where all thresholds are met ("and") or select stands where any of the thresholds are met ("or"). Default is c("single_value","and")}
+
+\item{subunit_field}{Optional. Field from input_shapefile identifying the pre-defined planning areas}
+
+\item{master_subunit_field}{Optional. Master subunit field if enabling master subunits.}
+
+\item{constaints_master_subunits}{Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE}
+
+\item{constraint_by_master_subunit}{If constraints by master subunit should be used. Default is FALSE.}
 
 \item{output_xml}{Path and name (with xml extention) where the xml file for the run should be stored.}
 
 \item{run_forsysx}{Binary. If 1 will run ForSysX. If 0 will end after saving the XML file}
 
+\item{save_outputs}{Vector with the outputs that must be saved. Options are "shapefile", "stand_csv" and/or "image". At least one output must be saved.}
+
+\item{spatial_optimization}{Logical. If TRUE, then the treatment areas are spatially aggregated into patches (projects) of adjacent stands. If FALSE, then projects are not created and stands are sorted based on their relevance for the objective(s). Default is TRUE.}
+
+\item{overwrite_data}{Logical. If TRUE, then any existing data with the same name and in the same directory will be replaced. Default is FALSE, which returns an error if the layer exists.}
+
+\item{plot_results}{Optional. If TRUE, the projects created by ForSys will be plotted. Requires that "shapefile" is saved as an output using the save_outputs parameter. Default is FALSE}
+
+\item{load_results}{Logical. If TRUE, then the csv stands and projects results from running ForSysX will be automatically loaded in R with the variable name as the outputs_base_name set by the user followed by prj_results and stnd_results. Default is FALSE}
+
+\item{build_report}{Optional. If TRUE, a html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
+
+\item{build_interac_report}{Optional. If TRUE, an interactive html report showing ForSys results and projects' attainment is created. Requires run_forsysx = 1. Default is FALSE}
+
+\item{report_variables}{Optional. A vector containing the names of categorical field(s) that should be analyzed in the report. Only available when only one scenario is created}
+
+\item{web_upload}{Logical. If TRUE, the HTML file will be automatically uploaded to a default website, allowing for an easy share between users. Default is FALSE.}
+
 \item{exe_path}{Path to the ForSysXConsole.exe}
 
-\item{available_for_management}{If the input_shapefile contains information on available and unavailable stands. <\emph{logical}>}
-
-\item{exclude_stands}{If the input_shapefile contains information on stands that should be excluded from the prioritization. <\emph{logical}>}
+\item{seed_stands_only_available_stands.}{Binary. If 1, then only the stands available for management are used as seed stands for potential projects. If 0 then all stands can be used as seed stands for potential projects. Default is 0.}
 }
 \description{
-Primary function for running the ForSysX treatment planner from R without an existent XML
-existing XML file. If a XML file defining the run already exists, consider using run_forsys_xml
+Primary function for running the ForSysX planning system from R without an
+existing XML file. If an XML file defining the run already exists, consider using run_forsys_xml
 }
