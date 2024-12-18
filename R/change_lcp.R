@@ -47,6 +47,25 @@ change_lcp <-function(forsys_output,
   #regras_use <- regras[1:12,c(6,7)]
   my_rules_use <- as.data.frame(my_rules)
 
+  if(any(my_rules_use[,1]==-1, na.rm = TRUE)){
+    row_for_minus1 <- which(my_rules_use[,1]==-1)
+    targeted_landuse <- my_rules_use[row_for_minus1,2]
+
+    my_rules_use_mod <- data.frame(
+      pre.treatment_code = all_possible_fuel_models,
+      post.treatment_code = targeted_landuse)
+
+    colnames(my_rules_use) <- c("pre.treatment_code","post.treatment_code")
+
+    my_rules_use_mod <- my_rules_use_mod %>%
+      left_join(my_rules_use, by = "pre.treatment_code", suffix = c(".mod", ".use")) %>%
+      mutate(post.treatment_code.mod = ifelse(!is.na(post.treatment_code.use), post.treatment_code.use, post.treatment_code.mod)) %>%
+      select(pre.treatment_code, post.treatment_code = post.treatment_code.mod) # Keep only relevant columns
+
+    my_rules_use <- my_rules_use_mod
+
+  }
+
 
   #check if all fuel models in the landscape are present in the rules
   unique_before_rules <- my_rules_use[,1][my_rules_use[,1] %in% all_possible_fuel_models]
@@ -77,13 +96,13 @@ change_lcp <-function(forsys_output,
   r4<-raster::reclassify(r3, my_rules_use)
   #r4@data@values
 
-  #plot(r4)
-
-
-
+  #raster::plot(r4)
+  #raster::writeRaster(r4,paste(folder_name,"/","fuel_model_traditional_way.asc",sep=""))
 
   ###delete the changed pixels from the original dataset####
   r5 <- raster::mask(fuel_model_map, forsys_output_shp,inverse=T)
+
+  #raster::plot(r5)
 
   #save the new fuel model map
   x <- list(r5, r4)
@@ -92,11 +111,13 @@ change_lcp <-function(forsys_output,
   x$overwrite <- TRUE
   m <- do.call(raster::merge, x)
 
+  #raster::writeRaster(m,paste(folder_name,"/","fuel_model_old_way_fin2.asc",sep=""))
 
   #save the new lcp
 
   lcp[[4]] <-  m
   raster::writeRaster(lcp, filename=file.path(folder_name, paste("post_forsys_",landscape_name,".tif",sep="")), options="INTERLEAVE=BAND", overwrite=TRUE)
+
 
 
 
