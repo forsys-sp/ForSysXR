@@ -28,7 +28,7 @@ The latest official version of the _ForSysXR_ package can be installed from [Git
 
 ```{r, eval = FALSE}
 if (!require(remotes)) install.packages("remotes")
-remotes::install_github("forsys-sp/ForSysXR", auth_token = 'your_token_here')
+remotes::install_github("forsys-sp/ForSysXR")
 ```
 
 
