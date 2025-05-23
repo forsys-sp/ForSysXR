@@ -26,6 +26,8 @@
 #' @param objectives Vector containing the field(s) from input_shapefile identifying the treatment priorities, type, minimum weight, maximum weight, and step. Five elements in the vector characterize each objective, following the order c("objective","treatment type","min weight","max weight", "step").
 #' @param objective_direction Direction ("minimize" or "maximize") for the objectives. If maximize, stands with highest values will be selected first. If minimize, stands with lowest values will be selected first. Default is "maximize"
 #' @param subunit_field Optional. Field from input_shapefile identifying the pre-defined planning areas
+#' @param constraint_by_subunit Optional. True if a subunit level field should be used to define the constraint. Default is FALSE.
+#' @param value_field_subunit Optional. Field to be used value field when constraint_by_subunit is set to TRUE.
 #' @param master_subunit_field Optional. Master subunit field if enabling master subunits.
 #' @param constaints_master_subunits Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE
 #' @param constraint_by_master_subunit If constraints by master subunit should be used. Default is FALSE.
@@ -84,6 +86,8 @@ set_forsysx_run <- function(input_shapefile,
                             threshold,
                             threshold_logic = c("single_value","and"),
                             subunit_field,
+                            constraint_by_subunit=FALSE,
+                            value_field_subunit=NULL,
                             master_subunit_field,
                             constaints_master_subunits,
                             constraint_by_master_subunit=FALSE,
@@ -99,7 +103,14 @@ set_forsysx_run <- function(input_shapefile,
                             report_variables=NULL,
                             web_upload=FALSE,
                             exe_path #,xml_path
-                            ) {
+) {
+
+  my_output_folder <- "C:/Users/almeidbr/Downloads/new_problem_michelle"
+  my_exe_path <-"C:/Users/ForSysXR/ForSysXConsole.exe"
+
+
+
+
 
 
 
@@ -133,9 +144,9 @@ set_forsysx_run <- function(input_shapefile,
 
 
   if(class(input_shapefile)[1]=="character"){
-  input_shapefile_format <- substrRight(input_shapefile,4)
-  if(input_shapefile_format!= ".shp")
-    stop("input_shapefile has to be a shapefile!")}
+    input_shapefile_format <- substrRight(input_shapefile,4)
+    if(input_shapefile_format!= ".shp")
+      stop("input_shapefile has to be a shapefile!")}
 
   if (missing(adjacency_matrix) & missing(output_adjacency_matrix) & spatial_optimization==TRUE) {
     stop("User must specify an existing adjacency matrix or generate one (output_adjacency_matrix parameter)")
@@ -174,7 +185,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-#this is ONLY if we are either plotting (plot=TRUE) or generating the adjacency matrix
+  #this is ONLY if we are either plotting (plot=TRUE) or generating the adjacency matrix
   if(class(input_shapefile)[1]=="sf"){
     my_shp <- (input_shapefile)
 
@@ -185,9 +196,9 @@ set_forsysx_run <- function(input_shapefile,
 
 
     if(overwrite_data==TRUE){
-    sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""),append=FALSE)}else{
-      sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
-    }
+      sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""),append=FALSE)}else{
+        sf::st_write(input_shapefile,paste(outputs_base_name,"_stand_data.shp",sep=""))
+      }
     input_shapefile <- paste(outputs_base_name,"_stand_data.shp",sep="")
   }
 
@@ -195,11 +206,11 @@ set_forsysx_run <- function(input_shapefile,
 
   if(class(input_shapefile)[1]=="character"){
     if(plot_results==TRUE | !missing(output_adjacency_matrix) | build_report==TRUE | build_interac_report==TRUE){
-    my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
+      my_shp <- sf::st_read(input_shapefile,quiet=TRUE)
 
-    if(max(nchar(names(my_shp)))>10){
-      stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
-    }
+      if(max(nchar(names(my_shp)))>10){
+        stop("The shapefile contains at least one field named with more than 10 characters. Please modify it manually or by using the function check_input_shapefile")
+      }
 
     }}
 
@@ -266,7 +277,7 @@ set_forsysx_run <- function(input_shapefile,
 
   if(!missing(threshold)){
     data("xml_data")
-    }
+  }
 
 
   xml_data_use <- gsub("my_input_shapefile.shp",input_shapefile_use,unlist(xml_data)) #input_shapefile_use
@@ -280,20 +291,20 @@ set_forsysx_run <- function(input_shapefile,
 
   #available_for_management -falta fazer este
   #if (available_for_management==1){
-    if (missing(available)) {
-      xml_data_use <- gsub("my_availability_field","",unlist(xml_data_use))
-      xml_data_use <- gsub("Availability=\"1\"","Availability=\"0\"",unlist(xml_data_use))
-      xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",0,"\"",sep=""),unlist(xml_data_use))
-    }
+  if (missing(available)) {
+    xml_data_use <- gsub("my_availability_field","",unlist(xml_data_use))
+    xml_data_use <- gsub("Availability=\"1\"","Availability=\"0\"",unlist(xml_data_use))
+    xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",0,"\"",sep=""),unlist(xml_data_use))
+  }
 
   if (!missing(available)) {
-  if (length(available)==1) {
-    xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))
-    xml_data_use <- gsub("Availability=\"1\"","Availability=\"1\"",unlist(xml_data_use))
-    xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
-  } else{
-    stop("One and only one field must be used to specify the available stands")
-  }}
+    if (length(available)==1) {
+      xml_data_use <- gsub("my_availability_field",available,unlist(xml_data_use))
+      xml_data_use <- gsub("Availability=\"1\"","Availability=\"1\"",unlist(xml_data_use))
+      xml_data_use <- gsub("SeedOnlyAvail=\"1\"",paste("SeedOnlyAvail=\"",seed_stands_only_available_stands,"\"",sep=""),unlist(xml_data_use))
+    } else{
+      stop("One and only one field must be used to specify the available stands")
+    }}
 
 
   #available_for_management -falta fazer este
@@ -311,61 +322,61 @@ set_forsysx_run <- function(input_shapefile,
   if (spatial_optimization==TRUE){
 
 
-  if (missing(exclude_field)) {
-    xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",0,"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
+    if (missing(exclude_field)) {
+      xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",0,"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
     }
 
 
-  if (!missing(exclude_field)) {
-    if(length(exclude_field)==1){
-      xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",1,"\"",sep=""),unlist(xml_data_use))
-      xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
-    } else{
-    stop("One and only one field must be used to specify the excluded stands")
-  }}
+    if (!missing(exclude_field)) {
+      if(length(exclude_field)==1){
+        xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",1,"\"",sep=""),unlist(xml_data_use))
+        xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+      } else{
+        stop("One and only one field must be used to specify the excluded stands")
+      }}
 
 
-  # xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",exclude_stands,"\"",sep=""),unlist(xml_data_use))
-  #
-  # if (exclude_stands == 0) {
-  #   xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
-  # } else {
-  #   xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
-  # }
+    # xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",exclude_stands,"\"",sep=""),unlist(xml_data_use))
+    #
+    # if (exclude_stands == 0) {
+    #   xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
+    # } else {
+    #   xml_data_use <- gsub("my_exclude_field",exclude_field,unlist(xml_data_use))
+    # }
 
 
 
 
-  #load_objective_steps - falta fazer
-  #step_file - falta fazer
-  #objective_direction - falta fazer
+    #load_objective_steps - falta fazer
+    #step_file - falta fazer
+    #objective_direction - falta fazer
     if(objective_direction=="minimize"){
-  xml_data_use <- gsub("ObjectiveDirection=\"1\"","ObjectiveDirection=\"0\"",unlist(xml_data_use))
+      xml_data_use <- gsub("ObjectiveDirection=\"1\"","ObjectiveDirection=\"0\"",unlist(xml_data_use))
     }
 
-  xml_data_use <- gsub("Point_X",x_coordinate,unlist(xml_data_use))
-  xml_data_use <- gsub("Point_Y",y_coordinate,unlist(xml_data_use))
+    xml_data_use <- gsub("Point_X",x_coordinate,unlist(xml_data_use))
+    xml_data_use <- gsub("Point_Y",y_coordinate,unlist(xml_data_use))
 
 
-  xml_data_use <- gsub("my_seed_stand",seed_stand_percent,unlist(xml_data_use))
-  xml_data_use <- gsub("my_max_diameter",max_project_diameter,unlist(xml_data_use))
-  xml_data_use <- gsub("my_project_number",max_number_projects,unlist(xml_data_use))
+    xml_data_use <- gsub("my_seed_stand",seed_stand_percent,unlist(xml_data_use))
+    xml_data_use <- gsub("my_max_diameter",max_project_diameter,unlist(xml_data_use))
+    xml_data_use <- gsub("my_project_number",max_number_projects,unlist(xml_data_use))
 
 
 
-  #new constraints - works with vector now
+    #new constraints - works with vector now
 
-  #constraints <- c("area_ha", 50, "")
-}
+    #constraints <- c("area_ha", 50, "")
+  }
 
 
 
 
   if (spatial_optimization==FALSE){
 
-      xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",0,"\"",sep=""),unlist(xml_data_use))
-      xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
+    xml_data_use <- gsub(paste("Exclusions=\"1\""),paste("Exclusions=\"",0,"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub("my_exclude_field","",unlist(xml_data_use))
 
 
 
@@ -408,7 +419,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
   if(missing(constraints_logic)){
-  #if missing constraints_logic, then it is always single_value
+    #if missing constraints_logic, then it is always single_value
 
     if(!(length(constraints) %in% c(3,6,9,12,15,18))){
       stop("Wrong number of constraints. Expected three arguments per constraint - name, value and slack")
@@ -417,48 +428,48 @@ set_forsysx_run <- function(input_shapefile,
     #length(constraints)
 
 
-  total_n_constraints <- base::length(constraints)
-  total_n_constraints <- total_n_constraints/3
+    total_n_constraints <- base::length(constraints)
+    total_n_constraints <- total_n_constraints/3
 
-  #integer_val <- total_n_constraints%%1==0
+    #integer_val <- total_n_constraints%%1==0
 
-  integer_val <- decimalplaces(total_n_constraints)
+    integer_val <- decimalplaces(total_n_constraints)
 
-  if(integer_val != 0)
-    stop("Wrong number of arguments when defining the constraints")
+    if(integer_val != 0)
+      stop("Wrong number of arguments when defining the constraints")
 
-  if(total_n_constraints > 6)
-    stop("Maximum number of constraints reached. Maximum number allowd is 6")
+    if(total_n_constraints > 6)
+      stop("Maximum number of constraints reached. Maximum number allowd is 6")
 
-  for (k in 1:total_n_constraints){
-
-
-    position_constraints <- (k-1)*3
-
-    constraints_name <- constraints[position_constraints+1]
-    constraints_value <- constraints[position_constraints+2]
-    constraints_slack <- constraints[position_constraints+3]
-
-    xml_data_use <- gsub(paste("my_constraint",k,"\"",sep=""),paste(constraints_name,"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("my_min_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("my_max_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("step_constraint",k,"\"",sep=""),paste("0",'"',sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("my_slack",k,sep=""),constraints_slack,unlist(xml_data_use))
+    for (k in 1:total_n_constraints){
 
 
-  }
+      position_constraints <- (k-1)*3
+
+      constraints_name <- constraints[position_constraints+1]
+      constraints_value <- constraints[position_constraints+2]
+      constraints_slack <- constraints[position_constraints+3]
+
+      xml_data_use <- gsub(paste("my_constraint",k,"\"",sep=""),paste(constraints_name,"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub(paste("my_min_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub(paste("my_max_constraint_val",k,"\"",sep=""),paste(constraints_value,"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub(paste("step_constraint",k,"\"",sep=""),paste("0",'"',sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub(paste("my_slack",k,sep=""),constraints_slack,unlist(xml_data_use))
 
 
-  #delete the unused constraints
-  if(total_n_constraints < 6){
-    diff_constraints <- 6-total_n_constraints
-    position_unused <- (1:6)
-    position_unused <- tail(position_unused,diff_constraints)
-
-    for(q in min(position_unused):max(position_unused)){
-      xml_data_use <- gsub(paste("<Constraint Field=\"my_constraint",q,"\""," MinValue=\"my_min_constraint_val",q,"\""," MaxValue=\"my_max_constraint_val",q,"\""," MinField=\"\" MaxField=\"\" Step=\"step_constraint",q,"\""," Slack=\"my_slack",q,"\" />",sep=""),"",unlist(xml_data_use))
     }
-  }
+
+
+    #delete the unused constraints
+    if(total_n_constraints < 6){
+      diff_constraints <- 6-total_n_constraints
+      position_unused <- (1:6)
+      position_unused <- tail(position_unused,diff_constraints)
+
+      for(q in min(position_unused):max(position_unused)){
+        xml_data_use <- gsub(paste("<Constraint Field=\"my_constraint",q,"\""," MinValue=\"my_min_constraint_val",q,"\""," MaxValue=\"my_max_constraint_val",q,"\""," MinField=\"\" MaxField=\"\" Step=\"step_constraint",q,"\""," Slack=\"my_slack",q,"\" />",sep=""),"",unlist(xml_data_use))
+      }
+    }
 
 
 
@@ -728,14 +739,14 @@ set_forsysx_run <- function(input_shapefile,
   list_objectives <- data.frame()
   for (k in 1:total_n_objective){
 
-  position_obj <- (k-1)*5
-  xml_data_use <- gsub(paste("<Objective Field=\"my_objective_",k,"\"",sep=""),paste("<Objective Field=\"",objectives[position_obj+1],"\"",sep=""),unlist(xml_data_use))
-  xml_data_use <- gsub(paste("type_my_objective_",k,sep=""),objectives[position_obj+2],unlist(xml_data_use))
-  xml_data_use <- gsub(paste("minweight_my_objective_",k,sep=""),objectives[position_obj+3],unlist(xml_data_use))
-  xml_data_use <- gsub(paste("maxweight_my_objective_",k,sep=""),objectives[position_obj+4],unlist(xml_data_use))
-  xml_data_use <- gsub(paste("step_my_objective_",k,sep=""),objectives[position_obj+5],unlist(xml_data_use))
+    position_obj <- (k-1)*5
+    xml_data_use <- gsub(paste("<Objective Field=\"my_objective_",k,"\"",sep=""),paste("<Objective Field=\"",objectives[position_obj+1],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("type_my_objective_",k,sep=""),objectives[position_obj+2],unlist(xml_data_use))
+    xml_data_use <- gsub(paste("minweight_my_objective_",k,sep=""),objectives[position_obj+3],unlist(xml_data_use))
+    xml_data_use <- gsub(paste("maxweight_my_objective_",k,sep=""),objectives[position_obj+4],unlist(xml_data_use))
+    xml_data_use <- gsub(paste("step_my_objective_",k,sep=""),objectives[position_obj+5],unlist(xml_data_use))
 
-  list_objectives <- rbind(list_objectives,objectives[position_obj+1])
+    list_objectives <- rbind(list_objectives,objectives[position_obj+1])
 
   }
 
@@ -748,7 +759,7 @@ set_forsysx_run <- function(input_shapefile,
 
     for(q in min(position_unused):max(position_unused)){
       xml_data_use <- gsub(paste("<Objective Field=\"my_objective_",q,"\""," Weight=\"1.00\" Type=\"type_my_objective_",q,"\""," MinWeight=\"minweight_my_objective_",q,"\""," MaxWeight=\"maxweight_my_objective_",q,"\""," Step=\"step_my_objective_",q,"\" />",sep=""),"",unlist(xml_data_use))
-      }
+    }
 
   }
 
@@ -756,106 +767,106 @@ set_forsysx_run <- function(input_shapefile,
 
 
   #repeat for threshold
-#
-#   if(missing(threshold)){
-#     for(q in 1:6){
-#       xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"1.00\" />",sep=""),"",unlist(xml_data_use))
-#     }
-#   }
+  #
+  #   if(missing(threshold)){
+  #     for(q in 1:6){
+  #       xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"10.00\" Step=\"1.00\" />",sep=""),"",unlist(xml_data_use))
+  #     }
+  #   }
 
 
   if(!missing(threshold) & missing(threshold_logic)){
     #if(length(threshold) !=3){
     #  stop("Wrong number of elements used in threshold (expected 3 elements). If using multiple thresholds, please specify the threshold_logic.")
     #}
-  total_n_threshold <- base::length(threshold)
-  total_n_threshold <- total_n_threshold/3
+    total_n_threshold <- base::length(threshold)
+    total_n_threshold <- total_n_threshold/3
 
-  #integer_val <- total_n_threshold%%1==0
+    #integer_val <- total_n_threshold%%1==0
 
-  integer_val <- decimalplaces(total_n_threshold)
+    integer_val <- decimalplaces(total_n_threshold)
 
-  if(integer_val != 0)
-    stop("Wrong number of arguments when defining the threshold")
+    if(integer_val != 0)
+      stop("Wrong number of arguments when defining the threshold")
 
-  if(total_n_threshold > 6)
-    stop("Maximum number of threshold reached. Maximum number allowd is 6")
+    if(total_n_threshold > 6)
+      stop("Maximum number of threshold reached. Maximum number allowd is 6")
 
-  for (k in 1:total_n_threshold){
+    for (k in 1:total_n_threshold){
 
-    position_threshold <- (k-1)*3
-    xml_data_use <- gsub(paste("my_threshold",k,"\"",sep=""),paste(threshold[position_threshold+1],"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("my_operator",k,sep=""),
-                         if(threshold[position_threshold+2]==">="){"&gt;="} else
-                         if(threshold[position_threshold+2]=="<="){"&lt;="} else
-                         if(threshold[position_threshold+2]=="<"){"&lt;"} else
-                         if(threshold[position_threshold+2]==">"){"&gt;"} else
-                         if(threshold[position_threshold+2]=="=="){"=="},
-                         unlist(xml_data_use))
-    xml_data_use <- gsub(paste("min_val_threshold",k,sep=""),threshold[position_threshold+3],unlist(xml_data_use))
+      position_threshold <- (k-1)*3
+      xml_data_use <- gsub(paste("my_threshold",k,"\"",sep=""),paste(threshold[position_threshold+1],"\"",sep=""),unlist(xml_data_use))
+      xml_data_use <- gsub(paste("my_operator",k,sep=""),
+                           if(threshold[position_threshold+2]==">="){"&gt;="} else
+                             if(threshold[position_threshold+2]=="<="){"&lt;="} else
+                               if(threshold[position_threshold+2]=="<"){"&lt;"} else
+                                 if(threshold[position_threshold+2]==">"){"&gt;"} else
+                                   if(threshold[position_threshold+2]=="=="){"=="},
+                           unlist(xml_data_use))
+      xml_data_use <- gsub(paste("min_val_threshold",k,sep=""),threshold[position_threshold+3],unlist(xml_data_use))
 
-    #if we only want to run one threshold and not steps, we do this
-    xml_data_use <- gsub(paste("step_threshold",k,sep=""),"0",unlist(xml_data_use))
+      #if we only want to run one threshold and not steps, we do this
+      xml_data_use <- gsub(paste("step_threshold",k,sep=""),"0",unlist(xml_data_use))
 
-  }
+    }
 
 
-  #delete the unused threshold
-  if(total_n_threshold < 6){
-    diff_threshold <- 6-total_n_threshold
-    position_unused <- (1:6)
-    position_unused <- tail(position_unused,diff_threshold)
+    #delete the unused threshold
+    if(total_n_threshold < 6){
+      diff_threshold <- 6-total_n_threshold
+      position_unused <- (1:6)
+      position_unused <- tail(position_unused,diff_threshold)
 
-    for(q in min(position_unused):max(position_unused)){
-      xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"max_val_threshold",q,"\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
+      for(q in min(position_unused):max(position_unused)){
+        xml_data_use <- gsub(paste("<Threshold Field=\"my_threshold",q,"\""," Operator=\"my_operator",q,"\""," Value=\"1.00\" MinValue=\"min_val_threshold",q,"\""," MaxValue=\"max_val_threshold",q,"\" Step=\"step_threshold",q,"\" />",sep=""),"",unlist(xml_data_use))
       }
-  }
-
-
-  #if multiple thresholds used, then we need to get the thresholdLogic
-  #threshold_logic = c("single_value","and")
-
-
-
-  if(!missing(threshold_logic)){
-
-
-    if(length(threshold_logic)!=2){
-      stop("threshold_logic has to have two elements. The first has to be single_value or multiple_value, and the second and or or.")
     }
 
-    if(threshold_logic[1]!="single_value" & threshold_logic[1]!="multiple_value"){
-      stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
-    }
 
-    if(threshold_logic[2]!="and" & threshold_logic[2]!="or"){
-      stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
-    }
-
-    if(threshold_logic[2]=="and"){
-      threshold_logic_val <- 0
-    }
-
-    if(threshold_logic[2]=="or"){
-      threshold_logic_val <- 1
-    }
-
-  xml_data_use <- gsub("ThresholdLogic=\"0\"", paste("ThresholdLogic=\"",threshold_logic_val,"\"", sep=""),unlist(xml_data_use))
+    #if multiple thresholds used, then we need to get the thresholdLogic
+    #threshold_logic = c("single_value","and")
 
 
-  if(threshold_logic[1]=="single_value"){
-    threshold_logic_single <- 1
-  }
+
+    if(!missing(threshold_logic)){
 
 
-  if(threshold_logic[1]=="multiple_value"){
-    threshold_logic_single <- 0
-  }
+      if(length(threshold_logic)!=2){
+        stop("threshold_logic has to have two elements. The first has to be single_value or multiple_value, and the second and or or.")
+      }
 
-  xml_data_use <- gsub("ThresholdSingleValue=\"1\"", paste("ThresholdSingleValue=\"",threshold_logic_single,"\"", sep=""),unlist(xml_data_use))
+      if(threshold_logic[1]!="single_value" & threshold_logic[1]!="multiple_value"){
+        stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+      }
+
+      if(threshold_logic[2]!="and" & threshold_logic[2]!="or"){
+        stop("threshold_logic has to be single_value or multiple_value followed by and or or.")
+      }
+
+      if(threshold_logic[2]=="and"){
+        threshold_logic_val <- 0
+      }
+
+      if(threshold_logic[2]=="or"){
+        threshold_logic_val <- 1
+      }
+
+      xml_data_use <- gsub("ThresholdLogic=\"0\"", paste("ThresholdLogic=\"",threshold_logic_val,"\"", sep=""),unlist(xml_data_use))
 
 
-  }}
+      if(threshold_logic[1]=="single_value"){
+        threshold_logic_single <- 1
+      }
+
+
+      if(threshold_logic[1]=="multiple_value"){
+        threshold_logic_single <- 0
+      }
+
+      xml_data_use <- gsub("ThresholdSingleValue=\"1\"", paste("ThresholdSingleValue=\"",threshold_logic_single,"\"", sep=""),unlist(xml_data_use))
+
+
+    }}
 
 
 
@@ -1051,7 +1062,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-    }
+  }
 
 
 
@@ -1105,6 +1116,16 @@ set_forsysx_run <- function(input_shapefile,
   }else{
     subunit_field<-NULL
   }
+
+  if (constraint_by_subunit==TRUE){
+    xml_data_use <- gsub(paste("SubunitConstraintFields=\"0\"",sep=""),"SubunitConstraintFields=\"1\"",unlist(xml_data_use))
+    #xml_data_use <- gsub(paste(" SubunitsField=\"\"",sep=""),paste("SubunitsField=\"",subunit_field,"\"",sep=""),unlist(xml_data_use))
+    #subunit_field_exists <- TRUE
+    xml_data_use <- gsub(paste("MinField=\"\"",sep=""),paste("MinField=\"",value_field_subunit,"\"",sep=""),unlist(xml_data_use))
+
+  }
+
+
 
 
   if (missing(master_subunit_field)){
@@ -1180,7 +1201,7 @@ set_forsysx_run <- function(input_shapefile,
     xml_data_use <- gsub("my_patchbuster_id","",unlist(xml_data_use))
     xml_data_use <- gsub("my_patchbuster_weight","0",unlist(xml_data_use))
     xml_data_use <- gsub("RecursiveOpt=\"0\"","RecursiveOpt=\"0\"",unlist(xml_data_use))
-    }
+  }
 
   # if (!missing(patchbuster_weight)){
   #   xml_data_use <- gsub("my_patchbuster_weight",patchbuster_weight,unlist(xml_data_use))
@@ -1246,30 +1267,30 @@ set_forsysx_run <- function(input_shapefile,
 
 
     if(any(grepl("stand_csv", save_outputs, fixed = TRUE))==TRUE){
-    output_csv_run_use <- output_csv_run[!output_csv_run %in% exclude_this_file_csv]
+      output_csv_run_use <- output_csv_run[!output_csv_run %in% exclude_this_file_csv]
 
-    if(length(output_csv_run_use)==1){
-      stnd_results <- read.csv(paste(path_with_results,output_csv_run_use,sep="/"))
-    }
-
-    if(length(output_csv_run_use)>1){
-      stnd_results <- data.frame()
-      for(e in 1:length(output_csv_run_use)){
-        stnd_results_e <- read.csv(paste(path_with_results,output_csv_run_use[e],sep="/"))
-        get_name_stnd <- output_csv_run_use[e]
-        stnd_results_e$file_name <-get_name_stnd
-        stnd_results<-rbind(stnd_results,stnd_results_e)
+      if(length(output_csv_run_use)==1){
+        stnd_results <- read.csv(paste(path_with_results,output_csv_run_use,sep="/"))
       }
 
-    }
+      if(length(output_csv_run_use)>1){
+        stnd_results <- data.frame()
+        for(e in 1:length(output_csv_run_use)){
+          stnd_results_e <- read.csv(paste(path_with_results,output_csv_run_use[e],sep="/"))
+          get_name_stnd <- output_csv_run_use[e]
+          stnd_results_e$file_name <-get_name_stnd
+          stnd_results<-rbind(stnd_results,stnd_results_e)
+        }
 
-    #if(length(output_csv_run_use)!=1){
-    #  stop("Could not load ForSysX results in R. Multiple files match the name given. Please use a unique name in outputs_base_name or load the csv results manually.")
-    #} else {
-    #  stnd_results <- read.csv(paste(path_with_results,output_csv_run_use,sep="/"))
-    #}
+      }
 
-    suppressWarnings(assign(paste(last_name,"_stnd_results",sep=""),stnd_results,pos = 1)) #,pos = 1
+      #if(length(output_csv_run_use)!=1){
+      #  stop("Could not load ForSysX results in R. Multiple files match the name given. Please use a unique name in outputs_base_name or load the csv results manually.")
+      #} else {
+      #  stnd_results <- read.csv(paste(path_with_results,output_csv_run_use,sep="/"))
+      #}
+
+      suppressWarnings(assign(paste(last_name,"_stnd_results",sep=""),stnd_results,pos = 1)) #,pos = 1
     }
 
 
@@ -1306,18 +1327,18 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-if(build_report==TRUE | build_interac_report==TRUE){
-  build_report_run(outputs_base_name=outputs_base_name,
-                             stand_shapefile=my_shp,
-                             effect_fields=effect_fields,
-                             area=area,
-                             subunit_field=subunit_field,
-                             master_subunit_field=master_subunit_field,
-                             report_variables=report_variables,
-                             static=build_report,
-                             interac=build_interac_report,
-                             write_commands=TRUE,
-                             spatial_optimization = spatial_optimization)}
+  if(build_report==TRUE | build_interac_report==TRUE){
+    build_report_run(outputs_base_name=outputs_base_name,
+                     stand_shapefile=my_shp,
+                     effect_fields=effect_fields,
+                     area=area,
+                     subunit_field=subunit_field,
+                     master_subunit_field=master_subunit_field,
+                     report_variables=report_variables,
+                     static=build_report,
+                     interac=build_interac_report,
+                     write_commands=TRUE,
+                     spatial_optimization = spatial_optimization)}
 
 
 
@@ -1549,18 +1570,16 @@ if(build_report==TRUE | build_interac_report==TRUE){
 
   if(web_upload==TRUE & build_interac_report==TRUE){
     ForSysXR:::upload_content(output_folder_web=path_with_results,
-                                    last_name_web=last_name,
-                                    static=FALSE)
+                              last_name_web=last_name,
+                              static=FALSE)
   }
 
 
   if(web_upload==TRUE & build_interac_report==FALSE){
     ForSysXR:::upload_content(output_folder_web=path_with_results,
-                                    last_name_web=last_name,
-                                    static=TRUE)
+                              last_name_web=last_name,
+                              static=TRUE)
   }
 
 
-  }
-
-
+}
