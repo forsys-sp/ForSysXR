@@ -33,7 +33,7 @@ set_forsysx_run(
   threshold_logic = c("single_value", "and"),
   subunit_field,
   constraint_by_subunit = FALSE,
-  value_field_subunit = NULL,
+  constraints_subunits,
   master_subunit_field,
   constaints_master_subunits,
   constraint_by_master_subunit = FALSE,
@@ -79,7 +79,7 @@ set_forsysx_run(
   threshold_logic = c("single_value", "and"),
   subunit_field,
   constraint_by_subunit = FALSE,
-  value_field_subunit = NULL,
+  constraints_subunits,
   master_subunit_field,
   constaints_master_subunits,
   constraint_by_master_subunit = FALSE,
@@ -150,7 +150,7 @@ set_forsysx_run(
 
 \item{constraint_by_subunit}{Optional. True if a subunit level field should be used to define the constraint. Default is FALSE.}
 
-\item{value_field_subunit}{Optional. Field to be used value field when constraint_by_subunit is set to TRUE.}
+\item{constraints_subunits}{Optional. Vector of three elements containing the constraint(s) field name, the constraint field value, and the slack value to be used.}
 
 \item{master_subunit_field}{Optional. Master subunit field if enabling master subunits.}
 

@@ -10,6 +10,8 @@ build_report_run(
   effect_fields,
   area,
   subunit_field = NULL,
+  constraint_by_subunit = FALSE,
+  constraints_subunits = NULL,
   master_subunit_field = NULL,
   report_variables = NULL,
   static = TRUE,
@@ -26,6 +28,10 @@ build_report_run(
 \item{area}{Field from input_shapefile containing the area of each stand}
 
 \item{subunit_field}{Optional. Field from input_shapefile identifying the pre-defined planning areas}
+
+\item{constraint_by_subunit}{Optional. If TRUE, then will constraint by subunit and constraints_subunits parameter is required. Default is FALSE}
+
+\item{constraints_subunits}{Optional. Vector of three elements containing the constraint(s) field name, the constraint field value, and the slack value to be used.}
 
 \item{master_subunit_field}{Optional. Master subunit field if enabling master subunits.}
 
