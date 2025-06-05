@@ -29,7 +29,7 @@
 #' @param constraint_by_subunit Optional. True if a subunit level field should be used to define the constraint. Default is FALSE.
 #' @param constraints_subunits Optional. Vector of three elements containing the constraint(s) field name, the constraint field value, and the slack value to be used.
 #' @param master_subunit_field Optional. Master subunit field if enabling master subunits.
-#' @param constaints_master_subunits Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE
+#' @param constraints_master_subunits Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE
 #' @param constraint_by_master_subunit If constraints by master subunit should be used. Default is FALSE.
 #' @param save_outputs Vector with the outputs that must be saved. Options are "shapefile", "stand_csv" and/or "image". At least one output must be saved.
 #' @param output_xml Path and name (with xml extention) where the xml file for the run should be stored.
@@ -90,7 +90,7 @@ set_forsysx_run <- function(input_shapefile,
                             #value_field_subunit=NULL,
                             constraints_subunits,
                             master_subunit_field,
-                            constaints_master_subunits,
+                            constraints_master_subunits,
                             constraint_by_master_subunit=FALSE,
                             output_xml,
                             run_forsysx,
@@ -1219,13 +1219,13 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-  if (!missing(constaints_master_subunits) & constraint_by_master_subunit==TRUE){
-    if(length(constaints_master_subunits)!=3){
-      stop("constaints_master_subunits requires three elements in this order: constraint name, value field, and slack")
+  if (!missing(constraints_master_subunits) & constraint_by_master_subunit==TRUE){
+    if(length(constraints_master_subunits)!=3){
+      stop("constraints_master_subunits requires three elements in this order: constraint name, value field, and slack")
     }
-    xml_data_use <- gsub(paste("Field=\"NestedConstraint_field1\"",sep=""),paste("Field=\"",constaints_master_subunits[1],"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("MinField=\"NestedConstraint_Minfield\"",sep=""),paste("MinField=\"",constaints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("Slack=\"NestedConstraint_slack\"",sep=""),paste("Slack=\"",constaints_master_subunits[3],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("Field=\"NestedConstraint_field1\"",sep=""),paste("Field=\"",constraints_master_subunits[1],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("MinField=\"NestedConstraint_Minfield\"",sep=""),paste("MinField=\"",constraints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("Slack=\"NestedConstraint_slack\"",sep=""),paste("Slack=\"",constraints_master_subunits[3],"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("MinValue=\"NestedConstraint_minval\"",sep=""),paste("MinValue=\"1.00\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("MaxValue=\"NestedConstraint_maxval\"",sep=""),paste("MaxValue=\"10.00\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("Step=\"NestedConstraint_step\"",sep=""),paste("Step=\"1.00\"",sep=""),unlist(xml_data_use))
@@ -1235,15 +1235,15 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-  if (!missing(constaints_master_subunits) & constraint_by_master_subunit==FALSE){
-    if(length(constaints_master_subunits)!=3){
-      stop("constaints_master_subunits requires three elements in this order: constraint name, constraint value, and slack")
+  if (!missing(constraints_master_subunits) & constraint_by_master_subunit==FALSE){
+    if(length(constraints_master_subunits)!=3){
+      stop("constraints_master_subunits requires three elements in this order: constraint name, constraint value, and slack")
     }
-    xml_data_use <- gsub(paste("Field=\"NestedConstraint_field1\"",sep=""),paste("Field=\"",constaints_master_subunits[1],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("Field=\"NestedConstraint_field1\"",sep=""),paste("Field=\"",constraints_master_subunits[1],"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("MinField=\"NestedConstraint_Minfield\"",sep=""),paste("MinField=\"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("Slack=\"NestedConstraint_slack\"",sep=""),paste("Slack=\"",constaints_master_subunits[3],"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("MinValue=\"NestedConstraint_minval\"",sep=""),paste("MinValue=\"",constaints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
-    xml_data_use <- gsub(paste("MaxValue=\"NestedConstraint_maxval\"",sep=""),paste("MaxValue=\"",constaints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("Slack=\"NestedConstraint_slack\"",sep=""),paste("Slack=\"",constraints_master_subunits[3],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("MinValue=\"NestedConstraint_minval\"",sep=""),paste("MinValue=\"",constraints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
+    xml_data_use <- gsub(paste("MaxValue=\"NestedConstraint_maxval\"",sep=""),paste("MaxValue=\"",constraints_master_subunits[2],"\"",sep=""),unlist(xml_data_use))
     xml_data_use <- gsub(paste("Step=\"NestedConstraint_step\"",sep=""),paste("Step=\"0.00\"",sep=""),unlist(xml_data_use))
 
     #xml_data_use <- gsub(paste("NestedSubunitsEnable=\"1\"",sep=""),"NestedSubunitsEnable=\"0\"",unlist(xml_data_use))
@@ -1253,7 +1253,7 @@ set_forsysx_run <- function(input_shapefile,
 
 
 
-  if (missing(constaints_master_subunits)){
+  if (missing(constraints_master_subunits)){
     xml_data_use <- gsub("</NestedConstraints>","<NestedConstraints />",unlist(xml_data_use))
     xml_data_use <- gsub("    <NestedConstraints>","",unlist(xml_data_use))
     xml_data_use <- gsub("        <NestedConstraint Field=\"NestedConstraint_field1\" MinValue=\"NestedConstraint_minval\" MaxValue=\"NestedConstraint_maxval\" MinField=\"NestedConstraint_Minfield\" MaxField=\"\" Step=\"NestedConstraint_step\" Slack=\"NestedConstraint_slack\" />","",unlist(xml_data_use))
