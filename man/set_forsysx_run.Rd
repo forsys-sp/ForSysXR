@@ -35,7 +35,7 @@ set_forsysx_run(
   constraint_by_subunit = FALSE,
   constraints_subunits,
   master_subunit_field,
-  constaints_master_subunits,
+  constraints_master_subunits,
   constraint_by_master_subunit = FALSE,
   output_xml,
   run_forsysx,
@@ -81,7 +81,7 @@ set_forsysx_run(
   constraint_by_subunit = FALSE,
   constraints_subunits,
   master_subunit_field,
-  constaints_master_subunits,
+  constraints_master_subunits,
   constraint_by_master_subunit = FALSE,
   output_xml,
   run_forsysx,
@@ -154,7 +154,7 @@ set_forsysx_run(
 
 \item{master_subunit_field}{Optional. Master subunit field if enabling master subunits.}
 
-\item{constaints_master_subunits}{Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE}
+\item{constraints_master_subunits}{Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE}
 
 \item{constraint_by_master_subunit}{If constraints by master subunit should be used. Default is FALSE.}
 
@@ -181,6 +181,8 @@ set_forsysx_run(
 \item{web_upload}{Logical. If TRUE, the HTML file will be automatically uploaded to a default website, allowing for an easy share between users. Default is FALSE.}
 
 \item{exe_path}{Path to the ForSysXConsole.exe}
+
+\item{constaints_master_subunits}{Mandatory when using master_subunit. Vector containing constraint name, constraint value, and slack, if constraint_by_master_subunit is FALSE or constraint name, value field, and slack, if constraint_by_master_subunit is TRUE}
 
 \item{seed_stands_only_available_stands.}{Binary. If 1, then only the stands available for management are used as seed stands for potential projects. If 0 then all stands can be used as seed stands for potential projects. Default is 0.}
 }
